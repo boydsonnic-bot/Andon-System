@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Andon-System/AndonDashbooard.csproj" />
+  <Project Path="AndonTerminal/AndonTerminal.csproj" />
+  <Project Path="ShareLib/ShareLib.csproj" />
+</Solution>
