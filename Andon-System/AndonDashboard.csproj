@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShareLib\ShareLib.csproj" />
+    <ProjectReference Include="..\ShareLib\SharedLib.csproj" />
   </ItemGroup>
 
 </Project>

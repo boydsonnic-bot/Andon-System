@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShareLib.Model
+namespace SharedLib.Model
 {// Định nghĩa 5 trạng thái cốt lõi của preAndon
     public enum TicketStatus
     {
@@ -24,16 +24,23 @@ namespace ShareLib.Model
         public string? StationName { get; set; }
 
         // Trạng thái hiện tại
+        public int AlarmTypeIndex { get; set; }
         public TicketStatus Status { get; set; } = TicketStatus.Green;
 
         // Dữ liệu thời gian (Rất quan trọng để tính KPI MTTR/MTBF)
         public DateTime? ReportedAt { get; set; }
         public DateTime? TechCheckinAt { get; set; }
+        public DateTime? TechFixedAt { get; set; }
         public DateTime? LeaderConfirmedAt { get; set; }
+
+        // Thông tin khi KTV xử lý
+        public string? ErrorReason { get; set; } // Nguyên nhân lỗi
+        public string? FixNote { get; set; }     // Cách khắc phục
 
         // Thông tin con người (Để bạn quản lý hiệu suất)
         public string? OperatorName { get; set; }
         public string? TechnicianName { get; set; }
+        public string? LeaderName { get; set; }
 
         // Mã lệnh sản xuất đang chạy/ mã sản phẩm 
         public string? WorkOrder { get; set; }
