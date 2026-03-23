@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace SharedLib.Model
     public class IncidentTicket
     {
         // Thông tin cơ bản
+        [Key]
         public string? TicketId { get; set; }
         public string? LineNumber { get; set; }
         public string? StationName { get; set; }

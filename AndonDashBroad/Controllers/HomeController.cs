@@ -3,15 +3,24 @@ using SharedLib.Model;
 using SharedLib.Services;
 using System;
 using System.Collections.Generic;
+using AndonDashBroad.Data;
+using System.Linq;
 
-namespace AndonWebDashboard.Controllers
+namespace AndonWebDashboard.Controllers // Hoặc AndonDashBroad.Controllers tùy project name của sếp
 {
     public class HomeController : Controller
     {
+        // Khai báo cả 2 service
         private readonly IncidentService _dbService;
+        private readonly AndonDbContext _context;
 
-        public HomeController()
+        // Gộp chung vào 1 Constructor
+        public HomeController(AndonDbContext context)
         {
+            // 1. Gán context cho EF Core (Dùng cho biểu đồ Chart.js)
+            _context = context;
+
+            // 2. Khởi tạo service cũ (Dùng cho trang Index hiện tại)
             // 🚨 SỬA LẠI ĐƯỜNG DẪN NÀY CHO ĐÚNG MÁY SẾP NHÉ
             string dbFilePath = @"C:\C#\Andon-System\AndonTerminal\bin\Debug\net8.0-windows\test.db";
             _dbService = new IncidentService(dbFilePath);
@@ -103,6 +112,28 @@ namespace AndonWebDashboard.Controllers
             ViewBag.HistoryData = System.Text.Json.JsonSerializer.Serialize(history);
 
             return View();
+        }
+        // Endpoint trả về dữ liệu cho Chart.js
+        [HttpGet]
+        public IActionResult GetChartData()
+        {
+            var today = DateTime.Today;
+            _context.Database.EnsureCreated();
+            // Đổi StartTime thành ReportedAt và AlarmType thành AlarmTypeIndex cho khớp với Model
+            var stats = _context.IncidentTickets
+                .Where(t => t.ReportedAt >= today)
+                .GroupBy(t => t.AlarmTypeIndex)
+                .Select(g => new {
+                    Label = "Loại cảnh báo " + g.Key, // Thêm chữ cho biểu đồ dễ đọc
+                    Count = g.Count()
+                })
+                .ToList();
+
+            return Json(new
+            {
+                labels = stats.Select(s => s.Label),
+                data = stats.Select(s => s.Count)
+            });
         }
     }
 }

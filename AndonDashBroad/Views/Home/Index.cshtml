@@ -161,7 +161,6 @@ tr:hover td{background:var(--bg-secondary)}
 <body>
 <div id="app">
 
-  <!-- HEADER -->
   <div class="hdr">
     <div class="hdr-left">
       <span class="hdr-title">eAndon</span>
@@ -181,18 +180,15 @@ tr:hover td{background:var(--bg-secondary)}
     </div>
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
     <button class="tab on" id="tab-dash"  onclick="aTab('dash')">Dashboard</button>
     <button class="tab"    id="tab-ins"   onclick="aTab('ins')">Insights</button>
     <button class="tab"    id="tab-analy" onclick="aTab('analy')">Analytics</button>
   </div>
 
-  <!-- ===================== DASHBOARD ===================== -->
   <div id="pg-dash" class="page on">
     <div class="dash-wrap">
 
-      <!-- COL 1: Line rows -->
       <div>
         <div class="panel-hdr" id="lc-hdr">
           <span class="panel-hdr-title">Trạng thái Lines</span>
@@ -200,7 +196,6 @@ tr:hover td{background:var(--bg-secondary)}
         <div id="lc"></div>
       </div>
 
-      <!-- COL 2: Stats -->
       <div>
         <div class="panel-hdr" id="sc-hdr">
           <span class="panel-hdr-title">Thống kê ca hiện tại</span>
@@ -208,7 +203,6 @@ tr:hover td{background:var(--bg-secondary)}
         <div id="sc"></div>
       </div>
 
-      <!-- COL 3: AI Hints -->
       <div class="ai-panel" id="ai-panel">
         <div class="ai-header">
           <div class="ai-icon">
@@ -224,7 +218,6 @@ tr:hover td{background:var(--bg-secondary)}
     </div>
   </div>
 
-  <!-- ===================== INSIGHTS ===================== -->
   <div id="pg-ins" class="page">
     <div class="kpi-ribbon" id="kpi-ribbon"></div>
     <div class="ins-grid">
@@ -270,7 +263,6 @@ tr:hover td{background:var(--bg-secondary)}
     </div>
   </div>
 
-  <!-- ===================== ANALYTICS ===================== -->
   <div id="pg-analy" class="page">
     <div class="filter-bar">
       <select id="f-line"><option value="">Tất cả Line</option></select>
@@ -286,6 +278,14 @@ tr:hover td{background:var(--bg-secondary)}
       <button onclick="resetFilter()">Reset</button>
     </div>
     <div class="mg4" id="am"></div>
+    
+    <div class="cbox" style="margin-bottom: 10px;">
+        <div class="cbox-label">Thống kê loại cảnh báo trong ngày (Live Data từ SQLite)</div>
+        <div style="position:relative; height:200px">
+            <canvas id="incidentChart"></canvas>
+        </div>
+    </div>
+
     <div class="cg2">
       <div class="cbox">
         <div class="cbox-label">Sự cố hôm nay theo Line</div>
@@ -513,7 +513,7 @@ function initInsights() {
     {cls:'kpi-t', l:'MTBF TB',          v:avgMtbf+'m', d:'Mean Time Between Failures'},
     {cls:'kpi-r', l:'Line đang lỗi',    v:active,      d:'Trong tổng '+LS.length+' Line'},
     {cls:'kpi-y', l:'Sự cố hôm nay',    v:totInc,      d:'Tất cả loại'},
-    {cls:'kpi-p', l:'Response rate',    v:'87%',        d:'KTV phản hồi trong 5p'},
+    {cls:'kpi-p', l:'Response rate',    v:'87%',       d:'KTV phản hồi trong 5p'},
   ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-l">${k.l}</div><div class="kpi-v">${k.v}</div><div class="kpi-d" style="color:var(--text-tertiary)">${k.d}</div></div>`).join('');
 
   setTimeout(() => buildInsightCharts(), 100);
@@ -583,7 +583,7 @@ function buildInsightCharts() {
 }
 
 // ============================================================
-// ANALYTICS
+// ANALYTICS & LIVE DATA CHART
 // ============================================================
 let _analInit = false;
 function initAnaly() {
@@ -591,7 +591,6 @@ function initAnaly() {
   const ls = document.getElementById('f-line');
   LS.forEach(l=>{const o=document.createElement('option');o.value=l.id;o.textContent=l.nm;ls.appendChild(o);});
   const ss = document.getElementById('f-stn');
-  // Lấy trạm từ data DB thực tế
   [...new Set(allH.map(h=>h.stn))].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;ss.appendChild(o);});
   const td=new Date(),wa=new Date(td);wa.setDate(wa.getDate()-7);
   document.getElementById('f-from').value=wa.toISOString().split('T')[0];
@@ -600,10 +599,11 @@ function initAnaly() {
   const avgAv  =(LS.reduce((a,l)=>a+l.av,0)/(LS.length||1)).toFixed(1);
   document.getElementById('am').innerHTML=[
     {lbl:'Tổng sự cố',     val:LS.reduce((a,l)=>a+l.inc,0), u:''},
-    {lbl:'MTTR trung bình',val:avgMttr,                      u:'m'},
-    {lbl:'Availability TB',val:avgAv,                        u:'%'},
+    {lbl:'MTTR trung bình',val:avgMttr,                     u:'m'},
+    {lbl:'Availability TB',val:avgAv,                       u:'%'},
     {lbl:'Line đang lỗi',  val:LS.filter(l=>l.s!=='green').length, u:''},
   ].map(m=>`<div class="mc"><div class="mc-l">${m.lbl}</div><div class="mc-v">${m.val}${m.u}</div></div>`).join('');
+  
   setTimeout(()=>{
     if(typeof Chart==='undefined')return;
     new Chart(document.getElementById('cb'),{type:'bar',
@@ -684,6 +684,7 @@ const ZOOM_TITLES = {
   'c-scatter':'MTBF vs MTTR','c-donut':'Tỷ lệ mức độ sự cố',
   'hm-wrap':'Heatmap sự cố theo giờ','pareto-list':'Pareto loại lỗi',
   'cb':'Sự cố hôm nay theo Line','cl':'MTTR 7 ngày gần nhất',
+  'incidentChart':'Thống kê loại cảnh báo trong ngày (Live Data)'
 };
 const ZSvg = `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
 window._charts = {};
@@ -751,9 +752,56 @@ window.Chart=function(el,cfg){const inst=new _OC(el,cfg);if(el&&el.id)window._ch
 Object.setPrototypeOf(window.Chart,_OC);Object.assign(window.Chart,_OC);window.Chart.prototype=_OC.prototype;
 
 setTimeout(injectZoom,350);
+
+// ============================================================
+// AJAX LIVE DATA TỪ SQLITE CHO CHART
+// ============================================================
+document.addEventListener("DOMContentLoaded", function() {
+    var canvasEl = document.getElementById('incidentChart');
+    if (!canvasEl) return;
+    
+    var ctx = canvasEl.getContext('2d');
+    var liveChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [], 
+            datasets: [{
+                label: 'Số lượng vé (Tickets)',
+                data: [],
+                backgroundColor: ['#16a34a99', '#d9770699', '#dc262699', '#2563eb99'],
+                borderColor: ['#16a34a', '#d97706', '#dc2626', '#2563eb'],
+                borderWidth: 1,
+                borderRadius: 3
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { ticks: { stepSize: 1 }, beginAtZero: true, grid: { color: 'rgba(128,128,128,0.15)' } }
+            }
+        }
+    });
+
+    function fetchLiveData() {
+        fetch('/Home/GetChartData')
+            .then(response => response.json())
+            .then(result => {
+                liveChart.data.labels = result.labels;
+                liveChart.data.datasets[0].data = result.data;
+                liveChart.update();
+            })
+            .catch(err => console.error("Lỗi tải Live Data:", err));
+    }
+
+    fetchLiveData();
+    setInterval(fetchLiveData, 10000); 
+});
+
 </script>
 
-<!-- MODAL ZOOM -->
 <div id="mOv" onclick="if(event.target===this)closeZoom()"
   style="display:none;opacity:0;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;
          align-items:center;justify-content:center;padding:20px;transition:opacity .2s">
