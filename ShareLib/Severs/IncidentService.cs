@@ -551,5 +551,153 @@ namespace SharedLib.Services
                 { "Material (Thiếu Hàng)", thieuVatTu }
             };
         }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // THÊM VÀO IncidentService.cs — PHẦN SHIFT SESSION
+        // Copy paste đoạn này vào trong class IncidentService, sau phần
+        // InitializeStationTable() hiện có
+        // ═══════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Tạo bảng ShiftSession nếu chưa có — gọi 1 lần khi khởi động
+        /// </summary>
+        public void InitializeShiftSessionTable()
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+            using var cmd = new SQLiteCommand(@"
+        CREATE TABLE IF NOT EXISTS ShiftSession (
+            Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            FactoryCode TEXT NOT NULL,
+            LineName    TEXT NOT NULL,
+            Type        TEXT NOT NULL DEFAULT 'WORK',
+            Source      TEXT NOT NULL DEFAULT 'MANUAL',
+            StartTime   DATETIME NOT NULL,
+            EndTime     DATETIME
+        );
+        CREATE INDEX IF NOT EXISTS idx_session_line_date
+            ON ShiftSession(LineName, StartTime);
+    ", conn);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Gọi khi terminal BẬT — bắt đầu đếm giờ làm
+        /// </summary>
+        public string StartWorkSession(string factoryCode, string lineName)
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+            using var cmd = new SQLiteCommand(@"
+        INSERT INTO ShiftSession (FactoryCode, LineName, Type, Source, StartTime)
+        VALUES (@fc, @ln, 'WORK', 'MANUAL', @st);
+        SELECT last_insert_rowid();", conn);
+            cmd.Parameters.AddWithValue("@fc", factoryCode);
+            cmd.Parameters.AddWithValue("@ln", lineName);
+            cmd.Parameters.AddWithValue("@st", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            return cmd.ExecuteScalar()?.ToString() ?? "0";
+        }
+
+        /// <summary>
+        /// Gọi khi terminal TẮT hoặc kết thúc ca — đóng session WORK hiện tại
+        /// </summary>
+        public void EndCurrentWorkSession(string factoryCode, string lineName)
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+            using var cmd = new SQLiteCommand(@"
+        UPDATE ShiftSession
+        SET EndTime = @et
+        WHERE FactoryCode = @fc
+          AND LineName    = @ln
+          AND Type        = 'WORK'
+          AND EndTime IS NULL", conn);
+            cmd.Parameters.AddWithValue("@et", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            cmd.Parameters.AddWithValue("@fc", factoryCode);
+            cmd.Parameters.AddWithValue("@ln", lineName);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Gọi khi công nhân bấm NGHỈ — bắt đầu đoạn nghỉ
+        /// Đồng thời tạm đóng WORK session hiện tại
+        /// </summary>
+        public void StartBreak(string factoryCode, string lineName, string source = "MANUAL")
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+
+            // Đóng WORK session hiện tại
+            using (var cmd = new SQLiteCommand(@"
+        UPDATE ShiftSession SET EndTime=@et
+        WHERE FactoryCode=@fc AND LineName=@ln AND Type='WORK' AND EndTime IS NULL", conn))
+            {
+                cmd.Parameters.AddWithValue("@et", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                cmd.Parameters.AddWithValue("@fc", factoryCode);
+                cmd.Parameters.AddWithValue("@ln", lineName);
+                cmd.ExecuteNonQuery();
+            }
+
+            // Mở BREAK session mới
+            using (var cmd = new SQLiteCommand(@"
+        INSERT INTO ShiftSession (FactoryCode, LineName, Type, Source, StartTime)
+        VALUES (@fc, @ln, 'BREAK', @src, @st)", conn))
+            {
+                cmd.Parameters.AddWithValue("@fc", factoryCode);
+                cmd.Parameters.AddWithValue("@ln", lineName);
+                cmd.Parameters.AddWithValue("@src", source);
+                cmd.Parameters.AddWithValue("@st", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Gọi khi công nhân bấm TIẾP TỤC CA — kết thúc nghỉ, mở WORK mới
+        /// </summary>
+        public void EndBreak(string factoryCode, string lineName)
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+
+            // Đóng BREAK session hiện tại
+            using (var cmd = new SQLiteCommand(@"
+        UPDATE ShiftSession SET EndTime=@et
+        WHERE FactoryCode=@fc AND LineName=@ln AND Type='BREAK' AND EndTime IS NULL", conn))
+            {
+                cmd.Parameters.AddWithValue("@et", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                cmd.Parameters.AddWithValue("@fc", factoryCode);
+                cmd.Parameters.AddWithValue("@ln", lineName);
+                cmd.ExecuteNonQuery();
+            }
+
+            // Mở WORK session mới
+            using (var cmd = new SQLiteCommand(@"
+        INSERT INTO ShiftSession (FactoryCode, LineName, Type, Source, StartTime)
+        VALUES (@fc, @ln, 'WORK', 'MANUAL', @st)", conn))
+            {
+                cmd.Parameters.AddWithValue("@fc", factoryCode);
+                cmd.Parameters.AddWithValue("@ln", lineName);
+                cmd.Parameters.AddWithValue("@st", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Kiểm tra terminal hiện đang ở trạng thái WORK hay BREAK
+        /// </summary>
+        public bool IsCurrentlyOnBreak(string factoryCode, string lineName)
+        {
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+            using var cmd = new SQLiteCommand(@"
+        SELECT Type FROM ShiftSession
+        WHERE FactoryCode=@fc AND LineName=@ln AND EndTime IS NULL
+        ORDER BY StartTime DESC LIMIT 1", conn);
+            cmd.Parameters.AddWithValue("@fc", factoryCode);
+            cmd.Parameters.AddWithValue("@ln", lineName);
+            var result = cmd.ExecuteScalar()?.ToString();
+            return result == "BREAK";
+        }
+
     }
 }
