@@ -3,6 +3,7 @@ using SharedLib.Services;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Data.SQLite; // THÊM DÒNG NÀY VÀO ĐẦU FILE
 
 namespace AndonTerminal.Forms
 {
@@ -249,8 +250,31 @@ namespace AndonTerminal.Forms
             txtFactoryCode!.Text = _cfg.FactoryCode;
             txtLineName!.Text = _cfg.LineName;
             listStations!.Items.Clear();
-            foreach (var s in _cfg.Stations)
-                listStations.Items.Add(s);
+
+            if (_cfg.Stations.Count > 0)
+            {
+                foreach (var s in _cfg.Stations)
+                    listStations.Items.Add(s);
+            }
+            else
+            {
+                // Nếu config trống, đọc thẳng từ SQLite Database cho chắc cú
+                try
+                {
+                    string connString = $"Data Source={_cfg.DbPath};Version=3;";
+                    using (var conn = new SQLiteConnection(connString))
+                    {
+                        conn.Open();
+                        using (var cmd = new SQLiteCommand("SELECT StationName FROM Stations", conn))
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                                listStations.Items.Add(reader["StationName"]?.ToString() ?? "");
+                        }
+                    }
+                }
+                catch { /* Bỏ qua nếu DB chưa có bảng */ }
+            }
         }
 
         private void AddStation()
@@ -336,13 +360,27 @@ namespace AndonTerminal.Forms
 
                 _cfg.Stations.Clear();
                 foreach (var item in listStations!.Items)
-                    _cfg.Stations.Add(item?.ToString() ?? "");
+                {
+                    string stationName = item?.ToString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(stationName))
+                    {
+                        _cfg.Stations.Add(stationName);
+                    }
+                }
 
                 // Ghi vào terminal.cfg — giữ nguyên DbPath và các key khác
                 _cfg.Save(CFG_PATH);
 
-                MessageBox.Show("Đã lưu thành công!\n\nKhởi động lại ứng dụng nếu đổi tên Line.",
+                // ────────────────────────────────────────────────────────
+                // GỌI HÀM ĐỒNG BỘ XUỐNG DATABASE TỪ INCIDENT SERVICE
+                // (Thay thế cho đoạn code viết lệnh SQLite dài dòng cũ)
+                // ────────────────────────────────────────────────────────
+                var dbService = new IncidentService(_cfg.DbPath);
+                dbService.UpsertStations(_cfg.FactoryCode, _cfg.LineName, _cfg.Stations);
+
+                MessageBox.Show("Đã lưu thành công!\n\nCấu hình Trạm đã được đồng bộ xuống Database.",
                     "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
@@ -352,7 +390,6 @@ namespace AndonTerminal.Forms
                     "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         // ─────────────────────────────────────────────────────────────
         // UI HELPERS
         // ─────────────────────────────────────────────────────────────

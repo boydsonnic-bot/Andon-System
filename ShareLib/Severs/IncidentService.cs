@@ -438,6 +438,47 @@ namespace SharedLib.Services
                 }
             }
         }
+        public void UpsertStations(string factoryCode, string lineName, IEnumerable<string> stations)
+        {
+            // Bảo vệ: Tránh lỗi NOT NULL do chuỗi rỗng
+            if (string.IsNullOrWhiteSpace(factoryCode) || string.IsNullOrWhiteSpace(lineName))
+                return;
+
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+
+            try
+            {
+                // Xóa các trạm cũ của Line này
+                using (var del = conn.CreateCommand())
+                {
+                    del.CommandText = "DELETE FROM Stations WHERE FactoryCode=@f AND LineName=@l";
+                    del.Parameters.AddWithValue("@f", factoryCode);
+                    del.Parameters.AddWithValue("@l", lineName);
+                    del.ExecuteNonQuery();
+                }
+
+                // Chèn danh sách trạm mới (đã lọc các trạm rỗng)
+                foreach (var s in stations.Where(x => !string.IsNullOrWhiteSpace(x)))
+                {
+                    using var ins = conn.CreateCommand();
+                    ins.CommandText = @"INSERT INTO Stations(FactoryCode, LineName, StationName, IsActive)
+                                        VALUES(@f, @l, @s, 1)";
+                    ins.Parameters.AddWithValue("@f", factoryCode);
+                    ins.Parameters.AddWithValue("@l", lineName);
+                    ins.Parameters.AddWithValue("@s", s.Trim());
+                    ins.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw; // Ném lỗi ra ngoài để UI bắt được nếu có sự cố nghiêm trọng
+            }
+        }
 
         // =========================================================================
         // THUẬT TOÁN TÍNH OEE (DÙNG SQL ĐỌC TRỰC TIẾP TỪ DATABASE)
