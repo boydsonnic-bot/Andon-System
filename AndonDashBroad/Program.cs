@@ -8,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 // MVC
 builder.Services.AddControllersWithViews();
 
+// Đăng ký Analytics Service
+builder.Services.AddScoped<AnalyticsService>();
+
 // DbContext
 builder.Services.AddDbContext<AndonDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
