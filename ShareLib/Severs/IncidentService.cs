@@ -478,6 +478,30 @@ namespace SharedLib.Services
                 tx.Rollback();
                 throw; // Ném lỗi ra ngoài để UI bắt được nếu có sự cố nghiêm trọng
             }
+
+            using var conn = new SQLiteConnection(_connectionString);
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+
+            using (var del = conn.CreateCommand())
+            {
+                del.CommandText = "DELETE FROM Stations WHERE FactoryCode=@f AND LineName=@l";
+                del.Parameters.AddWithValue("@f", factoryCode);
+                del.Parameters.AddWithValue("@l", lineName);
+                del.ExecuteNonQuery();
+            }
+
+            foreach (var s in stations.Where(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                using var ins = conn.CreateCommand();
+                ins.CommandText = @"INSERT INTO Stations (FactoryCode, LineName, StationName, IsActive)
+                                    VALUES (@f, @l, @s, 1)";
+                ins.Parameters.AddWithValue("@f", factoryCode);
+                ins.Parameters.AddWithValue("@l", lineName);
+                ins.Parameters.AddWithValue("@s", s.Trim());
+                ins.ExecuteNonQuery();
+            }
+            tx.Commit();
         }
 
         // =========================================================================
@@ -739,6 +763,8 @@ namespace SharedLib.Services
             var result = cmd.ExecuteScalar()?.ToString();
             return result == "BREAK";
         }
+
+
 
     }
 }

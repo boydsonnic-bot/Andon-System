@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using AndonDashBroad.Data; // Thêm dòng này để Program.cs biết AndonDbContext nằm ở đâu
+using Microsoft.EntityFrameworkCore;
+using SharedLib.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,24 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AndonDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 // 🟢 KẾT THÚC 🟢
+builder.Services.AddSingleton(new EmailSender(
+    builder.Configuration["Smtp:Host"],
+    builder.Configuration.GetValue<int>("Smtp:Port"),
+    builder.Configuration["Smtp:User"],
+    builder.Configuration["Smtp:Pass"],
+    builder.Configuration["Smtp:Sender"]));
 
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<ZaloSender>(sp =>
+{
+    var http = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
+    return new ZaloSender(http,
+        builder.Configuration["Zalo:AccessToken"],
+        builder.Configuration["Zalo:OAId"]);
+});
+
+builder.Services.AddHostedService<EscalationWorker>();
+builder.Services.AddHostedService<WeeklyReportWorker>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
