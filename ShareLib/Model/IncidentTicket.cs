@@ -39,6 +39,10 @@ namespace SharedLib.Model
         public string? ErrorReason { get; set; } // Nguyên nhân lỗi
         public string? FixNote { get; set; }     // Cách khắc phục
 
+        // THÊM 2 THUỘC TÍNH NÀY CHO TÍNH NĂNG ESCALATION
+        public DateTime? EscalationSentAt { get; set; }
+        public int? EscalationLevel { get; set; }
+
         // Thông tin con người (Để bạn quản lý hiệu suất)
         public string? OperatorName { get; set; }
         public string? TechnicianName { get; set; }

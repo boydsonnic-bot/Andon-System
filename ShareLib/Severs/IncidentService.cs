@@ -25,6 +25,8 @@ namespace SharedLib.Services
             using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
+
+                // 1. Tạo bảng mới (Đã bổ sung sẵn 2 cột Escalation cho các máy cài mới)
                 using (var cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
@@ -45,10 +47,33 @@ namespace SharedLib.Services
                             WorkOrder TEXT,
                             Product TEXT,
                             ErrorReason TEXT,
-                            FixNote TEXT
+                            FixNote TEXT,
+                            EscalationSentAt TEXT,
+                            EscalationLevel INTEGER
                         )";
                     cmd.ExecuteNonQuery();
                 }
+
+                // 2. TỰ ĐỘNG NÂNG CẤP DB CŨ (Dành cho các máy đã cài từ trước)
+                try
+                {
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "ALTER TABLE Tickets ADD COLUMN EscalationSentAt TEXT;";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch { /* Cột đã tồn tại, đi tiếp */ }
+
+                try
+                {
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "ALTER TABLE Tickets ADD COLUMN EscalationLevel INTEGER;";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch { /* Cột đã tồn tại, đi tiếp */ }
             }
         }
 
@@ -440,17 +465,16 @@ namespace SharedLib.Services
         }
         public void UpsertStations(string factoryCode, string lineName, IEnumerable<string> stations)
         {
-            // Bảo vệ: Tránh lỗi NOT NULL do chuỗi rỗng
             if (string.IsNullOrWhiteSpace(factoryCode) || string.IsNullOrWhiteSpace(lineName))
                 return;
 
             using var conn = new SQLiteConnection(_connectionString);
             conn.Open();
-            using var tx = conn.BeginTransaction();
+            using var tran = conn.BeginTransaction();
 
             try
             {
-                // Xóa các trạm cũ của Line này
+                // Xóa trạm cũ
                 using (var del = conn.CreateCommand())
                 {
                     del.CommandText = "DELETE FROM Stations WHERE FactoryCode=@f AND LineName=@l";
@@ -459,49 +483,25 @@ namespace SharedLib.Services
                     del.ExecuteNonQuery();
                 }
 
-                // Chèn danh sách trạm mới (đã lọc các trạm rỗng)
+                // Chèn trạm mới
                 foreach (var s in stations.Where(x => !string.IsNullOrWhiteSpace(x)))
                 {
                     using var ins = conn.CreateCommand();
-                    ins.CommandText = @"INSERT INTO Stations(FactoryCode, LineName, StationName, IsActive)
-                                        VALUES(@f, @l, @s, 1)";
+                    ins.CommandText = @"INSERT INTO Stations (FactoryCode, LineName, StationName, IsActive)
+                                VALUES (@f, @l, @s, 1)";
                     ins.Parameters.AddWithValue("@f", factoryCode);
                     ins.Parameters.AddWithValue("@l", lineName);
                     ins.Parameters.AddWithValue("@s", s.Trim());
                     ins.ExecuteNonQuery();
                 }
 
-                tx.Commit();
+                tran.Commit();
             }
             catch
             {
-                tx.Rollback();
-                throw; // Ném lỗi ra ngoài để UI bắt được nếu có sự cố nghiêm trọng
+                tran.Rollback();
+                throw;
             }
-
-            using var conn = new SQLiteConnection(_connectionString);
-            conn.Open();
-            using var tx = conn.BeginTransaction();
-
-            using (var del = conn.CreateCommand())
-            {
-                del.CommandText = "DELETE FROM Stations WHERE FactoryCode=@f AND LineName=@l";
-                del.Parameters.AddWithValue("@f", factoryCode);
-                del.Parameters.AddWithValue("@l", lineName);
-                del.ExecuteNonQuery();
-            }
-
-            foreach (var s in stations.Where(x => !string.IsNullOrWhiteSpace(x)))
-            {
-                using var ins = conn.CreateCommand();
-                ins.CommandText = @"INSERT INTO Stations (FactoryCode, LineName, StationName, IsActive)
-                                    VALUES (@f, @l, @s, 1)";
-                ins.Parameters.AddWithValue("@f", factoryCode);
-                ins.Parameters.AddWithValue("@l", lineName);
-                ins.Parameters.AddWithValue("@s", s.Trim());
-                ins.ExecuteNonQuery();
-            }
-            tx.Commit();
         }
 
         // =========================================================================
@@ -764,7 +764,7 @@ namespace SharedLib.Services
             return result == "BREAK";
         }
 
-
+       
 
     }
 }
