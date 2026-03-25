@@ -19,12 +19,12 @@ namespace AndonDashBroad.Services
         private readonly string _zaloUserId;
         private readonly int _thresholdMinutes;
 
-        public EscalationWorker(ILogger<EscalationWorker> logger, IConfiguration cfg, EmailSender email, ZaloSender zalo)
+        public  EscalationWorker(ILogger<EscalationWorker> logger, IConfiguration cfg, EmailSender email, ZaloSender zalo)
         {
             _logger = logger;
             _email = email;
             _zalo = zalo;
-            _connStr = cfg.GetConnectionString("DefaultConnection");
+            _connStr = cfg.GetConnectionString("DefaultConnection") ?? "";
             _emailTo = cfg.GetSection("Escalation:EmailTo").Get<string[]>() ?? Array.Empty<string>();
             _zaloUserId = cfg.GetValue<string>("Zalo:DefaultUserId") ?? "";
             _thresholdMinutes = cfg.GetValue<int>("Escalation:ThresholdMinutes", 15);

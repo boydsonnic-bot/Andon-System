@@ -21,7 +21,7 @@ namespace AndonDashBroad.Services
         {
             _logger = logger;
             _email = email;
-            _connStr = cfg.GetConnectionString("DefaultConnection");
+            _connStr = cfg.GetConnectionString("DefaultConnection") ?? "";
             _to = cfg.GetSection("WeeklyReportTo").Get<string[]>()
                   ?? cfg.GetSection("Escalation:WeeklyReportTo").Get<string[]>()
                   ?? Array.Empty<string>();
