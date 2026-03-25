@@ -276,7 +276,8 @@ namespace SharedLib.Services
                             ErrorReason AS 'Nguyên Nhân Lỗi',
                             FixNote AS 'Cách Khắc Phục',
                             WorkOrder AS 'Mã Lệnh SX',
-                            Product AS 'Mã Sản Phẩm'
+                            Product AS 'Mã Sản Phẩm',
+                            EscalationSentAt AS 'Giờ Leo Thang'
                         FROM Tickets 
                         ORDER BY Id DESC LIMIT 50";
 

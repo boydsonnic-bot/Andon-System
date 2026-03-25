@@ -608,6 +608,18 @@ namespace AndonTerminal.Forms
                     _dbService.UpdateTicket(btnStatus.Tag?.ToString() ?? "",
                         TicketStatus.Repairing, f.EmployeeName, techCheckinAt: DateTime.Now);
 
+                    // ─────────────────────────────────────────────────────────
+                    // GỌI AI SMART HINT & HIỂN THỊ POPUP HỖ TRỢ KTV
+                    // ─────────────────────────────────────────────────────────
+                    string aiHint = _dbService.GetSmartHintFromHistory(stationName);
+                    MessageBox.Show(
+                        $"KTV {f.EmployeeName} đã nhận việc thành công.\n\n{aiHint}",
+                        "AI Hỗ trợ Kỹ thuật",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                    // ─────────────────────────────────────────────────────────
+
                     lblHint.Text = $"● KTV {f.EmployeeName} đang sửa\n● Chờ sửa xong...";
                     lblHint.ForeColor = Color.FromArgb(253, 186, 116);
 

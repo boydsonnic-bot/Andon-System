@@ -62,7 +62,16 @@ namespace AndonWebDashboard.Controllers // Hoặc AndonDashBroad.Controllers tù
                             timestamp = new DateTimeOffset(dtBaoLoi).ToUnixTimeMilliseconds();
                         }
 
-                        var rnd = new Random(chuyen.GetHashCode());
+                        // ──────────────────────────────────────────────────
+                        // KIỂM TRA CỜ LEO THANG (ESCALATED) TRƯỚC KHI ADD
+                        // ──────────────────────────────────────────────────
+                        bool isEscalated = false;
+                        if (row.Table.Columns.Contains("Giờ Leo Thang") &&
+                            row["Giờ Leo Thang"] != DBNull.Value &&
+                            !string.IsNullOrEmpty(row["Giờ Leo Thang"].ToString()))
+                        {
+                            isEscalated = true;
+                        }
 
                         liveLines.Add(new
                         {
@@ -77,12 +86,15 @@ namespace AndonWebDashboard.Controllers // Hoặc AndonDashBroad.Controllers tù
                             tech = ktv != "" ? new { nm = ktv } : null,
                             lead = leader != "" ? new { nm = leader } : null,
                             lastErr = statusCode == "green" ? new { min = 120, st = row["Vị Trí"].ToString(), al = "Bệnh cũ", dur = 15 } : null,
-                            inc = rnd.Next(1, 5),
-                            mttr = rnd.Next(10, 30),
-                            mtbf = rnd.Next(100, 300),
-                            av = rnd.Next(85, 98),
-                            yellow = rnd.Next(0, 3),
-                            red = rnd.Next(0, 2)
+
+                            // ĐÃ SẠCH BÓNG CHỮ "rnd", GÁN VỀ 0 ĐỂ CHỜ JAVASCRIPT GỌI API LẤY SỐ THẬT
+                            inc = 0,
+                            mttr = 0,
+                            mtbf = 0,
+                            av = 100,
+                            yellow = 0,
+                            red = 0,
+                            esc = isEscalated
                         });
                     }
 
