@@ -614,7 +614,7 @@ namespace AndonTerminal.Forms
                     string aiHint = _dbService.GetSmartHintFromHistory(stationName);
                     MessageBox.Show(
                         $"KTV {f.EmployeeName} đã nhận việc thành công.\n\n{aiHint}",
-                        "AI Hỗ trợ Kỹ thuật",
+                        "Hỗ trợ Kỹ thuật",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information
                     );

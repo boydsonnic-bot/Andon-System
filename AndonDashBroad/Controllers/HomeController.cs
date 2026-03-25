@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using AndonDashBroad.Data;
 using System.Linq;
 
-namespace AndonWebDashboard.Controllers // Hoặc AndonDashBroad.Controllers tùy project name của sếp
+namespace AndonWebDashboard.Controllers
 {
     public class HomeController : Controller
     {
@@ -123,8 +123,42 @@ namespace AndonWebDashboard.Controllers // Hoặc AndonDashBroad.Controllers tù
             ViewBag.LiveLines = System.Text.Json.JsonSerializer.Serialize(liveLines);
             ViewBag.HistoryData = System.Text.Json.JsonSerializer.Serialize(history);
 
+            // =========================================================
+            // LẤY DỮ LIỆU SẢN XUẤT THỰC TẾ TRUYỀN RA GIAO DIỆN SẢN XUẤT
+            // =========================================================
+            var prodList = new List<object>();
+
+            // Giả lập 11 Line cho giao diện Sản Xuất. Sau này sếp thay bằng code đọc từ DB MES/ERP của xưởng
+            for (int i = 1; i <= 11; i++)
+            {
+                string lineId = $"L{i}";
+                string lineName = $"Line {i:D2}"; // VD: Line 01, Line 02...
+
+                prodList.Add(new
+                {
+                    id = lineId,
+                    nm = lineName,
+                    model = "Model X-Pro", // Lấy từ DB
+                    target = 1200,         // Target trong ca lấy từ DB
+                    actual = 950,          // Số lượng đếm thực tế hiện tại từ DB
+                    shift = "Ca sáng",
+                    // Mảng history để vẽ biểu đồ theo từng giờ trong Modal Zoom
+                    history = new[]
+                    {
+                        new { hour = "8h", actual = 120, target = 150 },
+                        new { hour = "9h", actual = 140, target = 150 },
+                        new { hour = "10h", actual = 135, target = 150 },
+                        new { hour = "11h", actual = 145, target = 150 }
+                    }
+                });
+            }
+
+            // Ném thêm cục data Sản Xuất sang view
+            ViewBag.ProductionData = System.Text.Json.JsonSerializer.Serialize(prodList);
+
             return View();
         }
+
         // Endpoint trả về dữ liệu cho Chart.js
         [HttpGet]
         public IActionResult GetChartData()
