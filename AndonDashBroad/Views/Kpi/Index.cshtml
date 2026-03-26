@@ -1,308 +1,140 @@
 ﻿@{
-    ViewData["Title"] = "Manufacturing Dashboard";
-    Layout = null; 
+    ViewData["Title"] = "KPI Sản xuất";
+    Layout = "_Layout";
 }
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manufacturing Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-    :root {
-        --bg-main: #e0e9f0;
-        --card-bg: #ffffff;
-        --text-main: #1f2937;
-        --text-sub: #64748b;
-        --border-color: #cbd5e1;
-        --excel-blue: #0284c7;
-        --excel-blue-light: #38bdf8;
-        --excel-header: #005a8d;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Arial, sans-serif; }
-    body { background-color: var(--bg-main); padding: 10px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-    /* HEADER TABS */
-    .top-bar { background: var(--excel-header); color: white; padding: 10px 20px; font-size: 20px; font-weight: bold; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px; }
-    .excel-tabs { display: flex; background: var(--excel-header); padding: 0 10px; border-bottom: 2px solid #94a3b8; }
-    .excel-tab { padding: 8px 20px; color: #bae6fd; cursor: pointer; font-size: 13px; font-weight: 600; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 5px; transition: 0.2s; }
-    .excel-tab:hover { background: rgba(255,255,255,0.1); }
-    .excel-tab.active { background: var(--bg-main); color: var(--excel-header); }
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">KPI Sản xuất</h3>
+        <div class="d-flex gap-2">
+            <input type="date" id="from" class="form-control form-control-sm" style="width:160px;">
+            <input type="date" id="to" class="form-control form-control-sm" style="width:160px;">
+            <button class="btn btn-primary btn-sm" id="btnLoad">Lọc</button>
+        </div>
+    </div>
 
-    /* BỐ CỤC 3 CỘT */
-    .dashboard-layout { display: flex; gap: 10px; padding-top: 10px; flex: 1; overflow: hidden; }
-    
-    /* SIDEBARS LỌC DỮ LIỆU */
-    .sidebar { width: 180px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex-shrink: 0; }
-    .slicer { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; }
-    .slicer-header { display: flex; justify-content: space-between; padding: 5px 8px; font-size: 12px; font-weight: bold; color: var(--text-main); border-bottom: 1px solid var(--border-color); }
-    .slicer-body { padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
-    .slicer-item { background: var(--excel-header); color: white; font-size: 11px; padding: 4px 6px; border-radius: 3px; cursor: pointer; flex: 1 1 45%; text-align: center; }
-    .slicer-item.inactive { background: #e2e8f0; color: #94a3b8; }
-    .slicer-item.full { flex: 1 1 100%; text-align: left; padding-left: 8px; }
+    <!-- Cards -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-2"><div class="card shadow-sm text-center p-2"><div class="small text-muted">Quantity Produced</div><div class="h4 mb-0" id="cardQty">-</div></div></div>
+        <div class="col-6 col-lg-2"><div class="card shadow-sm text-center p-2"><div class="small text-muted">Defects</div><div class="h4 mb-0" id="cardDef">-</div></div></div>
+        <div class="col-6 col-lg-2"><div class="card shadow-sm text-center p-2"><div class="small text-muted">Production Cost ($)</div><div class="h5 mb-0" id="cardCost">-</div></div></div>
+        <div class="col-6 col-lg-2"><div class="card shadow-sm text-center p-2"><div class="small text-muted">Sales Revenue ($)</div><div class="h5 mb-0" id="cardRev">-</div></div></div>
+        <div class="col-6 col-lg-2"><div class="card shadow-sm text-center p-2"><div class="small text-muted">Efficiency (%)</div><div class="h4 mb-0" id="cardEff">-</div></div></div>
+        <div class="col-6 col-lg-2"><div class="card shadow-sm text-center p-2"><div class="small text-muted">Downtime (min)</div><div class="h4 mb-0" id="cardDown">-</div></div></div>
+    </div>
 
-    /* KHU VỰC TRUNG TÂM & TABS NỘI DUNG */
-    .center-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .tab-pane { display: none; flex-direction: column; gap: 10px; height: 100%; overflow-y: auto; padding-right: 5px; }
-    .tab-pane.active { display: flex; }
-    
-    /* KPI CARDS */
-    .kpi-row { display: flex; gap: 10px; flex-shrink: 0; }
-    .kpi-card { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 12px 10px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
-    .kpi-value { font-size: 22px; font-weight: bold; color: var(--excel-header); margin-bottom: 4px; line-height: 1; }
-    .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-main); }
-
-    /* CHARTS */
-    .chart-grid-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; height: 260px; flex-shrink: 0; }
-    .chart-grid-half { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 280px; flex-shrink: 0; }
-    .chart-grid-bottom { display: grid; grid-template-columns: 1fr; height: 220px; flex-shrink: 0; }
-    
-    .chart-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; }
-    .chart-title { font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; color: var(--text-main); }
-    .chart-container { flex: 1; position: relative; min-height: 0; min-width: 0; width: 100%; }
-
-    .chart-grid-top > .chart-box:first-child { grid-column: span 1; }
-</style>
-</head>
-<body>
-
-<div class="top-bar">Manufacturing Dashboard in Web</div>
-<div class="excel-tabs">
-    <div class="excel-tab active" onclick="switchTab('overview')">Overview</div>
-    <div class="excel-tab" onclick="switchTab('production')">Production Analysis</div>
-    <div class="excel-tab" onclick="switchTab('quality')">Quality Analysis</div>
-    <div class="excel-tab" onclick="switchTab('cost')">Cost and Revenue</div>
-    <div class="excel-tab" onclick="switchTab('efficiency')">Efficiency and Downtime</div>
-</div>
-
-<div class="dashboard-layout">
-    <div class="sidebar">
-        <div class="slicer">
-            <div class="slicer-header"><span>Plant</span><span>⧨ Filter</span></div>
-            <div class="slicer-body">
-                <div class="slicer-item">Plant A</div><div class="slicer-item inactive">Plant B</div>
-                <div class="slicer-item inactive">Plant C</div><div class="slicer-item inactive">Plant D</div>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header small text-muted">Revenue vs Production Cost by Product</div>
+                <div class="card-body"><canvas id="barRevCost"></canvas></div>
             </div>
         </div>
-        <div class="slicer">
-            <div class="slicer-header"><span>Year</span><span>⧨ Filter</span></div>
-            <div class="slicer-body">
-                <div class="slicer-item">2024</div><div class="slicer-item">2025</div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header small text-muted">Quantity Produced by Plant</div>
+                <div class="card-body"><canvas id="pieQtyPlant"></canvas></div>
             </div>
         </div>
-        <div class="slicer">
-            <div class="slicer-header"><span>Month</span><span>⧨ Filter</span></div>
-            <div class="slicer-body">
-                <div class="slicer-item">Jan</div><div class="slicer-item inactive">Feb</div>
-                <div class="slicer-item">Mar</div><div class="slicer-item inactive">Apr</div>
-                <div class="slicer-item">May</div><div class="slicer-item inactive">Jun</div>
-                <div class="slicer-item inactive">Jul</div><div class="slicer-item inactive">Aug</div>
-                <div class="slicer-item">Sep</div><div class="slicer-item inactive">Oct</div>
-                <div class="slicer-item">Nov</div><div class="slicer-item inactive">Dec</div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header small text-muted">Defects by Product Category</div>
+                <div class="card-body"><canvas id="pieDefCat"></canvas></div>
             </div>
         </div>
     </div>
 
-    <div class="center-wrapper">
-        
-        <div id="pane-overview" class="tab-pane active">
-            <div class="kpi-row">
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">288,514</div><div class="kpi-label">Quantity Produced</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0f766e">12,642</div><div class="kpi-label">Defects</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">$13.9M</div><div class="kpi-label">Production Cost ($)</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">$27.4M</div><div class="kpi-label">Sales Revenue ($)</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">84.27%</div><div class="kpi-label">Efficiency (%)</div></div>
-            </div>
-            <div class="chart-grid-top">
-                <div class="chart-box"><div class="chart-title">Revenue vs. Production Cost by Product</div><div class="chart-container"><canvas id="c-rev-cost"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">Quantity Produced by Plant</div><div class="chart-container"><canvas id="c-qty-plant"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">Defects by Product Category</div><div class="chart-container"><canvas id="c-defects-cat"></canvas></div></div>
-            </div>
-            <div class="chart-grid-bottom">
-                <div class="chart-box"><div class="chart-title">Sales Revenue By Category and Month</div><div class="chart-container"><canvas id="c-sales-month"></canvas></div></div>
-            </div>
-        </div>
-
-        <div id="pane-production" class="tab-pane">
-            <div class="kpi-row">
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">305,000</div><div class="kpi-label">Target Output</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#16a34a">288,514</div><div class="kpi-label">Actual Output</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#ea580c">-5.4%</div><div class="kpi-label">Variance</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">4.2 min</div><div class="kpi-label">Avg Cycle Time</div></div>
-            </div>
-            <div class="chart-grid-half">
-                <div class="chart-box"><div class="chart-title">Production Trend (YTD)</div><div class="chart-container"><canvas id="c-prod-trend"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">Output Volume by Machine</div><div class="chart-container"><canvas id="c-machine-out"></canvas></div></div>
-            </div>
-            <div class="chart-grid-half">
-                <div class="chart-box"><div class="chart-title">Shift Performance (Day vs Night)</div><div class="chart-container"><canvas id="c-shift"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">Target vs Actual Fulfillment</div><div class="chart-container"><canvas id="c-fulfill"></canvas></div></div>
-            </div>
-        </div>
-
-        <div id="pane-quality" class="tab-pane">
-            <div class="kpi-row">
-                <div class="kpi-card"><div class="kpi-value" style="color:#dc2626">12,642</div><div class="kpi-label">Total Defects</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0f766e">4.38%</div><div class="kpi-label">Scrap Rate</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#16a34a">95.62%</div><div class="kpi-label">First Time Yield (FTT)</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#ea580c">2,450</div><div class="kpi-label">Reworked Units</div></div>
-            </div>
-            <div class="chart-grid-half">
-                <div class="chart-box"><div class="chart-title">Top Defect Reasons (Pareto)</div><div class="chart-container"><canvas id="c-pareto-defect"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">Quality Pass vs Fail Ratio</div><div class="chart-container"><canvas id="c-q-donut"></canvas></div></div>
-            </div>
-            <div class="chart-grid-bottom">
-                <div class="chart-box"><div class="chart-title">Defect Trend Over Time</div><div class="chart-container"><canvas id="c-defect-trend"></canvas></div></div>
-            </div>
-        </div>
-
-        <div id="pane-cost" class="tab-pane">
-            <div class="kpi-row">
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">$27.4M</div><div class="kpi-label">Total Revenue</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#ea580c">$13.9M</div><div class="kpi-label">Total Costs</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#16a34a">$13.5M</div><div class="kpi-label">Gross Profit</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#0f766e">49.2%</div><div class="kpi-label">Profit Margin</div></div>
-            </div>
-            <div class="chart-grid-half">
-                <div class="chart-box"><div class="chart-title">Cost Breakdown (Labor/Mat/Overhead)</div><div class="chart-container"><canvas id="c-cost-break"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">Profit Margin by Product</div><div class="chart-container"><canvas id="c-margin-prod"></canvas></div></div>
-            </div>
-        </div>
-
-        <div id="pane-efficiency" class="tab-pane">
-            <div class="kpi-row">
-                <div class="kpi-card"><div class="kpi-value" style="color:#0284c7">84.27%</div><div class="kpi-label">Overall Equipment Effectiveness (OEE)</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#dc2626">1,240 hrs</div><div class="kpi-label">Total Downtime</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#ea580c">45 min</div><div class="kpi-label">MTTR (Mean Time To Repair)</div></div>
-                <div class="kpi-card"><div class="kpi-value" style="color:#16a34a">320 hrs</div><div class="kpi-label">MTBF (Mean Time Between Failures)</div></div>
-            </div>
-            <div class="chart-grid-half">
-                <div class="chart-box"><div class="chart-title">Top 5 Downtime Reasons</div><div class="chart-container"><canvas id="c-down-reason"></canvas></div></div>
-                <div class="chart-box"><div class="chart-title">OEE Components (Avail, Perf, Qual)</div><div class="chart-container"><canvas id="c-oee-radar"></canvas></div></div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="sidebar">
-        <div class="slicer">
-            <div class="slicer-header"><span>Category</span><span>⧨ Filter</span></div>
-            <div class="slicer-body">
-                <div class="slicer-item full">Automotive</div><div class="slicer-item full">Consumer Goods</div><div class="slicer-item full">Electronics</div>
-            </div>
-        </div>
-        <div class="slicer">
-            <div class="slicer-header"><span>Product</span><span>⧨ Filter</span></div>
-            <div class="slicer-body">
-                <div class="slicer-item full">Component Z</div><div class="slicer-item full">Gadget X</div><div class="slicer-item full">Gadget Y</div>
-            </div>
-        </div>
-        <div class="slicer">
-            <div class="slicer-header"><span>Supervisor</span><span>⧨ Filter</span></div>
-            <div class="slicer-body">
-                <div class="slicer-item full">Kelsey Nguyen</div><div class="slicer-item full">Nicholas Clark</div>
-                <div class="slicer-item full">Richard Harris</div><div class="slicer-item full">Suzanne May PhD</div>
+    <div class="row g-3 mt-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header small text-muted">Sales Revenue by Category and Month</div>
+                <div class="card-body"><canvas id="heatSales"></canvas></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ==========================================
-    // LOGIC CHUYỂN TABS
-    // ==========================================
-    let isChartsRendered = false;
+    const barCtx = document.getElementById('barRevCost');
+    const pieQtyCtx = document.getElementById('pieQtyPlant');
+    const pieDefCtx = document.getElementById('pieDefCat');
+    const heatCtx = document.getElementById('heatSales');
 
-    function switchTab(tabId) {
-        // Đổi màu tab đang chọn
-        document.querySelectorAll('.excel-tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
+    let barChart, pieQtyChart, pieDefChart, heatChart;
 
-        // Ẩn tất cả các màn hình
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        // Hiện màn hình tương ứng
-        document.getElementById('pane-' + tabId).classList.add('active');
+    async function loadData() {
+    const f = document.getElementById('from').value;
+    const t = document.getElementById('to').value;
+    const url = `/kpi/overview?from=${f||''}&to=${t||''}`;
+    const res = await fetch(url);
+    const data = await res.json();
 
-        // Vẽ biểu đồ cho các tab phụ nếu chưa vẽ
-        if(tabId !== 'overview' && !isChartsRendered) {
-            renderOtherCharts();
-            isChartsRendered = true;
-        }
+    // cards
+    document.getElementById('cardQty').innerText = data.cards.quantity.toLocaleString();
+    document.getElementById('cardDef').innerText = data.cards.defects.toLocaleString();
+    document.getElementById('cardCost').innerText = data.cards.productionCost.toLocaleString();
+    document.getElementById('cardRev').innerText = data.cards.revenue.toLocaleString();
+    document.getElementById('cardEff').innerText = data.cards.efficiency;
+    document.getElementById('cardDown').innerText = (data.downtime?.reduce((s,x)=>s+x.downMinutes,0)||0);
+
+    // bar revenue vs cost
+    const labels = data.revCostByProduct.map(x=>x.label);
+    const rev = data.revCostByProduct.map(x=>x.revenue);
+    const cost= data.revCostByProduct.map(x=>x.cost);
+    barChart?.destroy();
+    barChart = new Chart(barCtx, {
+    type:'bar',
+    data:{labels, datasets:[
+    {label:'Revenue', data:rev, backgroundColor:'#4e79a7'},
+    {label:'Cost', data:cost, backgroundColor:'#f28e2b'}
+    ]},
+    options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+    });
+
+    // pie qty by plant
+    pieQtyChart?.destroy();
+    pieQtyChart = new Chart(pieQtyCtx,{
+    type:'doughnut',
+    data:{labels:data.qtyByPlant.map(x=>x.label),
+    datasets:[{data:data.qtyByPlant.map(x=>x.value), backgroundColor:['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f']}]},
+    options:{plugins:{legend:{position:'bottom'}}}
+    });
+
+    // pie defects by category
+    pieDefChart?.destroy();
+    pieDefChart = new Chart(pieDefCtx,{
+    type:'pie',
+    data:{labels:data.defectsByCat.map(x=>x.label),
+    datasets:[{data:data.defectsByCat.map(x=>x.value), backgroundColor:['#e15759','#edc948','#59a14f','#af7aa1','#ff9da7']}]},
+    options:{plugins:{legend:{position:'bottom'}}}
+    });
+
+    // heatmap (mô phỏng bằng stacked bar 12 tháng)
+    const months = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const cats = [...new Set(data.salesCatMonth.map(x=>x.category))];
+    const datasets = cats.map((c,i)=>({
+    label:c,
+    data: months.map(m => {
+    const row = data.salesCatMonth.find(x=>x.category===c && x.m===m);
+    return row ? row.value : 0;
+    }),
+    backgroundColor: `hsl(${(i*60)%360},70%,60%)`,
+    stack:'stack1'
+    }));
+    heatChart?.destroy();
+    heatChart = new Chart(heatCtx,{
+    type:'bar',
+    data:{labels: months.map(m=>`Thg ${m}`), datasets},
+    options:{responsive:true, scales:{x:{stacked:true}, y:{stacked:true}}}
+    });
     }
 
-    // Gắn sự kiện click cho các nút Slicer (Lọc dữ liệu)
-    document.querySelectorAll('.slicer-item').forEach(item => {
-        item.addEventListener('click', function() {
-            this.classList.toggle('inactive');
-        });
-    });
-
-    // ==========================================
-    // VẼ BIỂU ĐỒ - CẤU HÌNH CHUNG
-    // ==========================================
-    Chart.defaults.font.family = '"Segoe UI", Arial, sans-serif';
-    Chart.defaults.font.size = 10;
-    Chart.defaults.color = '#475569';
-
-    // ==========================================
-    // BIỂU ĐỒ TAB 1: OVERVIEW (GIỐNG EXCEL)
-    // ==========================================
-    new Chart(document.getElementById('c-rev-cost'), {
-        type: 'bar',
-        data: { labels: ['Widget B', 'Widget A', 'Gadget Y', 'Gadget X', 'Component Z'],
-                datasets: [{ label: 'Production Cost ($)', data: [2.8, 3.0, 2.7, 2.7, 2.8], backgroundColor: '#38bdf8' },
-                           { label: 'Sales Revenue ($)', data: [5.2, 6.1, 5.3, 5.4, 5.5], backgroundColor: '#0284c7' }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } }, scales: { x: { display: false }, y: { grid: { display: false } } } }
-    });
-
-    new Chart(document.getElementById('c-qty-plant'), {
-        type: 'doughnut',
-        data: { labels: ['Plant A', 'Plant B', 'Plant C', 'Plant D'],
-                datasets: [{ data: [25, 21, 28, 26], backgroundColor: ['#84cc16', '#3b82f6', '#eab308', '#0ea5e9'], borderWidth: 1 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '60%' }
-    });
-
-    new Chart(document.getElementById('c-defects-cat'), {
-        type: 'pie',
-        data: { labels: ['Machinery', 'Electronics', 'Consumer Goods', 'Automotive'],
-                datasets: [{ data: [33, 23, 24, 20], backgroundColor: ['#eab308', '#0ea5e9', '#84cc16', '#3b82f6'], borderWidth: 1 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-    });
-
-    new Chart(document.getElementById('c-sales-month'), {
-        type: 'bar',
-        data: { labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-                datasets: [{ label: 'Automotive', data: [20,25,20,30,25,20,25,20,30,25,20,25], backgroundColor: '#eab308' },
-                           { label: 'Consumer Goods', data: [30,25,35,25,30,35,25,30,25,35,30,25], backgroundColor: '#f97316' },
-                           { label: 'Electronics', data: [25,30,20,25,20,25,30,25,25,20,30,25], backgroundColor: '#84cc16' },
-                           { label: 'Machinery', data: [25,20,25,20,25,20,20,25,20,20,20,25], backgroundColor: '#0ea5e9' }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10 } } }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, ticks: { callback: function(value){ return value + '%'; } } } } }
-    });
-
-    // ==========================================
-    // VẼ BIỂU ĐỒ CÁC TAB CÒN LẠI (TỰ ĐỘNG GỌI KHI BẤM TAB)
-    // ==========================================
-    function renderOtherCharts() {
-        // TAB 2: PRODUCTION
-        new Chart(document.getElementById('c-prod-trend'), { type: 'line', data: { labels: ['Jan','Feb','Mar','Apr','May','Jun'], datasets: [{ label: 'Output', data: [45000, 48000, 51000, 47000, 52000, 45514], borderColor: '#0284c7', backgroundColor:'rgba(2,132,199,0.1)', fill:true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}} } });
-        new Chart(document.getElementById('c-machine-out'), { type: 'bar', data: { labels: ['MC-01','MC-02','MC-03','MC-04','MC-05'], datasets: [{ label: 'Units', data: [65000, 58000, 62000, 48000, 55514], backgroundColor: '#84cc16' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}} } });
-        new Chart(document.getElementById('c-shift'), { type: 'pie', data: { labels: ['Day Shift', 'Night Shift'], datasets: [{ data: [65, 35], backgroundColor: ['#3b82f6', '#1e293b'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-        new Chart(document.getElementById('c-fulfill'), { type: 'bar', data: { labels: ['Plant A', 'Plant B', 'Plant C', 'Plant D'], datasets: [{ label: 'Actual', data: [95, 88, 92, 98], backgroundColor: '#0284c7' },{ label: 'Target', data: [100, 100, 100, 100], backgroundColor: '#e2e8f0' }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' } });
-
-        // TAB 3: QUALITY
-        new Chart(document.getElementById('c-pareto-defect'), { type: 'bar', data: { labels: ['Scratches', 'Dimension', 'Assembly', 'Painting', 'Other'], datasets: [{ label: 'Count', data: [5200, 3100, 2100, 1500, 742], backgroundColor: '#ef4444', order: 2 }, { label: 'Cumulative %', data: [41, 65, 82, 94, 100], type: 'line', borderColor: '#f59e0b', yAxisID: 'y1', order: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y1: { type: 'linear', position: 'right', max: 100 } } } });
-        new Chart(document.getElementById('c-q-donut'), { type: 'doughnut', data: { labels: ['Pass (FTT)', 'Rework', 'Scrap'], datasets: [{ data: [95.6, 2.1, 2.3], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%' } });
-        new Chart(document.getElementById('c-defect-trend'), { type: 'line', data: { labels: ['Week 1','Week 2','Week 3','Week 4'], datasets: [{ label: 'Defect Rate (%)', data: [4.8, 4.5, 4.1, 4.38], borderColor: '#ef4444', borderDash: [5,5] }] }, options: { responsive: true, maintainAspectRatio: false } });
-
-        // TAB 4: COST
-        new Chart(document.getElementById('c-cost-break'), { type: 'pie', data: { labels: ['Materials', 'Labor', 'Overhead', 'Energy'], datasets: [{ data: [45, 30, 15, 10], backgroundColor: ['#0ea5e9', '#3b82f6', '#8b5cf6', '#eab308'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-        new Chart(document.getElementById('c-margin-prod'), { type: 'bar', data: { labels: ['Widget A', 'Widget B', 'Gadget X', 'Gadget Y', 'Component Z'], datasets: [{ label: 'Profit Margin %', data: [50.8, 46.1, 50.0, 49.0, 49.1], backgroundColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}} } });
-
-        // TAB 5: EFFICIENCY
-        new Chart(document.getElementById('c-down-reason'), { type: 'bar', data: { labels: ['Tool Break', 'Material Shortage', 'Setup/Changeover', 'Motor Fault', 'Sensors'], datasets: [{ label: 'Hours', data: [450, 320, 250, 150, 70], backgroundColor: '#f59e0b' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}}, indexAxis: 'y' } });
-        new Chart(document.getElementById('c-oee-radar'), { type: 'radar', data: { labels: ['Availability', 'Performance', 'Quality'], datasets: [{ label: 'Current OEE', data: [88.5, 95.2, 95.6], backgroundColor: 'rgba(2,132,199,0.2)', borderColor: '#0284c7', pointBackgroundColor: '#0284c7' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 60, max: 100 } } } });
-    }
+    document.getElementById('btnLoad').addEventListener('click', loadData);
+    const today = new Date();
+    document.getElementById('to').value = today.toISOString().slice(0,10);
+    const from = new Date(today); from.setDate(today.getDate()-30);
+    document.getElementById('from').value = from.toISOString().slice(0,10);
+    loadData();
 </script>
-</body>
-</html>
