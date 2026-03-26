@@ -6,7 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>eAndon Dashboard</title>
+<title>BOYD Dashboard</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f0efed;color:#1c1c1a;min-height:100vh}
@@ -70,11 +70,11 @@ body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f
 
 /* AI PANEL */
 .ai-panel{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
-.ai-header{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary)}
+.ai-header{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:0.5px solid var(--border);background:var(--bg-secondary);position:relative;}
 .ai-icon{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ai-icon svg{width:11px;height:11px;fill:#fff}
 .ai-title{font-size:11px;font-weight:500}
-.ai-badge{font-size:9px;padding:1px 5px;border-radius:10px;background:#7c3aed18;color:#7c3aed;border:0.5px solid #7c3aed40;margin-left:auto}
+.ai-badge{font-size:9px;padding:1px 5px;border-radius:10px;background:#7c3aed18;color:#7c3aed;border:0.5px solid #7c3aed40;margin-left:auto;margin-right:26px;} 
 .hint-list{padding:6px 8px}
 .hint{display:flex;gap:7px;padding:5px 4px;border-bottom:0.5px solid var(--border);align-items:flex-start}
 .hint:last-child{border-bottom:none}
@@ -112,6 +112,12 @@ body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f
 .kpi-v{font-size:18px;font-weight:500;padding-left:7px;line-height:1}
 .kpi-d{font-size:9px;padding-left:7px;margin-top:2px}
 
+/* CSS CHO PARETO MỚI */
+.pareto-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border)}
+.pareto-row:last-child{border-bottom:none}
+.pareto-bar-wrap{flex:1;height:5px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden}
+.pareto-bar{height:100%;background:var(--blue);border-radius:3px}
+
 /* HIST TABLE */
 .hist-wrap{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
 .hist-head{padding:6px 10px;border-bottom:0.5px solid var(--border);font-size:12px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
@@ -120,33 +126,12 @@ table{width:100%;border-collapse:collapse}
 th{font-weight:500;position:sticky;top:0;background:var(--bg-secondary);z-index:1}
 td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-bottom:0.5px solid var(--border)}
 
-/* ===================== TÍCH HỢP PRODUCTION PAGE MỚI ===================== */
-.prod-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}
-.prod-card{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-lg);
-           padding:14px 16px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer;}
-.prod-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px -6px rgba(0,0,0,.1)}
-.prod-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.prod-line{font-size:15px;font-weight:600}
-.prod-status{display:flex;align-items:center;gap:6px;font-size:12px}
-.prod-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.prod-model{font-size:13px;color:var(--text-secondary);margin-bottom:12px;font-family:monospace}
-.prod-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.prod-stat{text-align:center}
-.prod-stat-label{font-size:10px;color:var(--text-tertiary);margin-bottom:2px}
-.prod-stat-value{font-size:22px;font-weight:600;line-height:1}
-.prod-stat-sub{font-size:11px;color:var(--text-secondary)}
-.prod-progress{height:6px;background:var(--bg-tertiary);border-radius:9999px;margin:10px 0;overflow:hidden}
-.prod-progress-bar{height:100%;border-radius:9999px;transition:width .6s cubic-bezier(0.4,0,0.2,1)}
-.prod-ai-bar{display:flex;gap:8px;margin-top:12px;font-size:10px}
-.prod-ai-item{padding:4px 8px;border-radius:4px;background:var(--bg-secondary);border:0.5px solid var(--border);flex:1;text-align:center}
-.prod-stop-banner{position:absolute;top:0;left:0;right:0;background:var(--red);color:#fff;font-size:11px;
-                   padding:3px 12px;text-align:center;font-weight:500;letter-spacing:0.5px}
-.prod-modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:12px}
-.prod-modal-tab{padding:6px 16px;cursor:pointer;font-size:12px;border-bottom:2px solid transparent}
-.prod-modal-tab.on{border-bottom-color:var(--blue);color:var(--blue);font-weight:500}
-.prod-period-btn{padding:6px 18px;border-radius:9999px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;border:1px solid transparent}
-.prod-period-btn.on{background:var(--bg-primary);border-color:var(--border);box-shadow:0 1px 3px rgba(0,0,0,.1);color:var(--text-primary)}
+/* ZOOM */
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;min-height:20px;position:relative}
+.panel-hdr-title{font-size:11px;color:var(--text-secondary);flex:1;font-weight:600;text-transform:uppercase}
+.zoom-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:0.5px solid var(--border);border-radius:4px;background:none;cursor:pointer;color:var(--text-tertiary);flex-shrink:0;padding:0;font-family:inherit;position:absolute;right:0;top:50%;transform:translateY(-50%)}
+.zoom-btn:hover{color:var(--text-primary);background:var(--bg-secondary)}
+.zoom-btn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.2px;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -154,11 +139,16 @@ td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-b
 
   <div class="hdr">
     <div class="hdr-left">
-      <span class="hdr-title">eAndon</span>
+      <span class="hdr-title">BOYD</span>
       <span class="hdr-live"><span class="hdr-dot"></span>Live</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span class="hdr-time" id="clock"></span>
+      
+      <a href="/kpi" style="text-decoration:none; background:var(--blue); color:#fff; display:flex; align-items:center; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; font-family:inherit; transition:0.2s">
+        📊 KPI Sản Xuất 
+      </a>
+
       <button onclick="toggleFS()" id="btn-fs" title="Toàn màn hình" style="background:none;border:0.5px solid var(--border);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px 6px;border-radius:6px;gap:4px;font-size:11px;font-family:inherit">
         <svg id="fs-ico" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         <span id="fs-lbl">Toàn màn hình</span>
@@ -168,7 +158,6 @@ td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-b
 
   <div class="tabs">
     <button class="tab on" id="tab-dash"  onclick="aTab('dash')">Dashboard</button>
-    <button class="tab"    id="tab-prod"  onclick="aTab('prod')">Sản xuất</button>
     <button class="tab"    id="tab-ins"   onclick="aTab('ins')">Insights</button>
     <button class="tab"    id="tab-analy" onclick="aTab('analy')">Analytics</button>
   </div>
@@ -195,23 +184,6 @@ td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-b
         <button class="hint-refresh" onclick="genHints()">↻ Làm mới phân tích API</button>
       </div>
     </div>
-  </div>
-
-  <div id="pg-prod" class="page">
-    <div class="prod-header">
-      <div class="panel-hdr">
-        <span class="panel-hdr-title" style="font-size:15px">Thống kê Sản xuất — 11 Lines</span>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;background:var(--bg-secondary);padding:4px;border-radius:9999px">
-        <label onclick="switchProdPeriod('day')"   id="period-day"   class="prod-period-btn on">📅 Hôm nay (từ 8h)</label>
-        <label onclick="switchProdPeriod('week')"  id="period-week"  class="prod-period-btn">📆 Tuần này (từ T2)</label>
-        <label onclick="switchProdPeriod('month')" id="period-month" class="prod-period-btn">📅 Tháng này</label>
-        <label onclick="switchProdPeriod('ytd')"   id="period-ytd"   class="prod-period-btn">📆 Từ đầu năm</label>
-      </div>
-      <div id="prod-global-stop" style="display:flex;align-items:center;gap:8px;background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:6px 14px;font-size:13px"></div>
-    </div>
-    <div class="kpi-ribbon" id="prod-kpi" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px"></div>
-    <div id="prod-grid" class="prod-grid"></div>
   </div>
 
   <div id="pg-ins" class="page">
@@ -311,13 +283,12 @@ td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-b
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ============================================================
-// 1. DATA — KẾT NỐI SỐ LIỆU THẬT TỪ C# VIEWBAG (HOÀN CHỈNH)
+// 1. DATA — KẾT NỐI SỐ LIỆU THẬT TỪ C# VIEWBAG
 // ============================================================
-let LS = [], allH = [], PD = [];
+let LS = [], allH = [];
 try {
     LS   = JSON.parse('@Html.Raw(ViewBag.LiveLines)' || '[]');
     allH = JSON.parse('@Html.Raw(ViewBag.HistoryData)' || '[]');
-    PD   = JSON.parse('@Html.Raw(ViewBag.ProductionData)' || '[]');
 } catch (e) { console.error("Lỗi đọc Data từ Database:", e); }
 
 // TÍNH TOÁN DATA THẬT CHO TỪNG LINE TỪ LỊCH SỬ
@@ -331,38 +302,6 @@ LS.forEach(l => {
     l.mtbf = l.inc > 0 ? Math.round(480 / l.inc) : 480;
     l.av = Math.max(0, 100 - (l.inc * 1.5)); 
 });
-
-// TRUYỀN TÍN HIỆU ANDON SANG TRANG SẢN XUẤT (VÀ GIẢ LẬP CÁC CHỈ SỐ AI CHO UI MỚI)
-PD.forEach(p => {
-    const andonLine = LS.find(l => l.nm === p.nm);
-    // Tính giả MRB (FTT) dựa trên giờ hiện tại (khi có DB thực thì C# sẽ lo việc này)
-    p.mrb = Math.round((p.actual / Math.max(1, (new Date().getHours()-8))) * 0.05 * 10) / 10 || 0; 
-    
-    if (andonLine) {
-        p.andonStop = andonLine.s !== 'green' ? 1 : 0;
-        p.stopCount = andonLine.inc;
-        p.stopMin = andonLine.mttr * andonLine.inc;
-        p.status = andonLine.s;
-        p.reason = andonLine.al && andonLine.s !== 'green' ? andonLine.al : "";
-        p.ewma = andonLine.mttr > 0 ? andonLine.mttr + 3 : 0;
-        p.zscore = (andonLine.inc * 0.6).toFixed(1);
-        p.pattern = andonLine.inc > 2 ? 'high' : (andonLine.inc > 0 ? 'medium' : 'low');
-    } else {
-        p.andonStop = 0; p.stopCount = 0; p.stopMin = 0; p.status = 'green';
-        p.reason = ""; p.ewma = 0; p.zscore = 0.5; p.pattern = "low";
-    }
-});
-
-// KHỞI TẠO CÁC MẢNG DATA CHO TAB SẢN XUẤT (Day, Week, Month, YTD)
-let PROD_DAY = PD;
-// Giả lập scaling data cho các mốc thời gian lớn hơn (chờ sếp code SQL thật)
-let PROD_WEEK  = PROD_DAY.map(l => ({...l, target: Math.round(l.target*3.1), actual: Math.round(l.actual*3.05), mrb: +(l.mrb*0.98).toFixed(1), ewma: +(l.ewma*0.95).toFixed(1)}));
-let PROD_MONTH = PROD_DAY.map(l => ({...l, target: Math.round(l.target*13.5), actual: Math.round(l.actual*13.2), mrb: +(l.mrb*1.05).toFixed(1), ewma: +(l.ewma*1.1).toFixed(1)}));
-let PROD_YTD   = PROD_DAY.map(l => ({...l, target: Math.round(l.target*42), actual: Math.round(l.actual*40), mrb: +(l.mrb*1.1).toFixed(1), ewma: +(l.ewma*1.15).toFixed(1)}));
-
-let currentProdPeriod = 'day';
-let currentProdData = [...PROD_DAY];
-const periodLabels = { day:'Hôm nay (từ 8h)', week:'Tuần này (từ T2 8h)', month:'Tháng này', ytd:'Từ đầu năm' };
 
 const SC = {
   green:  {c:'#16a34a', lbl:'Bình thường'},
@@ -464,145 +403,19 @@ async function genHints() {
     critical:`<svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>`,
     warn:    `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm-1 5h2v6h-2V7zm0 8h2v2h-2v-2z"/></svg>`,
     good:    `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`,
-    info:    `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm-1 5h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>`,
+    info:    `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm-1 5h2v6h-2V7zm0 4h2v6h-2v-6z"/></svg>`,
   };
 
   document.getElementById('hint-list').innerHTML = hints.slice(0,7).map(h => `<div class="hint hint-${h.type}"><div class="hint-ico">${ico[h.type]}</div><div class="hint-body"><div class="hint-title">${h.title}</div><div class="hint-sub">${h.sub}</div><span class="hint-tag">${h.tag}</span></div></div>`).join('');
 }
 
 function aTab(t) {
-  ['dash','prod','ins','analy'].forEach(x => {
+  ['dash','ins','analy'].forEach(x => {
     document.getElementById('tab-'+x).classList.toggle('on', x===t);
     document.getElementById('pg-'+x).classList.toggle('on', x===t);
   });
   if (t === 'ins')   initInsights();
   if (t === 'analy') initAnaly();
-  if (t === 'prod')  initProd();
-}
-
-// ============================================================
-// 3. SẢN XUẤT TAB (GIAO DIỆN KPI MỚI)
-// ============================================================
-let _prodInit = false;
-function initProd() {
-  if (_prodInit) return; _prodInit = true;
-  switchProdPeriod('day');
-  setInterval(() => {
-      // Trong tương lai C# sẽ dùng AJAX để cập nhật. Tạm thời re-render UI.
-      renderProdPage();
-  }, 30000);
-}
-
-function switchProdPeriod(p) {
-  currentProdPeriod = p;
-  document.querySelectorAll('.prod-period-btn').forEach(b => b.classList.toggle('on', b.id === `period-${p}`));
-  if (p === 'day') currentProdData = [...PROD_DAY];
-  else if (p === 'week') currentProdData = [...PROD_WEEK];
-  else if (p === 'month') currentProdData = [...PROD_MONTH];
-  else if (p === 'ytd') currentProdData = [...PROD_YTD];
-  renderProdPage();
-}
-
-function renderProdPage() {
-  const stopped = currentProdData.filter(l => l.andonStop > 0);
-  document.getElementById('prod-global-stop').innerHTML = `
-    <span style="color:var(--red)">🔴</span>
-    <strong>${stopped.length}</strong> Line đang dừng (Andon + AI)
-    <span style="font-size:12px;color:var(--text-secondary);margin-left:12px">${stopped.map(l=>l.reason).join(' • ') || 'Không có'}</span>
-  `;
-  const totalTarget = currentProdData.reduce((a,l)=>a+l.target,0);
-  const totalActual = currentProdData.reduce((a,l)=>a+l.actual,0);
-  const avgMRB = (currentProdData.reduce((a,l)=>a+l.mrb,0)/currentProdData.length).toFixed(1);
-  const oee = Math.round((totalActual / totalTarget) * 100);
-  
-  document.getElementById('prod-kpi').innerHTML = `
-    <div class="kpi kpi-g"><div class="kpi-l">Tổng Target</div><div class="kpi-v">${totalTarget.toLocaleString('vi-VN')}</div><div class="kpi-d">${periodLabels[currentProdPeriod]}</div></div>
-    <div class="kpi kpi-b"><div class="kpi-l">Tổng Thực tế</div><div class="kpi-v">${totalActual.toLocaleString('vi-VN')}</div><div class="kpi-d">${oee}% hoàn thành</div></div>
-    <div class="kpi kpi-t"><div class="kpi-l">MRB TB</div><div class="kpi-v">${avgMRB}</div><div class="kpi-d">trung bình</div></div>
-    <div class="kpi ${oee>85?'kpi-g':oee>70?'kpi-y':'kpi-r'}"><div class="kpi-l">OEE</div><div class="kpi-v">${oee}%</div><div class="kpi-d">hiệu suất</div></div>
-  `;
-  
-  const grid = document.getElementById('prod-grid');
-  grid.innerHTML = currentProdData.map(line => {
-    const pct = Math.round((line.actual / line.target) * 100);
-    const color = line.status === 'green' ? 'var(--green)' : line.status === 'red' ? 'var(--red)' : line.status === 'yellow' ? 'var(--yellow)' : 'var(--orange)';
-    const stopBanner = line.andonStop > 0 ? `<div class="prod-stop-banner">🔴 DỪNG — ${line.reason}</div>` : '';
-    return `
-    <div class="prod-card" onclick="openProdDetail('${line.id}')">
-      ${stopBanner}
-      <div class="prod-card-header"><div class="prod-line">${line.nm}</div><div class="prod-status"><span class="prod-dot" style="background:${color}"></span><span style="color:${color};font-weight:500">${line.status==='green'?'Đang chạy':line.status==='red'?'Dừng':line.status==='yellow'?'Chờ KTV':'Đang sửa'}</span></div></div>
-      <div class="prod-model">Model: <strong>${line.model}</strong></div>
-      <div class="prod-stats">
-        <div class="prod-stat"><div class="prod-stat-label">TARGET</div><div class="prod-stat-value">${line.target.toLocaleString('vi-VN')}</div></div>
-        <div class="prod-stat"><div class="prod-stat-label">THỰC TẾ</div><div class="prod-stat-value" style="color:${pct>85?'var(--green)':pct>65?'var(--yellow)':'var(--red)'}">${line.actual.toLocaleString('vi-VN')}</div><div class="prod-stat-sub">${pct}%</div></div>
-        <div class="prod-stat"><div class="prod-stat-label">MRB TB</div><div class="prod-stat-value" style="color:var(--purple)">${line.mrb}</div></div>
-      </div>
-      <div class="prod-progress"><div class="prod-progress-bar" style="width:${pct}%;background:${pct>85?'var(--green)':pct>65?'var(--yellow)':'var(--red)'}"></div></div>
-      <div class="prod-ai-bar">
-        <div class="prod-ai-item">EWMA <strong>${line.ewma}p</strong></div>
-        <div class="prod-ai-item">Z-Score <strong>${line.zscore}</strong> <span style="color:${line.zscore>2?'var(--red)':line.zscore>1.5?'var(--yellow)':'var(--green)'}">(${line.zscore>2?'bất thường':line.zscore>1.5?'cảnh báo':'bình thường'})</span></div>
-        <div class="prod-ai-item">Pattern <strong>${line.pattern}</strong></div>
-      </div>
-      <div style="margin-top:12px;font-size:10px;color:var(--text-tertiary);text-align:right">▶ Click xem chi tiết & biểu đồ model năm ngoái</div>
-    </div>`;
-  }).join('');
-}
-
-function openProdDetail(id) {
-  const line = currentProdData.find(l => l.id === id);
-  if (!line) return;
-  document.getElementById('mTitle').innerHTML = `${line.nm} — ${line.model} <span style="font-size:13px;color:var(--text-secondary);margin-left:12px">(${periodLabels[currentProdPeriod]})</span>`;
-  const mc = document.getElementById('mContent');
-  mc.innerHTML = `
-    <div class="prod-modal-tabs">
-      <div onclick="showProdTab(0)" class="prod-modal-tab on" id="ptab-0">7 ngày gần nhất</div>
-      <div onclick="showProdTab(1)" class="prod-modal-tab" id="ptab-1">30 ngày</div>
-      <div onclick="showProdTab(2)" class="prod-modal-tab" id="ptab-2">Từ đầu năm</div>
-    </div>
-    <div id="prod-detail-content">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div><div class="cbox-label">Sản lượng theo ngày (so với Target)</div><div style="position:relative;height:260px"><canvas id="prod-chart-main"></canvas></div></div>
-        <div><div class="cbox-label">Số lần Andon &amp; lỗi (EWMA dự đoán sửa)</div><div style="position:relative;height:260px"><canvas id="prod-chart-andon"></canvas></div></div>
-      </div>
-      <div style="margin-top:20px;display:grid;grid-template-columns:2fr 1fr;gap:16px">
-        <div class="cbox"><div class="cbox-label">So sánh cùng kỳ năm ngoái <strong>(cùng model ${line.model})</strong></div><div style="position:relative;height:180px"><canvas id="prod-chart-year"></canvas></div></div>
-        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px">
-          <h4 style="margin-bottom:10px">AI Analysis</h4>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div><strong>EWMA</strong> — Dự đoán thời gian sửa: <span style="color:var(--blue)">${line.ewma} phút</span></div>
-            <div><strong>Z-Score</strong> — Bất thường: <span style="color:${line.zscore>2?'var(--red)':line.zscore>1.5?'var(--yellow)':'var(--green)'}">${line.zscore}</span></div>
-            <div><strong>Pattern Detection</strong> — Quy luật rủi ro: <span style="color:${line.pattern==='high'?'var(--red)':line.pattern==='medium'?'var(--yellow)':'var(--green)'}">${line.pattern.toUpperCase()}</span></div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  const ov = document.getElementById('mOv');
-  ov.style.display = 'flex';
-  requestAnimationFrame(() => ov.style.opacity = '1');
-  setTimeout(() => renderProdDetailCharts(line), 150);
-}
-
-let currentProdTab = 0;
-function showProdTab(tab) {
-  currentProdTab = tab;
-  document.querySelectorAll('.prod-modal-tab').forEach((el,i) => el.classList.toggle('on', i===tab));
-  const lineId = document.getElementById('mTitle').textContent.split('—')[0].trim().split(' ')[1];
-  const line = currentProdData.find(l => l.id === lineId);
-  if (line) renderProdDetailCharts(line);
-}
-
-function renderProdDetailCharts(line) {
-  const labels = currentProdTab === 0 ? ['T2','T3','T4','T5','T6','T7','CN'] : currentProdTab === 1 ? Array.from({length:15},(_,i)=>(i+1)+'') : Array.from({length:12},(_,i)=>'T'+(i+1));
-  const len = currentProdTab === 0 ? 7 : currentProdTab === 1 ? 15 : 12;
-  // Main chart
-  if (window.prodMainChart) window.prodMainChart.destroy();
-  window.prodMainChart = new Chart(document.getElementById('prod-chart-main'), {type:'bar', data:{labels, datasets:[{label:'Thực tế', data:Array.from({length:len},()=>Math.round(line.actual*0.7+Math.random()*line.actual*0.6)), backgroundColor:'#16a34a99'},{label:'Target', data:Array.from({length:len},()=>line.target), type:'line', borderColor:'#dc2626', borderDash:[4,2]}]}, options:{responsive:true, maintainAspectRatio:false}});
-  // Andon chart
-  if (window.prodAndonChart) window.prodAndonChart.destroy();
-  window.prodAndonChart = new Chart(document.getElementById('prod-chart-andon'), {type:'line', data:{labels, datasets:[{label:'Andon', data:Array.from({length:len},()=>Math.floor(Math.random()*6)), borderColor:'#dc2626'},{label:'EWMA', data:Array.from({length:len},()=>line.ewma + Math.random()*8-4), borderColor:'#7c3aed'}]}, options:{responsive:true, maintainAspectRatio:false}});
-  // Year compare
-  if (window.prodYearChart) window.prodYearChart.destroy();
-  window.prodYearChart = new Chart(document.getElementById('prod-chart-year'), {type:'bar', data:{labels:currentProdTab===0?['T2','T3','T4','T5','T6','T7','CN']:currentProdTab===1?Array.from({length:8},(_,i)=>(i+1)+''):Array.from({length:12},(_,i)=>'T'+(i+1)), datasets:[{label:`2026 (${line.model})`, data:Array.from({length:currentProdTab===0?7:currentProdTab===1?8:12},()=>Math.round(line.actual*1.2)), backgroundColor:'#2563eb'},{label:`2025 (cùng model)`, data:Array.from({length:currentProdTab===0?7:currentProdTab===1?8:12},()=>Math.round(line.actual*0.9)), backgroundColor:'#d97706'}]}, options:{responsive:true, maintainAspectRatio:false}});
 }
 
 // ============================================================
@@ -637,9 +450,19 @@ function initInsights() {
       const hmC=(v)=>v===0?'var(--bg-tertiary)':v<=1?'#bbf7d0':v<=2?'#86efac':v<=3?'#4ade80':'#16a34a';
       hmWrap.innerHTML=`<div style="display:flex;gap:2px;margin-bottom:4px;margin-left:52px">${hours.map(h=>`<div style="flex:1;text-align:center;font-size:9px;color:var(--text-tertiary)">${h}h</div>`).join('')}</div>${LS.map((l,i)=>`<div style="display:flex;gap:2px;margin-bottom:2px;align-items:center"><div style="width:48px;font-size:10px;color:var(--text-secondary);text-align:right;padding-right:4px;flex-shrink:0">${l.nm}</div>${hours.map((_,j)=>`<div title="${hours[j]}h: ${hmData[i][j]} sự cố" style="flex:1;height:18px;border-radius:2px;background:${hmC(hmData[i][j])}"></div>`).join('')}</div>`).join('')}<div style="display:flex;align-items:center;gap:4px;margin-top:6px;font-size:9px;color:var(--text-tertiary)"><span>Ít</span>${['var(--bg-tertiary)','#bbf7d0','#86efac','#4ade80','#16a34a'].map(c=>`<div style="width:12px;height:10px;border-radius:2px;background:${c}"></div>`).join('')}<span>Nhiều</span></div>`;
 
+      // Code Pareto
       const pareto=[{lbl:'Hỗ trợ bảo trì',n:28},{lbl:'Hỗ trợ kỹ thuật',n:19},{lbl:'Hỗ trợ chất lượng',n:15},{lbl:'Thiếu NVL',n:8},{lbl:'An toàn',n:4},{lbl:'Khác',n:2}];
-      const ptot=pareto.reduce((a,p)=>a+p.n,0); let cum=0;
-      document.getElementById('pareto-list').innerHTML=pareto.map(p=>{cum+=p.n;return`<div class="pareto-row"><span style="flex:0 0 130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">${p.lbl}</span><div class="pareto-bar-wrap"><div class="pareto-bar" style="width:${(p.n/pareto[0].n*100).toFixed(0)}%"></div></div><span style="width:22px;text-align:right;font-size:10px">${p.n}</span><span style="width:32px;text-align:right;font-size:9px;color:${cum/ptot>.8?'var(--red)':'var(--text-tertiary)'}">${(cum/ptot*100).toFixed(0)}%</span></div>`;}).join('');
+      const ptot = pareto.reduce((a,p)=>a+p.n,0);
+      let cum=0;
+      document.getElementById('pareto-list').innerHTML = pareto.map(p=>{
+        cum+=p.n;
+        return `<div class="pareto-row">
+          <span style="flex:0 0 130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px">${p.lbl}</span>
+          <div class="pareto-bar-wrap"><div class="pareto-bar" style="width:${(p.n/pareto[0].n*100).toFixed(0)}%"></div></div>
+          <span style="width:22px;text-align:right;font-size:10px">${p.n}</span>
+          <span style="width:32px;text-align:right;font-size:9px;color:${cum/ptot>.8?'var(--red)':'var(--text-tertiary)'}">${(cum/ptot*100).toFixed(0)}%</span>
+        </div>`;
+      }).join('');
 
       fetchAndDrawMttrChart();
   }, 100);
@@ -679,7 +502,6 @@ function initAnaly() {
   document.getElementById('hb').innerHTML=allH.map(r=>`<tr><td>${r.dt} ${r.tm}</td><td>${r.line}</td><td>${r.stn}</td><td>${r.al}</td><td>${r.sev}</td><td>${r.dur}m</td><td>${r.op}</td><td>${r.tech}</td><td>${r.lead}</td><td>${r.wo}</td></tr>`).join('');
   document.getElementById('hist-count').textContent=allH.length+' bản ghi';
 
-  // Biểu đồ Live
   var ctx = document.getElementById('incidentChart').getContext('2d');
   var liveChart = new Chart(ctx, {
       type: 'bar',
@@ -692,28 +514,152 @@ function initAnaly() {
   fetchLiveData(); setInterval(fetchLiveData, 10000); 
 }
 
-// ZOOM MODALS
+// ============================================================
+// ZOOM / MODAL ĐẦY ĐỦ CỦA SẾP
+// ============================================================
+const ZOOM_TITLES = {
+  'lc':        'Trạng thái Lines',
+  'sc':        'Thống kê ca hiện tại',
+  'ai-panel':  'AI Insights',
+  'c-avail':   'Availability theo ngày — 4 tuần gần nhất',
+  'c-mttr':    'MTTR trung bình từng Line — 7 ngày',
+  'c-radar':   'Hiệu suất KTV (Radar)',
+  'c-stack':   'Phân bổ sự cố Vàng / Đỏ theo Line',
+  'c-scatter': 'MTBF vs MTTR từng Line',
+  'c-donut':   'Tỷ lệ mức độ sự cố tháng này',
+  'hm-wrap':   'Heatmap sự cố theo giờ trong ngày',
+  'pareto-list':'Pareto loại lỗi (80/20)',
+  'cb':        'Sự cố hôm nay theo Line',
+  'cl':        'MTTR 7 ngày gần nhất',
+  'incidentChart': 'Thống kê loại cảnh báo trong ngày (Live Data)'
+};
 const ZSvg = `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
-window._charts = {}; function mkZoomBtn(tid,title){const b=document.createElement('button');b.className='zoom-btn';b.innerHTML=ZSvg;b.onclick=()=>openZoom(tid,title);return b;}
-function injectZoom() { document.querySelectorAll('.cbox').forEach(b=>{if(!b.querySelector('.zoom-btn')){const c=b.querySelector('canvas');if(c){const h=document.createElement('div');h.className='panel-hdr';h.innerHTML=`<span class="panel-hdr-title">${b.querySelector('.cbox-label').textContent}</span>`;h.appendChild(mkZoomBtn(c.id,b.querySelector('.cbox-label').textContent));b.querySelector('.cbox-label').replaceWith(h);}}}); }
-function openZoom(id,title){const src=document.getElementById(id);if(!src)return;document.getElementById('mTitle').textContent=title;const mc=document.getElementById('mContent');mc.innerHTML='';if(window._charts[id]){const nc=document.createElement('canvas');nc.id=id+'_z';const w=document.createElement('div');w.style.cssText='position:relative;width:100%;height:500px';w.appendChild(nc);mc.appendChild(w);new Chart(nc,{type:window._charts[id].config.type,data:JSON.parse(JSON.stringify(window._charts[id].config.data)),options:{responsive:true,maintainAspectRatio:false}});}document.getElementById('mOv').style.display='flex';setTimeout(()=>document.getElementById('mOv').style.opacity='1',10);document.addEventListener('keydown',escCl);}
-function closeZoom(){document.getElementById('mOv').style.opacity='0';setTimeout(()=>document.getElementById('mOv').style.display='none',200);document.removeEventListener('keydown',escCl);}
-function escCl(e){if(e.key==='Escape')closeZoom();}
-const _OC=Chart; window.Chart=function(el,cfg){const i=new _OC(el,cfg);if(el&&el.id)window._charts[el.id]=i;return i;}; Object.assign(window.Chart,_OC); window.Chart.prototype=_OC.prototype;
+window._charts = {};
+
+function mkZoomBtn(targetId, title) {
+  const b = document.createElement('button');
+  b.className = 'zoom-btn';
+  b.title = 'Phóng to';
+  b.innerHTML = ZSvg;
+  b.setAttribute('data-zbtn', '1');
+  b.onclick = () => openZoom(targetId, title || ZOOM_TITLES[targetId] || '');
+  return b;
+}
+
+function injectZoom() {
+  // Thêm zoom vào Dashboard panel headers
+  [
+    { hdrId: 'lc-hdr',  zoomId: 'lc' },
+    { hdrId: 'sc-hdr',  zoomId: 'sc' },
+  ].forEach(({ hdrId, zoomId }) => {
+    const hdr = document.getElementById(hdrId);
+    if (!hdr || hdr.querySelector('[data-zbtn]')) return;
+    hdr.appendChild(mkZoomBtn(zoomId));
+  });
+
+  // Thêm zoom vào AI panel
+  const aiHdr = document.querySelector('.ai-header');
+  if (aiHdr && !aiHdr.querySelector('[data-zbtn]')) {
+    aiHdr.appendChild(mkZoomBtn('ai-panel', 'AI Insights'));
+  }
+
+  // Thêm zoom vào các box có class .cbox
+  document.querySelectorAll('.cbox').forEach(box => {
+    if (box.querySelector('[data-zbtn]')) return;
+    const canvas = box.querySelector('canvas');
+    const inner  = box.querySelector('[id]');
+    const tid    = canvas ? canvas.id : (inner ? inner.id : null);
+    if (!tid) return;
+    const lbl   = box.querySelector('.cbox-label');
+    const title = lbl ? lbl.textContent.trim() : (ZOOM_TITLES[tid] || '');
+    const hdr   = document.createElement('div');
+    hdr.className = 'panel-hdr';
+    const sp = document.createElement('span');
+    sp.className = 'panel-hdr-title';
+    sp.textContent = title;
+    hdr.appendChild(sp);
+    hdr.appendChild(mkZoomBtn(tid, title));
+    if (lbl) lbl.replaceWith(hdr); else box.prepend(hdr);
+  });
+}
+
+function openZoom(id, title) {
+  const src = document.getElementById(id);
+  if (!src) return;
+  document.getElementById('mTitle').textContent = title || '';
+  const mc = document.getElementById('mContent');
+  mc.innerHTML = '';
+
+  const canvas = src.tagName === 'CANVAS' ? src : src.querySelector('canvas');
+  if (canvas && window._charts[canvas.id]) {
+    const orig = window._charts[canvas.id];
+    const w = document.createElement('div');
+    w.style.cssText = 'position:relative;width:100%;height:500px';
+    const nc = document.createElement('canvas');
+    nc.id = canvas.id + '_z';
+    w.appendChild(nc); mc.appendChild(w);
+    try {
+      new Chart(nc, {
+        type: orig.config.type,
+        data: JSON.parse(JSON.stringify(orig.config.data)),
+        options: { ...JSON.parse(JSON.stringify(orig.config.options || {})), responsive: true, maintainAspectRatio: false }
+      });
+    } catch(e) {
+      mc.innerHTML = '<p style="padding:20px;color:var(--text-secondary)">Không thể clone biểu đồ.</p>';
+    }
+  } else {
+    // Clone thẻ DOM
+    const cl = src.cloneNode(true);
+    cl.removeAttribute('id');
+    cl.querySelectorAll('[data-zbtn],[id^="ti-"]').forEach(e => e.remove());
+    cl.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+    cl.style.fontSize = '14px';
+    mc.appendChild(cl);
+  }
+
+  const ov = document.getElementById('mOv');
+  ov.style.display = 'flex';
+  requestAnimationFrame(() => ov.style.opacity = '1');
+  document.addEventListener('keydown', escCl);
+}
+
+function closeZoom() {
+  const ov = document.getElementById('mOv');
+  ov.style.opacity = '0';
+  setTimeout(() => ov.style.display = 'none', 200);
+  document.querySelectorAll('[id$="_z"]').forEach(c => { const ch = Chart.getChart(c); if (ch) ch.destroy(); });
+  document.removeEventListener('keydown', escCl);
+}
+function escCl(e) { if (e.key === 'Escape') closeZoom(); }
+
+// Patch Chart
+const _OC = Chart;
+window.Chart = function(el, cfg) {
+  const inst = new _OC(el, cfg);
+  if (el && el.id) window._charts[el.id] = inst;
+  return inst;
+};
+Object.setPrototypeOf(window.Chart, _OC);
+Object.assign(window.Chart, _OC);
+window.Chart.prototype = _OC.prototype;
 
 // ============================================================
 // KHỞI ĐỘNG
 // ============================================================
 if (LS.length > 0) { renderLines(); renderStats(); genHints(); } 
 else { document.getElementById('lc').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary)">Chưa có dữ liệu từ xưởng</div>'; }
-clock(); setInterval(()=>{ clock(); }, 1000); setInterval(genHints, 120000); setTimeout(injectZoom,350);
+clock(); setInterval(()=>{ clock(); }, 1000); setInterval(genHints, 120000); 
+
+// Kích hoạt Zoom
+setTimeout(injectZoom, 500);
+
 function toggleFS(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
 </script>
 
 <div id="mOv" onclick="if(event.target===this)closeZoom()" style="display:none;opacity:0;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;align-items:center;justify-content:center;padding:20px;transition:opacity .2s">
   <div style="background:var(--bg-primary);border-radius:12px;border:0.5px solid var(--border);width:100%;max-width:1120px;max-height:92vh;overflow:auto;padding:16px 18px 20px;position:relative">
-    <button onclick="closeZoom()" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border:0.5px solid var(--border);border-radius:6px;background:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:15px;font-family:inherit">✕</button>
-    <div id="mTitle" style="font-size:15px;font-weight:500;margin-bottom:14px;padding-right:36px;color:var(--text-primary)"></div>
+    <button onclick="closeZoom()" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border:0.5px solid var(--border);border-radius:6px;background:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:15px;font-family:inherit;z-index:10">✕</button>
+    <div id="mTitle" style="font-size:15px;font-weight:500;margin-bottom:14px;padding-right:36px;color:var(--text-primary);text-transform:uppercase"></div>
     <div id="mContent"></div>
   </div>
 </div>
