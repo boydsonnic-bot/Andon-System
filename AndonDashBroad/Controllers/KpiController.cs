@@ -1,98 +1,55 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
-public class KpiController : Controller
+namespace AndonDashBroad.Controllers
 {
-    private readonly ProdDbContext _prod;   // DB sản xuất (plan/actual/defect/revenue)
-    private readonly AndonDbContext _andon; // DB andon (downtime, alarm)
-    public KpiController(ProdDbContext prod, AndonDbContext andon)
-    { _prod = prod; _andon = andon; }
-
-    // Trang chính
-    public IActionResult Index() => View();
-
-    // API: dữ liệu tổng quan (cards + filters)
-    [HttpGet]
-    public async Task<IActionResult> Overview(DateTime? from, DateTime? to,
-        string plant = null, string category = null, string product = null, string supervisor = null)
+    public class KpiController : Controller
     {
-        var f = from ?? DateTime.Today.AddDays(-30);
-        var t = to ?? DateTime.Today.AddDays(1);
+        // -------------------------------------------------------------
+        // TODO: SAU NÀY KHI CÓ DB SẢN XUẤT, SẾP KHAI BÁO VÀO ĐÂY:
+        // private readonly ProdDbContext _prodDb;
+        // public KpiController(ProdDbContext prodDb) { _prodDb = prodDb; }
+        // -------------------------------------------------------------
 
-        // Quantity produced / Defects / Cost / Revenue / Efficiency
-        var qty = await _prod.Productions
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .SumAsync(x => (int?)x.GoodQty) ?? 0;
-
-        var defects = await _prod.Productions
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .SumAsync(x => (int?)x.DefectQty) ?? 0;
-
-        var prodCost = await _prod.Costs
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .SumAsync(x => (decimal?)x.ProductionCost) ?? 0m;
-
-        var revenue = await _prod.Sales
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .SumAsync(x => (decimal?)x.Revenue) ?? 0m;
-
-        var efficiency = qty == 0 ? 0 : Math.Round((qty - defects) * 100.0 / qty, 2);
-
-        // Revenue vs Production Cost by product
-        var revCostByProduct = await _prod.Productions
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .GroupBy(x => x.ProductName)
-            .Select(g => new { label = g.Key, revenue = g.Sum(x => x.Revenue), cost = g.Sum(x => x.ProductionCost) })
-            .ToListAsync();
-
-        // Quantity produced by plant (pie)
-        var qtyByPlant = await _prod.Productions
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .GroupBy(x => x.Plant)
-            .Select(g => new { label = g.Key, value = g.Sum(x => x.GoodQty) })
-            .ToListAsync();
-
-        // Defects by category (pie)
-        var defectsByCat = await _prod.Productions
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .GroupBy(x => x.Category)
-            .Select(g => new { label = g.Key, value = g.Sum(x => x.DefectQty) })
-            .ToListAsync();
-
-        // Sales by category & month (heatmap)
-        var salesCatMonth = await _prod.Sales
-            .Where(x => x.Timestamp >= f && x.Timestamp < t)
-            .GroupBy(x => new { x.Category, M = x.Timestamp.Month })
-            .Select(g => new { g.Key.Category, g.Key.M, value = g.Sum(x => x.Revenue) })
-            .ToListAsync();
-
-        // Downtime (Andon) real-time
-        var downByLine = await _andon.Tickets
-            .Where(x => x.ReportedAt >= f && x.ReportedAt < t && x.Status != 5)
-            .GroupBy(x => x.LineNumber)
-            .Select(g => new {
-                line = g.Key,
-                downMinutes = g.Sum(x => EF.Functions.DateDiffMinute(x.ReportedAt, x.TechFixedAt ?? DateTime.UtcNow))
-            }).ToListAsync();
-
-        return Json(new
+        public IActionResult Index()
         {
-            cards = new
+            var prodList = new List<object>();
+            var rnd = new Random();
+
+            // Giả lập Query từ DB Sản Xuất của công ty
+            for (int i = 1; i <= 11; i++)
             {
-                quantity = qty,
-                defects = defects,
-                productionCost = prodCost,
-                revenue = revenue,
-                efficiency = efficiency
-            },
-            revCostByProduct,
-            qtyByPlant,
-            defectsByCat,
-            salesCatMonth,
-            downtime = downByLine
-        });
+                string lineId = $"L{i:D2}";
+                string lineName = $"Line {i:D2}";
+
+                int target = 1500;
+                int actual = rnd.Next(800, 1600);
+                double mrb = Math.Round(rnd.NextDouble() * 5, 2);
+                int stopMin = rnd.Next(0, 120);
+                string status = stopMin > 60 ? "red" : (stopMin > 20 ? "yellow" : "green");
+
+                prodList.Add(new
+                {
+                    id = lineId,
+                    nm = lineName,
+                    model = "MODEL-X-2026",
+                    target = target,
+                    actual = actual,
+                    mrb = mrb,
+                    status = status,
+                    andonStop = status != "green" ? 1 : 0,
+                    stopCount = status != "green" ? rnd.Next(1, 4) : 0,
+                    stopMin = stopMin,
+                    reason = status != "green" ? "Lỗi máy" : "",
+                    ewma = status != "green" ? rnd.Next(10, 45) : 0,
+                    zscore = (rnd.NextDouble() * 3).ToString("0.1"),
+                    pattern = rnd.Next(0, 10) > 7 ? "high" : "low"
+                });
+            }
+
+            ViewBag.ProductionData = System.Text.Json.JsonSerializer.Serialize(prodList);
+            return View();
+        }
     }
 }
