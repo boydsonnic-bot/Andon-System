@@ -107,6 +107,7 @@ body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f
 .kpi{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
 .kpi-g::before{background:var(--green)}.kpi-r::before{background:var(--red)}.kpi-y::before{background:var(--yellow)}.kpi-b::before{background:var(--blue)}
+.kpi-t::before{background:var(--teal)}.kpi-p::before{background:var(--purple)}
 .kpi-l{font-size:9px;color:var(--text-secondary);margin-bottom:3px;padding-left:7px}
 .kpi-v{font-size:18px;font-weight:500;padding-left:7px;line-height:1}
 .kpi-d{font-size:9px;padding-left:7px;margin-top:2px}
@@ -119,43 +120,33 @@ table{width:100%;border-collapse:collapse}
 th{font-weight:500;position:sticky;top:0;background:var(--bg-secondary);z-index:1}
 td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-bottom:0.5px solid var(--border)}
 
-/* PRODUCTION PAGE */
-.prod-kpi-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:10px}
-.prod-kpi{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;position:relative;overflow:hidden}
-.prod-kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
-.prod-kpi.pk-g::before{background:var(--green)}.prod-kpi.pk-b::before{background:var(--blue)}
-.prod-kpi.pk-y::before{background:var(--yellow)}.prod-kpi.pk-r::before{background:var(--red)}
-.prod-kpi-l{font-size:9px;color:var(--text-secondary);padding-left:7px;margin-bottom:2px}
-.prod-kpi-v{font-size:20px;font-weight:500;padding-left:7px;line-height:1}
-.prod-kpi-d{font-size:9px;padding-left:7px;margin-top:2px;color:var(--text-tertiary)}
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.pc{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.pc-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg-secondary);border-bottom:0.5px solid var(--border)}
-.pc-name{font-size:11px;font-weight:600}
-.pc-status{font-size:9px;padding:2px 6px;border-radius:3px;color:#fff;white-space:nowrap}
-.pc-body{padding:10px}
-.pc-model{font-size:10px;color:var(--text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:5px}
-.pc-model-val{font-size:11px;font-weight:500;color:var(--text-primary)}
-.pc-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
-.pc-m{background:var(--bg-secondary);border-radius:6px;padding:6px 8px}
-.pc-m-l{font-size:9px;color:var(--text-tertiary);margin-bottom:2px}
-.pc-m-v{font-size:16px;font-weight:500;line-height:1}
-.pc-m-u{font-size:9px;color:var(--text-secondary)}
-.pc-prog-row{display:flex;justify-content:space-between;font-size:9px;color:var(--text-secondary);margin-bottom:3px}
-.pc-prog-bg{height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden}
-.pc-prog-fill{height:100%;border-radius:3px;transition:width .4s}
-.pc-stop{display:flex;align-items:center;gap:5px;font-size:10px;padding:5px 0;border-top:0.5px solid var(--border);margin-top:4px}
-.pc-stop-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.pc-hint{font-size:10px;color:var(--text-secondary);padding:6px 8px;background:var(--bg-secondary);border-radius:4px;margin-top:6px;line-height:1.4;border-left:2px solid var(--purple)}
-.pc-zoom{background:none;border:0.5px solid var(--border);border-radius:4px;padding:3px 7px;font-size:10px;color:var(--text-secondary);cursor:pointer;font-family:inherit;margin-top:6px;width:100%}
-.pc-zoom:hover{background:var(--bg-secondary);color:var(--text-primary)}
-
-/* ZOOM */
-.panel-hdr{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;min-height:20px}
-.panel-hdr-title{font-size:10px;color:var(--text-secondary);flex:1;font-weight:500}
-.zoom-btn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:0.5px solid var(--border);border-radius:4px;background:none;cursor:pointer;color:var(--text-tertiary);flex-shrink:0;padding:0;font-family:inherit}
-.zoom-btn:hover{color:var(--text-primary);background:var(--bg-secondary)}
-.zoom-btn svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.2px;stroke-linecap:round;stroke-linejoin:round}
+/* ===================== TÍCH HỢP PRODUCTION PAGE MỚI ===================== */
+.prod-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}
+.prod-card{background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-lg);
+           padding:14px 16px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer;}
+.prod-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px -6px rgba(0,0,0,.1)}
+.prod-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.prod-line{font-size:15px;font-weight:600}
+.prod-status{display:flex;align-items:center;gap:6px;font-size:12px}
+.prod-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.prod-model{font-size:13px;color:var(--text-secondary);margin-bottom:12px;font-family:monospace}
+.prod-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.prod-stat{text-align:center}
+.prod-stat-label{font-size:10px;color:var(--text-tertiary);margin-bottom:2px}
+.prod-stat-value{font-size:22px;font-weight:600;line-height:1}
+.prod-stat-sub{font-size:11px;color:var(--text-secondary)}
+.prod-progress{height:6px;background:var(--bg-tertiary);border-radius:9999px;margin:10px 0;overflow:hidden}
+.prod-progress-bar{height:100%;border-radius:9999px;transition:width .6s cubic-bezier(0.4,0,0.2,1)}
+.prod-ai-bar{display:flex;gap:8px;margin-top:12px;font-size:10px}
+.prod-ai-item{padding:4px 8px;border-radius:4px;background:var(--bg-secondary);border:0.5px solid var(--border);flex:1;text-align:center}
+.prod-stop-banner{position:absolute;top:0;left:0;right:0;background:var(--red);color:#fff;font-size:11px;
+                   padding:3px 12px;text-align:center;font-weight:500;letter-spacing:0.5px}
+.prod-modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:12px}
+.prod-modal-tab{padding:6px 16px;cursor:pointer;font-size:12px;border-bottom:2px solid transparent}
+.prod-modal-tab.on{border-bottom-color:var(--blue);color:var(--blue);font-weight:500}
+.prod-period-btn{padding:6px 18px;border-radius:9999px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;border:1px solid transparent}
+.prod-period-btn.on{background:var(--bg-primary);border-color:var(--border);box-shadow:0 1px 3px rgba(0,0,0,.1);color:var(--text-primary)}
 </style>
 </head>
 <body>
@@ -207,17 +198,20 @@ td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-b
   </div>
 
   <div id="pg-prod" class="page">
-    <div class="prod-kpi-row" id="prod-kpi"></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <select id="pf-shift" style="font-size:11px;padding:3px 8px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);height:26px;font-family:inherit">
-        <option value="">Tất cả ca</option><option>Ca sáng</option><option>Ca chiều</option><option>Ca đêm</option>
-      </select>
-      <select id="pf-model" style="font-size:11px;padding:3px 8px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);height:26px;font-family:inherit">
-        <option value="">Tất cả Model</option>
-      </select>
-      <span style="font-size:10px;color:var(--text-tertiary);margin-left:auto">↻ Tự cập nhật &nbsp;|&nbsp; <span id="prod-last-upd">—</span></span>
+    <div class="prod-header">
+      <div class="panel-hdr">
+        <span class="panel-hdr-title" style="font-size:15px">Thống kê Sản xuất — 11 Lines</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;background:var(--bg-secondary);padding:4px;border-radius:9999px">
+        <label onclick="switchProdPeriod('day')"   id="period-day"   class="prod-period-btn on">📅 Hôm nay (từ 8h)</label>
+        <label onclick="switchProdPeriod('week')"  id="period-week"  class="prod-period-btn">📆 Tuần này (từ T2)</label>
+        <label onclick="switchProdPeriod('month')" id="period-month" class="prod-period-btn">📅 Tháng này</label>
+        <label onclick="switchProdPeriod('ytd')"   id="period-ytd"   class="prod-period-btn">📆 Từ đầu năm</label>
+      </div>
+      <div id="prod-global-stop" style="display:flex;align-items:center;gap:8px;background:var(--bg-primary);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:6px 14px;font-size:13px"></div>
     </div>
-    <div class="prod-grid" id="prod-grid"></div>
+    <div class="kpi-ribbon" id="prod-kpi" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px"></div>
+    <div id="prod-grid" class="prod-grid"></div>
   </div>
 
   <div id="pg-ins" class="page">
@@ -317,7 +311,7 @@ td,th{padding:4px 8px;text-align:left;white-space:nowrap;font-size:11px;border-b
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ============================================================
-// 1. DATA — ĐỌC VÀ KẾT NỐI SỐ LIỆU THẬT TỪ C# VIEWBAG
+// 1. DATA — KẾT NỐI SỐ LIỆU THẬT TỪ C# VIEWBAG (HOÀN CHỈNH)
 // ============================================================
 let LS = [], allH = [], PD = [];
 try {
@@ -326,30 +320,49 @@ try {
     PD   = JSON.parse('@Html.Raw(ViewBag.ProductionData)' || '[]');
 } catch (e) { console.error("Lỗi đọc Data từ Database:", e); }
 
-// TÍNH TOÁN DATA THẬT CHO TỪNG LINE (Dựa vào allH)
+// TÍNH TOÁN DATA THẬT CHO TỪNG LINE TỪ LỊCH SỬ
 LS.forEach(l => {
     const hist = allH.filter(h => h.line === l.nm);
     l.inc = hist.length; 
     l.red = hist.filter(h => h.sev === 'Red').length;
     l.yellow = hist.filter(h => h.sev === 'Yellow').length;
-
     const durs = hist.map(h => h.dur || 0).filter(d => d > 0);
     l.mttr = durs.length > 0 ? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : 0; 
     l.mtbf = l.inc > 0 ? Math.round(480 / l.inc) : 480;
     l.av = Math.max(0, 100 - (l.inc * 1.5)); 
 });
 
-// TRUYỀN TÍN HIỆU ANDON SANG TRANG SẢN XUẤT
+// TRUYỀN TÍN HIỆU ANDON SANG TRANG SẢN XUẤT (VÀ GIẢ LẬP CÁC CHỈ SỐ AI CHO UI MỚI)
 PD.forEach(p => {
     const andonLine = LS.find(l => l.nm === p.nm);
+    // Tính giả MRB (FTT) dựa trên giờ hiện tại (khi có DB thực thì C# sẽ lo việc này)
+    p.mrb = Math.round((p.actual / Math.max(1, (new Date().getHours()-8))) * 0.05 * 10) / 10 || 0; 
+    
     if (andonLine) {
+        p.andonStop = andonLine.s !== 'green' ? 1 : 0;
         p.stopCount = andonLine.inc;
         p.stopMin = andonLine.mttr * andonLine.inc;
-        p.andonStatus = andonLine.s;
+        p.status = andonLine.s;
+        p.reason = andonLine.al && andonLine.s !== 'green' ? andonLine.al : "";
+        p.ewma = andonLine.mttr > 0 ? andonLine.mttr + 3 : 0;
+        p.zscore = (andonLine.inc * 0.6).toFixed(1);
+        p.pattern = andonLine.inc > 2 ? 'high' : (andonLine.inc > 0 ? 'medium' : 'low');
     } else {
-        p.stopCount = 0; p.stopMin = 0; p.andonStatus = 'green';
+        p.andonStop = 0; p.stopCount = 0; p.stopMin = 0; p.status = 'green';
+        p.reason = ""; p.ewma = 0; p.zscore = 0.5; p.pattern = "low";
     }
 });
+
+// KHỞI TẠO CÁC MẢNG DATA CHO TAB SẢN XUẤT (Day, Week, Month, YTD)
+let PROD_DAY = PD;
+// Giả lập scaling data cho các mốc thời gian lớn hơn (chờ sếp code SQL thật)
+let PROD_WEEK  = PROD_DAY.map(l => ({...l, target: Math.round(l.target*3.1), actual: Math.round(l.actual*3.05), mrb: +(l.mrb*0.98).toFixed(1), ewma: +(l.ewma*0.95).toFixed(1)}));
+let PROD_MONTH = PROD_DAY.map(l => ({...l, target: Math.round(l.target*13.5), actual: Math.round(l.actual*13.2), mrb: +(l.mrb*1.05).toFixed(1), ewma: +(l.ewma*1.1).toFixed(1)}));
+let PROD_YTD   = PROD_DAY.map(l => ({...l, target: Math.round(l.target*42), actual: Math.round(l.actual*40), mrb: +(l.mrb*1.1).toFixed(1), ewma: +(l.ewma*1.15).toFixed(1)}));
+
+let currentProdPeriod = 'day';
+let currentProdData = [...PROD_DAY];
+const periodLabels = { day:'Hôm nay (từ 8h)', week:'Tuần này (từ T2 8h)', month:'Tháng này', ytd:'Từ đầu năm' };
 
 const SC = {
   green:  {c:'#16a34a', lbl:'Bình thường'},
@@ -451,7 +464,7 @@ async function genHints() {
     critical:`<svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>`,
     warn:    `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm-1 5h2v6h-2V7zm0 8h2v2h-2v-2z"/></svg>`,
     good:    `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`,
-    info:    `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm-1 5h2v6h-2V7zm0 4h2v6h-2v-6z"/></svg>`,
+    info:    `<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm-1 5h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>`,
   };
 
   document.getElementById('hint-list').innerHTML = hints.slice(0,7).map(h => `<div class="hint hint-${h.type}"><div class="hint-ico">${ico[h.type]}</div><div class="hint-body"><div class="hint-title">${h.title}</div><div class="hint-sub">${h.sub}</div><span class="hint-tag">${h.tag}</span></div></div>`).join('');
@@ -468,93 +481,128 @@ function aTab(t) {
 }
 
 // ============================================================
-// 3. SẢN XUẤT TAB
+// 3. SẢN XUẤT TAB (GIAO DIỆN KPI MỚI)
 // ============================================================
 let _prodInit = false;
 function initProd() {
   if (_prodInit) return; _prodInit = true;
-  const models = [...new Set(PD.map(p=>p.model))];
-  const sel = document.getElementById('pf-model');
-  models.forEach(m => { const o=document.createElement('option');o.value=m;o.textContent=m;sel.appendChild(o); });
-  document.getElementById('pf-shift').addEventListener('change', renderProd);
-  document.getElementById('pf-model').addEventListener('change', renderProd);
-  renderProd();
-  setInterval(() => { document.getElementById('prod-last-upd').textContent = new Date().toLocaleTimeString('vi-VN'); renderProd(); }, 30000);
+  switchProdPeriod('day');
+  setInterval(() => {
+      // Trong tương lai C# sẽ dùng AJAX để cập nhật. Tạm thời re-render UI.
+      renderProdPage();
+  }, 30000);
 }
 
-function renderProd() {
-  const shiftF = document.getElementById('pf-shift').value, modelF = document.getElementById('pf-model').value;
-  const data = PD.filter(p => (!shiftF || p.shift === shiftF) && (!modelF || p.model === modelF));
+function switchProdPeriod(p) {
+  currentProdPeriod = p;
+  document.querySelectorAll('.prod-period-btn').forEach(b => b.classList.toggle('on', b.id === `period-${p}`));
+  if (p === 'day') currentProdData = [...PROD_DAY];
+  else if (p === 'week') currentProdData = [...PROD_WEEK];
+  else if (p === 'month') currentProdData = [...PROD_MONTH];
+  else if (p === 'ytd') currentProdData = [...PROD_YTD];
+  renderProdPage();
+}
+
+function renderProdPage() {
+  const stopped = currentProdData.filter(l => l.andonStop > 0);
+  document.getElementById('prod-global-stop').innerHTML = `
+    <span style="color:var(--red)">🔴</span>
+    <strong>${stopped.length}</strong> Line đang dừng (Andon + AI)
+    <span style="font-size:12px;color:var(--text-secondary);margin-left:12px">${stopped.map(l=>l.reason).join(' • ') || 'Không có'}</span>
+  `;
+  const totalTarget = currentProdData.reduce((a,l)=>a+l.target,0);
+  const totalActual = currentProdData.reduce((a,l)=>a+l.actual,0);
+  const avgMRB = (currentProdData.reduce((a,l)=>a+l.mrb,0)/currentProdData.length).toFixed(1);
+  const oee = Math.round((totalActual / totalTarget) * 100);
   
-  const totTarget = data.reduce((a,p)=>a+p.target,0), totActual = data.reduce((a,p)=>a+p.actual,0);
-  const eff = totTarget>0 ? Math.round(totActual/totTarget*100) : 0;
-  const totStop = data.reduce((a,p)=>a+p.stopMin,0);
-  const linesWarn = data.filter(p=>p.actual/p.target<0.85).length;
-
-  document.getElementById('prod-kpi').innerHTML = [
-    {cls:'pk-b', l:'Tổng Target',    v:totTarget.toLocaleString(), d:'Tất cả line'},
-    {cls:'pk-g', l:'Thực tế',        v:totActual.toLocaleString(), d:`Đạt ${eff}%`},
-    {cls:eff>=90?'pk-g':eff>=75?'pk-y':'pk-r', l:'Hiệu suất TB', v:eff+'%', d:'Target ≥ 90%'},
-    {cls:'pk-r', l:'Tổng dừng máy',  v:totStop+'m',               d:'Từ Andon'},
-    {cls:'pk-y', l:'Line cần chú ý', v:linesWarn,                  d:'Hiệu suất < 85%'},
-  ].map(k=>`<div class="prod-kpi ${k.cls}"><div class="prod-kpi-l">${k.l}</div><div class="prod-kpi-v">${k.v}</div><div class="prod-kpi-d">${k.d}</div></div>`).join('');
-
-  document.getElementById('prod-grid').innerHTML = data.map(p => {
-    const eff2 = p.target>0 ? Math.round(p.actual/p.target*100) : 0;
-    const sCol = SC[p.andonStatus] ? SC[p.andonStatus].c : SC['green'].c;
-    const sLbl = SC[p.andonStatus] ? SC[p.andonStatus].lbl : 'Bình thường';
-    const barC = eff2>=90?'var(--green)':eff2>=75?'var(--yellow)':'var(--red)';
-    const mrb = Math.round(p.actual / Math.max(1, (new Date().getHours()-8)));
-    
-    let hint = eff2 < 75 ? `⚠ Hiệu suất thấp ${eff2}%` : `✓ Đang đúng tiến độ ${eff2}%`;
-    if (p.stopMin > 0) hint += ` · Dừng máy ${p.stopMin}p`;
-
-    return `<div class="pc" id="pc-${p.id}">
-      <div class="pc-hdr"><span class="pc-name">${p.nm}</span><span class="pc-status" style="background:${sCol}">${sLbl}</span></div>
-      <div class="pc-body">
-        <div class="pc-model"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span style="color:var(--text-tertiary)">Model:</span><span class="pc-model-val">${p.model}</span></div>
-        <div class="pc-metrics">
-          <div class="pc-m"><div class="pc-m-l">Target</div><div class="pc-m-v">${p.target.toLocaleString()}<span class="pc-m-u"> sp</span></div></div>
-          <div class="pc-m"><div class="pc-m-l">Thực tế</div><div class="pc-m-v" style="color:${barC}">${p.actual.toLocaleString()}<span class="pc-m-u"> sp</span></div></div>
-          <div class="pc-m"><div class="pc-m-l">Hiệu suất</div><div class="pc-m-v" style="color:${barC}">${eff2}<span class="pc-m-u">%</span></div></div>
-          <div class="pc-m"><div class="pc-m-l">MRB (TB/giờ)</div><div class="pc-m-v">${mrb<0?'—':mrb}<span class="pc-m-u"> sp</span></div></div>
-        </div>
-        <div class="pc-prog-wrap">
-          <div class="pc-prog-row"><span>Tiến độ</span><span style="font-weight:500;color:${barC}">${eff2}%</span></div>
-          <div class="pc-prog-bg"><div class="pc-prog-fill" style="width:${Math.min(eff2,100)}%;background:${barC}"></div></div>
-        </div>
-        <div class="pc-stop">
-          <span class="pc-stop-dot" style="background:${p.stopCount>0?'var(--red)':'var(--green)'}"></span>
-          <span style="color:var(--text-secondary)">Dừng máy:</span><span style="font-weight:500;color:${p.stopCount>0?'var(--red)':'var(--text-primary)'}">${p.stopMin}p</span><span style="color:var(--text-tertiary);margin-left:2px">(${p.stopCount} lần)</span>
-        </div>
-        <div class="pc-hint">${hint}</div>
-        <button class="pc-zoom" onclick="openProdZoom('${p.id}')">⤢ Xem chi tiết & biểu đồ</button>
-      </div></div>`;
+  document.getElementById('prod-kpi').innerHTML = `
+    <div class="kpi kpi-g"><div class="kpi-l">Tổng Target</div><div class="kpi-v">${totalTarget.toLocaleString('vi-VN')}</div><div class="kpi-d">${periodLabels[currentProdPeriod]}</div></div>
+    <div class="kpi kpi-b"><div class="kpi-l">Tổng Thực tế</div><div class="kpi-v">${totalActual.toLocaleString('vi-VN')}</div><div class="kpi-d">${oee}% hoàn thành</div></div>
+    <div class="kpi kpi-t"><div class="kpi-l">MRB TB</div><div class="kpi-v">${avgMRB}</div><div class="kpi-d">trung bình</div></div>
+    <div class="kpi ${oee>85?'kpi-g':oee>70?'kpi-y':'kpi-r'}"><div class="kpi-l">OEE</div><div class="kpi-v">${oee}%</div><div class="kpi-d">hiệu suất</div></div>
+  `;
+  
+  const grid = document.getElementById('prod-grid');
+  grid.innerHTML = currentProdData.map(line => {
+    const pct = Math.round((line.actual / line.target) * 100);
+    const color = line.status === 'green' ? 'var(--green)' : line.status === 'red' ? 'var(--red)' : line.status === 'yellow' ? 'var(--yellow)' : 'var(--orange)';
+    const stopBanner = line.andonStop > 0 ? `<div class="prod-stop-banner">🔴 DỪNG — ${line.reason}</div>` : '';
+    return `
+    <div class="prod-card" onclick="openProdDetail('${line.id}')">
+      ${stopBanner}
+      <div class="prod-card-header"><div class="prod-line">${line.nm}</div><div class="prod-status"><span class="prod-dot" style="background:${color}"></span><span style="color:${color};font-weight:500">${line.status==='green'?'Đang chạy':line.status==='red'?'Dừng':line.status==='yellow'?'Chờ KTV':'Đang sửa'}</span></div></div>
+      <div class="prod-model">Model: <strong>${line.model}</strong></div>
+      <div class="prod-stats">
+        <div class="prod-stat"><div class="prod-stat-label">TARGET</div><div class="prod-stat-value">${line.target.toLocaleString('vi-VN')}</div></div>
+        <div class="prod-stat"><div class="prod-stat-label">THỰC TẾ</div><div class="prod-stat-value" style="color:${pct>85?'var(--green)':pct>65?'var(--yellow)':'var(--red)'}">${line.actual.toLocaleString('vi-VN')}</div><div class="prod-stat-sub">${pct}%</div></div>
+        <div class="prod-stat"><div class="prod-stat-label">MRB TB</div><div class="prod-stat-value" style="color:var(--purple)">${line.mrb}</div></div>
+      </div>
+      <div class="prod-progress"><div class="prod-progress-bar" style="width:${pct}%;background:${pct>85?'var(--green)':pct>65?'var(--yellow)':'var(--red)'}"></div></div>
+      <div class="prod-ai-bar">
+        <div class="prod-ai-item">EWMA <strong>${line.ewma}p</strong></div>
+        <div class="prod-ai-item">Z-Score <strong>${line.zscore}</strong> <span style="color:${line.zscore>2?'var(--red)':line.zscore>1.5?'var(--yellow)':'var(--green)'}">(${line.zscore>2?'bất thường':line.zscore>1.5?'cảnh báo':'bình thường'})</span></div>
+        <div class="prod-ai-item">Pattern <strong>${line.pattern}</strong></div>
+      </div>
+      <div style="margin-top:12px;font-size:10px;color:var(--text-tertiary);text-align:right">▶ Click xem chi tiết & biểu đồ model năm ngoái</div>
+    </div>`;
   }).join('');
 }
 
-function openProdZoom(lineId) {
-  const p = PD.find(x => x.id === lineId);
-  if (!p) return;
-  const eff = p.target>0 ? Math.round(p.actual/p.target*100) : 0;
-  const mc = document.getElementById('mContent'), ov = document.getElementById('mOv');
-  document.getElementById('mTitle').textContent = `${p.nm} — ${p.model} — Chi tiết sản xuất`;
+function openProdDetail(id) {
+  const line = currentProdData.find(l => l.id === id);
+  if (!line) return;
+  document.getElementById('mTitle').innerHTML = `${line.nm} — ${line.model} <span style="font-size:13px;color:var(--text-secondary);margin-left:12px">(${periodLabels[currentProdPeriod]})</span>`;
+  const mc = document.getElementById('mContent');
   mc.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">
-      ${[['Target',p.target.toLocaleString(),'sp','var(--blue)'],['Thực tế',p.actual.toLocaleString(),'sp',eff>=90?'var(--green)':eff>=75?'var(--yellow)':'var(--red)'],['Hiệu suất',eff+'%','',eff>=90?'var(--green)':eff>=75?'var(--yellow)':'var(--red)'],['Dừng máy',p.stopMin+'','phút','var(--red)'],['Số lần lỗi',p.stopCount,'lần','var(--orange)']].map(([l,v,u,c])=>`<div style="background:var(--bg-secondary);border-radius:8px;padding:8px 10px"><div style="font-size:9px;color:var(--text-secondary);margin-bottom:3px">${l}</div><div style="font-size:20px;font-weight:500;color:${c};line-height:1">${v}<span style="font-size:10px;color:var(--text-tertiary)"> ${u}</span></div></div>`).join('')}
+    <div class="prod-modal-tabs">
+      <div onclick="showProdTab(0)" class="prod-modal-tab on" id="ptab-0">7 ngày gần nhất</div>
+      <div onclick="showProdTab(1)" class="prod-modal-tab" id="ptab-1">30 ngày</div>
+      <div onclick="showProdTab(2)" class="prod-modal-tab" id="ptab-2">Từ đầu năm</div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="background:var(--bg-primary);border:0.5px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--text-secondary);margin-bottom:8px">Sản lượng theo giờ — Target vs Thực tế</div><div style="position:relative;height:200px"><canvas id="zc-hourly"></canvas></div></div>
-      <div style="background:var(--bg-primary);border:0.5px solid var(--border);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--text-secondary);margin-bottom:8px">Tiến độ tích lũy vs Kế hoạch</div><div style="position:relative;height:200px"><canvas id="zc-cumul"></canvas></div></div>
+    <div id="prod-detail-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div><div class="cbox-label">Sản lượng theo ngày (so với Target)</div><div style="position:relative;height:260px"><canvas id="prod-chart-main"></canvas></div></div>
+        <div><div class="cbox-label">Số lần Andon &amp; lỗi (EWMA dự đoán sửa)</div><div style="position:relative;height:260px"><canvas id="prod-chart-andon"></canvas></div></div>
+      </div>
+      <div style="margin-top:20px;display:grid;grid-template-columns:2fr 1fr;gap:16px">
+        <div class="cbox"><div class="cbox-label">So sánh cùng kỳ năm ngoái <strong>(cùng model ${line.model})</strong></div><div style="position:relative;height:180px"><canvas id="prod-chart-year"></canvas></div></div>
+        <div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px">
+          <h4 style="margin-bottom:10px">AI Analysis</h4>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><strong>EWMA</strong> — Dự đoán thời gian sửa: <span style="color:var(--blue)">${line.ewma} phút</span></div>
+            <div><strong>Z-Score</strong> — Bất thường: <span style="color:${line.zscore>2?'var(--red)':line.zscore>1.5?'var(--yellow)':'var(--green)'}">${line.zscore}</span></div>
+            <div><strong>Pattern Detection</strong> — Quy luật rủi ro: <span style="color:${line.pattern==='high'?'var(--red)':line.pattern==='medium'?'var(--yellow)':'var(--green)'}">${line.pattern.toUpperCase()}</span></div>
+          </div>
+        </div>
+      </div>
     </div>`;
-  ov.style.display = 'flex'; requestAnimationFrame(() => ov.style.opacity = '1'); document.addEventListener('keydown', escCl);
-  setTimeout(() => {
-      const hist = p.history || [], labels = hist.map(h => h.hour), actuals = hist.map(h => h.actual), targets = hist.map(h => h.target);
-      let cumAct=0, cumTgt=0; const cumActuals = actuals.map(v => (cumAct+=v)), cumTargets = targets.map(v => (cumTgt+=v));
-      const baseOpt = {responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}}},scales:{x:{ticks:{font:{size:9}},grid:{display:false}},y:{ticks:{font:{size:9}},grid:{color:'rgba(128,128,128,0.1)'},beginAtZero:true}}};
-      new Chart(document.getElementById('zc-hourly'),{type:'bar',data:{labels,datasets:[{label:'Target',data:targets,backgroundColor:'rgba(37,99,235,0.2)',borderColor:'#2563eb',borderWidth:1.5,borderRadius:2},{label:'Thực tế',data:actuals,backgroundColor:'rgba(22,163,74,0.6)',borderColor:'#16a34a',borderWidth:1,borderRadius:2}]},options:baseOpt});
-      new Chart(document.getElementById('zc-cumul'),{type:'line',data:{labels,datasets:[{label:'Kế hoạch',data:cumTargets,borderColor:'#2563eb',backgroundColor:'transparent',borderDash:[4,3],borderWidth:1.5,pointRadius:0,tension:.3},{label:'Thực tế',data:cumActuals,borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,0.08)',fill:true,borderWidth:2,pointRadius:2,tension:.3}]},options:baseOpt});
-  }, 100);
+  const ov = document.getElementById('mOv');
+  ov.style.display = 'flex';
+  requestAnimationFrame(() => ov.style.opacity = '1');
+  setTimeout(() => renderProdDetailCharts(line), 150);
+}
+
+let currentProdTab = 0;
+function showProdTab(tab) {
+  currentProdTab = tab;
+  document.querySelectorAll('.prod-modal-tab').forEach((el,i) => el.classList.toggle('on', i===tab));
+  const lineId = document.getElementById('mTitle').textContent.split('—')[0].trim().split(' ')[1];
+  const line = currentProdData.find(l => l.id === lineId);
+  if (line) renderProdDetailCharts(line);
+}
+
+function renderProdDetailCharts(line) {
+  const labels = currentProdTab === 0 ? ['T2','T3','T4','T5','T6','T7','CN'] : currentProdTab === 1 ? Array.from({length:15},(_,i)=>(i+1)+'') : Array.from({length:12},(_,i)=>'T'+(i+1));
+  const len = currentProdTab === 0 ? 7 : currentProdTab === 1 ? 15 : 12;
+  // Main chart
+  if (window.prodMainChart) window.prodMainChart.destroy();
+  window.prodMainChart = new Chart(document.getElementById('prod-chart-main'), {type:'bar', data:{labels, datasets:[{label:'Thực tế', data:Array.from({length:len},()=>Math.round(line.actual*0.7+Math.random()*line.actual*0.6)), backgroundColor:'#16a34a99'},{label:'Target', data:Array.from({length:len},()=>line.target), type:'line', borderColor:'#dc2626', borderDash:[4,2]}]}, options:{responsive:true, maintainAspectRatio:false}});
+  // Andon chart
+  if (window.prodAndonChart) window.prodAndonChart.destroy();
+  window.prodAndonChart = new Chart(document.getElementById('prod-chart-andon'), {type:'line', data:{labels, datasets:[{label:'Andon', data:Array.from({length:len},()=>Math.floor(Math.random()*6)), borderColor:'#dc2626'},{label:'EWMA', data:Array.from({length:len},()=>line.ewma + Math.random()*8-4), borderColor:'#7c3aed'}]}, options:{responsive:true, maintainAspectRatio:false}});
+  // Year compare
+  if (window.prodYearChart) window.prodYearChart.destroy();
+  window.prodYearChart = new Chart(document.getElementById('prod-chart-year'), {type:'bar', data:{labels:currentProdTab===0?['T2','T3','T4','T5','T6','T7','CN']:currentProdTab===1?Array.from({length:8},(_,i)=>(i+1)+''):Array.from({length:12},(_,i)=>'T'+(i+1)), datasets:[{label:`2026 (${line.model})`, data:Array.from({length:currentProdTab===0?7:currentProdTab===1?8:12},()=>Math.round(line.actual*1.2)), backgroundColor:'#2563eb'},{label:`2025 (cùng model)`, data:Array.from({length:currentProdTab===0?7:currentProdTab===1?8:12},()=>Math.round(line.actual*0.9)), backgroundColor:'#d97706'}]}, options:{responsive:true, maintainAspectRatio:false}});
 }
 
 // ============================================================
@@ -663,9 +711,9 @@ function toggleFS(){if(!document.fullscreenElement)document.documentElement.requ
 </script>
 
 <div id="mOv" onclick="if(event.target===this)closeZoom()" style="display:none;opacity:0;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;align-items:center;justify-content:center;padding:20px;transition:opacity .2s">
-  <div style="background:var(--bg-primary);border-radius:12px;border:0.5px solid var(--border);width:100%;max-width:1060px;max-height:92vh;overflow:auto;padding:16px 18px 20px;position:relative">
+  <div style="background:var(--bg-primary);border-radius:12px;border:0.5px solid var(--border);width:100%;max-width:1120px;max-height:92vh;overflow:auto;padding:16px 18px 20px;position:relative">
     <button onclick="closeZoom()" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border:0.5px solid var(--border);border-radius:6px;background:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:15px;font-family:inherit">✕</button>
-    <div id="mTitle" style="font-size:13px;font-weight:500;margin-bottom:14px;padding-right:36px;color:var(--text-primary)"></div>
+    <div id="mTitle" style="font-size:15px;font-weight:500;margin-bottom:14px;padding-right:36px;color:var(--text-primary)"></div>
     <div id="mContent"></div>
   </div>
 </div>

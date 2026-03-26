@@ -1,0 +1,148 @@
+﻿@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Hiệu suất Sản Xuất (KPI) - eAndon</title>
+<style>
+    :root {
+        --bg: #f4f4f5; --card: #ffffff; --text: #18181b; --text-sub: #71717a;
+        --border: #e4e4e7; --green: #22c55e; --yellow: #f59e0b; --red: #ef4444; --blue: #3b82f6;
+    }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .header h1 { font-size: 20px; margin: 0; }
+    .filter-group select { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 14px; }
+    .refresh-badge { font-size: 12px; color: var(--text-sub); margin-left: 10px; }
+    .grid-lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; position: relative; overflow: hidden; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px; }
+    .line-name { font-weight: bold; font-size: 16px; }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric { background: var(--bg); padding: 8px; border-radius: 6px; text-align: center; }
+    .metric span { display: block; font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+    .metric strong { font-size: 16px; }
+    .ai-hint { margin-top: 10px; padding: 8px; border-radius: 6px; font-size: 12px; display: none; }
+    .ai-hint.show { display: block; }
+    .ai-hint.pattern { background: #fef2f2; color: #991b1b; border-left: 3px solid var(--red); }
+    .ai-hint.ewma { background: #eff6ff; color: #1e40af; border-left: 3px solid var(--blue); }
+    .btn-zoom { width: 100%; margin-top: 12px; padding: 6px; background: transparent; border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; color: var(--text-sub); transition: 0.2s; }
+    .btn-zoom:hover { background: var(--bg); color: var(--text); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal-content { background: var(--card); width: 800px; max-width: 90%; border-radius: 12px; padding: 20px; }
+    .modal-header { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+<div class="header">
+    <h1>🏭 Production KPI & Andon Analytics</h1>
+    <div class="filter-group">
+        <select id="presetSelect" onchange="fetchSummary()">
+            <option value="today">Today (08:00 - Hiện tại)</option>
+            <option value="week">Tuần này</option>
+            <option value="7d">7 Ngày qua</option>
+            <option value="30d">30 Ngày qua</option>
+            <option value="lytd">Cùng kỳ năm trước (LYTD)</option>
+        </select>
+        <span class="refresh-badge">Cập nhật: <span id="lblTime">Đang tải...</span></span>
+    </div>
+</div>
+
+<div class="grid-lines" id="gridLines"></div>
+
+<div class="modal-overlay" id="zoomModal" onclick="if(event.target===this) closeZoom()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalTitle">Line 00 - Chi tiết</span>
+            <button onclick="closeZoom()" style="border:none; background:none; cursor:pointer; font-size:18px;">✕</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div><canvas id="chartActual" height="200"></canvas></div>
+            <div><canvas id="chartDowntime" height="200"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let chart1, chart2;
+
+    async function fetchSummary() {
+        const preset = document.getElementById('presetSelect').value;
+        const res = await fetch(`/kpi/summary?preset=${preset}`);
+        const json = await res.json();
+        
+        document.getElementById('lblTime').innerText = new Date().toLocaleTimeString();
+        renderGrid(json.data);
+    }
+
+    function renderGrid(data) {
+        const html = data.map(line => {
+            const eff = Math.round((line.actual / line.target) * 100);
+            const effColor = eff >= 90 ? 'var(--green)' : (eff >= 75 ? 'var(--yellow)' : 'var(--red)');
+            const dotColor = line.status === 'red' ? 'var(--red)' : (line.status === 'yellow' ? 'var(--yellow)' : 'var(--green)');
+
+            let hintHtml = '';
+            if (line.patternFlag || line.zscoreFlag) {
+                hintHtml += `<div class="ai-hint pattern show">⚠️ <b>Cảnh báo Z-Score/Pattern:</b> Trạm có dấu hiệu hỏng hóc lặp lại bất thường.</div>`;
+            }
+            if (line.status !== 'green' && line.ewma > 0) {
+                hintHtml += `<div class="ai-hint ewma show">⏱️ <b>EWMA Predict:</b> Dự kiến cần ~${line.ewma} phút để khắc phục.</div>`;
+            }
+
+            return `
+                <div class="card">
+                    <div class="card-top">
+                        <span class="line-name">${line.line}</span>
+                        <div class="status-dot" style="background: ${dotColor}; box-shadow: 0 0 8px ${dotColor}"></div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric"><span>Tiến độ (Act/Tgt)</span><strong style="color:${effColor}">${line.actual}/${line.target}</strong></div>
+                        <div class="metric"><span>OEE Tạm tính</span><strong style="color:${effColor}">${eff}%</strong></div>
+                        <div class="metric"><span>MRB (Lỗi FTT)</span><strong>${line.mrb}%</strong></div>
+                        <div class="metric"><span>Andon Downtime</span><strong style="color:${line.downtime > 0 ? 'var(--red)' : 'inherit'}">${line.downtime}p</strong></div>
+                    </div>
+                    ${hintHtml}
+                    <button class="btn-zoom" onclick="openZoom('${line.line}')">⤢ Mở rộng Biểu đồ (7D/30D)</button>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('gridLines').innerHTML = html;
+    }
+
+    async function openZoom(line) {
+        document.getElementById('modalTitle').innerText = `${line} — Phân tích dữ liệu`;
+        document.getElementById('zoomModal').style.display = 'flex';
+
+        const res = await fetch(`/kpi/history?line=${line}`);
+        const data = await res.json();
+
+        if(chart1) chart1.destroy();
+        if(chart2) chart2.destroy();
+
+        chart1 = new Chart(document.getElementById('chartActual'), {
+            type: 'bar',
+            data: { labels: data.labels, datasets: [
+                { label: 'Target', data: data.targets, backgroundColor: '#e4e4e7' },
+                { label: 'Thực tế', data: data.actuals, backgroundColor: '#3b82f6' }
+            ]}
+        });
+
+        chart2 = new Chart(document.getElementById('chartDowntime'), {
+            type: 'line',
+            data: { labels: data.labels, datasets: [
+                { label: 'Downtime (Phút)', data: data.downtimes, borderColor: '#ef4444', backgroundColor: '#fef2f2', fill: true }
+            ]}
+        });
+    }
+
+    function closeZoom() { document.getElementById('zoomModal').style.display = 'none'; }
+
+    fetchSummary();
+    setInterval(fetchSummary, 30000);
+</script>
+</body>
+</html>
