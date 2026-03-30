@@ -1,0 +1,321 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPC Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f1f5f9;color:#0f172a;height:100vh;overflow:hidden}
+
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f8fafc;--bg-tertiary:#e2e8f0;
+  --text-primary:#0f172a;--text-secondary:#475569;--text-tertiary:#94a3b8;
+  --border:#e2e8f0;
+  --radius-md:8px;--radius-lg:12px;
+  --green:#10b981;--yellow:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;
+}
+#app{max-width:1600px;margin:0 auto;padding:10px 14px;height:100%;display:flex;flex-direction:column;gap:10px}
+
+/* HEADER */
+.hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:var(--bg-primary);padding:10px 16px;border-radius:var(--radius-lg);border:1px solid var(--border)}
+.hdr-title{font-size:16px;font-weight:800;color:var(--text-primary);letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.hdr-dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.hdr-time{font-size:13px;color:var(--text-secondary);font-family:monospace;font-weight:600}
+
+/* CONTROLS (LỌC DỮ LIỆU) */
+.ctrl-row{flex-shrink:0;display:flex;align-items:center;gap:10px;background:var(--bg-primary);padding:10px 16px;border-radius:var(--radius-lg);border:1px solid var(--border)}
+.ctrl-group{display:flex;align-items:center;gap:8px}
+.ctrl-lbl{font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase}
+.ctrl-select{padding:6px 12px;border-radius:6px;border:1px solid var(--border);font-size:13px;font-weight:600;outline:none;background:#f8fafc;cursor:pointer}
+.ctrl-select:hover{border-color:var(--blue)}
+
+/* TOP KPI (CP, CPK, MEAN) */
+.kpi-row{flex-shrink:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.kpi-card{background:var(--bg-primary);border-radius:var(--radius-lg);padding:12px 14px;border:1px solid var(--border);border-left:4px solid;display:flex;flex-direction:column;justify-content:center}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.kpi-val{font-size:24px;font-weight:800;line-height:1}
+
+/* KHU VỰC CHART CHÍNH */
+.main-content{flex:1;display:grid;grid-template-columns:2fr 1fr;gap:10px;min-height:0}
+.col-left{display:flex;flex-direction:column;gap:10px;min-height:0;overflow-y:auto}
+.col-right{display:flex;flex-direction:column;gap:10px;min-height:0}
+
+/* THẺ CHART */
+.chart-box{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
+.chart-box-xbar{flex:1.2;min-height:220px}
+.chart-box-rchart{flex:1;min-height:180px}
+.chart-box-hist{flex:1.5;min-height:250px}
+.chart-box-data{flex:1;min-height:150px;overflow:hidden;display:flex;flex-direction:column}
+
+.c-title{font-size:13px;font-weight:800;color:var(--text-primary);text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between}
+.c-badge{font-size:10px;background:var(--bg-secondary);padding:2px 8px;border-radius:4px;color:var(--text-secondary);font-weight:600}
+
+/* DATA TABLE NHO NHỎ */
+.table-wrap{flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:6px}
+table{width:100%;border-collapse:collapse;text-align:center}
+th{position:sticky;top:0;background:var(--bg-secondary);font-size:10px;padding:6px;border-bottom:1px solid var(--border);color:var(--text-secondary);text-transform:uppercase}
+td{font-size:11px;padding:5px;border-bottom:1px solid var(--border);color:var(--text-primary)}
+tr:hover td{background:#f1f5f9}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-title"><span class="hdr-dot"></span> STATISTICAL PROCESS CONTROL (SPC)</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="hdr-time" id="clock"></span>
+      <a href="/kpi" style="text-decoration:none;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600">⬅ Back to KPI</a>
+      <button onclick="toggleFS()" style="background:var(--blue);border:none;color:#fff;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600">⛶ Fullscreen</button>
+    </div>
+  </div>
+
+  <div class="ctrl-row">
+    <div class="ctrl-group">
+      <span class="ctrl-lbl">Parameter:</span>
+      <select class="ctrl-select" id="spcParam" onchange="generateSPC()">
+        <option value="thickness">Thickness (mm)</option>
+        <option value="weight">Weight (g)</option>
+        <option value="temp">Temperature (°C)</option>
+      </select>
+    </div>
+    <div class="ctrl-group" style="margin-left:15px">
+      <span class="ctrl-lbl">Line / Machine:</span>
+      <select class="ctrl-select" id="spcLine" onchange="generateSPC()">
+        <option>Line 01 - CNC</option>
+        <option>Line 02 - SMT</option>
+      </select>
+    </div>
+    <div class="ctrl-group" style="margin-left:15px">
+      <span class="ctrl-lbl">Subgroup Size (n):</span>
+      <select class="ctrl-select" disabled>
+        <option>5</option>
+      </select>
+    </div>
+    <button onclick="generateSPC()" style="margin-left:auto;background:var(--bg-secondary);border:1px solid var(--border);padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600">↻ Refresh Data</button>
+  </div>
+
+  <div class="kpi-row" id="spc-kpis">
+    </div>
+
+  <div class="main-content">
+    <div class="col-left">
+      <div class="chart-box chart-box-xbar">
+        <div class="c-title"><span>X-Bar Chart (Sample Mean)</span> <span class="c-badge" id="lbl-xbar-status">Processing...</span></div>
+        <div style="flex:1;position:relative"><canvas id="cXbar"></canvas></div>
+      </div>
+      <div class="chart-box chart-box-rchart">
+        <div class="c-title"><span>R-Chart (Sample Range)</span></div>
+        <div style="flex:1;position:relative"><canvas id="cRchart"></canvas></div>
+      </div>
+    </div>
+    
+    <div class="col-right">
+      <div class="chart-box chart-box-hist">
+        <div class="c-title"><span>Process Capability (Histogram)</span></div>
+        <div style="flex:1;position:relative"><canvas id="cHist"></canvas></div>
+      </div>
+      <div class="chart-box chart-box-data">
+        <div class="c-title"><span>Recent Subgroups (n=5)</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Grp</th><th>X1</th><th>X2</th><th>X3</th><th>X4</th><th>X5</th><th>Mean (X̄)</th><th>Range (R)</th></tr></thead>
+            <tbody id="spc-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// =========================================================
+// THUẬT TOÁN SPC & TẠO MOCK DATA PHÂN BỐ GAUSS
+// =========================================================
+
+// Hằng số SPC cho cỡ mẫu n=5
+const n = 5;
+const A2 = 0.577, D3 = 0, D4 = 2.114, d2 = 2.326;
+
+// Hàm tạo số ngẫu nhiên theo phân bố chuẩn (Box-Muller transform)
+function randn_bm(mean, stddev) {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    return num * stddev + mean;
+}
+
+let charts = {};
+
+function generateSPC() {
+    const param = document.getElementById('spcParam').value;
+    
+    // Cấu hình thông số kỹ thuật (USL, LSL, Target) tùy theo loại
+    let spec = {};
+    if(param === 'thickness') spec = { tgt: 10.0, usl: 10.5, lsl: 9.5, std: 0.12 };
+    else if(param === 'weight') spec = { tgt: 250, usl: 255, lsl: 245, std: 1.5 };
+    else spec = { tgt: 180, usl: 185, lsl: 175, std: 1.2 };
+
+    // Tạo 25 Subgroups, mỗi subgroup có n=5 mẫu
+    let subgroups = [];
+    let allData = [];
+    let sumX = 0, sumR = 0;
+
+    for (let i = 1; i <= 25; i++) {
+        let samples = [];
+        // Cố tình tạo một chút sai lệch nhẹ (Shift mean) ở các nhóm cuối để biểu đồ sinh động
+        let drift = i > 18 ? spec.std * 1.5 : 0; 
+
+        for (let j = 0; j < n; j++) {
+            let val = randn_bm(spec.tgt + drift, spec.std);
+            samples.push(val);
+            allData.push(val);
+        }
+        let mean = samples.reduce((a,b)=>a+b,0) / n;
+        let range = Math.max(...samples) - Math.min(...samples);
+        
+        subgroups.push({ id: i, samples, mean, range });
+        sumX += mean;
+        sumR += range;
+    }
+
+    // Tính toán các đường trung tâm (CL)
+    let X_DoubleBar = sumX / subgroups.length;
+    let R_Bar = sumR / subgroups.length;
+
+    // Tính Control Limits cho X-Bar
+    let UCL_X = X_DoubleBar + (A2 * R_Bar);
+    let LCL_X = X_DoubleBar - (A2 * R_Bar);
+
+    // Tính Control Limits cho R-Chart
+    let UCL_R = D4 * R_Bar;
+    let LCL_R = D3 * R_Bar;
+
+    // Tính Năng lực quá trình (Cp, Cpk)
+    let sigma_est = R_Bar / d2; // Ước lượng độ lệch chuẩn nội bộ
+    let Cp = (spec.usl - spec.lsl) / (6 * sigma_est);
+    let Cpk_u = (spec.usl - X_DoubleBar) / (3 * sigma_est);
+    let Cpk_l = (X_DoubleBar - spec.lsl) / (3 * sigma_est);
+    let Cpk = Math.min(Cpk_u, Cpk_l);
+
+    let isCapable = Cpk >= 1.33;
+
+    // 1. UPDATE GIAO DIỆN KPI
+    const cColor = isCapable ? 'var(--green)' : 'var(--red)';
+    document.getElementById('spc-kpis').innerHTML = `
+        <div class="kpi-card" style="border-color:var(--blue)"><div class="kpi-lbl">Target (Nominal)</div><div class="kpi-val" style="color:var(--blue)">${spec.tgt}</div></div>
+        <div class="kpi-card" style="border-color:#94a3b8"><div class="kpi-lbl">USL / LSL</div><div class="kpi-val" style="font-size:20px;color:var(--text-primary)">${spec.usl} / ${spec.lsl}</div></div>
+        <div class="kpi-card" style="border-color:var(--purple)"><div class="kpi-lbl">Process Mean (X̄)</div><div class="kpi-val" style="color:var(--purple)">${X_DoubleBar.toFixed(2)}</div></div>
+        <div class="kpi-card" style="border-color:${cColor}"><div class="kpi-lbl">Cp Index</div><div class="kpi-val" style="color:${cColor}">${Cp.toFixed(2)}</div></div>
+        <div class="kpi-card" style="border-color:${cColor}"><div class="kpi-lbl">Cpk Index</div><div class="kpi-val" style="color:${cColor}">${Cpk.toFixed(2)}</div></div>
+        <div class="kpi-card" style="border-color:${cColor};background:${isCapable?'#f0fdf4':'#fef2f2'}"><div class="kpi-lbl">Status</div><div class="kpi-val" style="color:${cColor};font-size:18px;margin-top:4px">${isCapable?'CAPABLE ✅':'NEEDS ACTION 🚨'}</div></div>
+    `;
+    document.getElementById('lbl-xbar-status').textContent = isCapable ? 'In Control' : 'Out of Control Risk';
+    document.getElementById('lbl-xbar-status').style.color = isCapable ? 'var(--green)' : 'var(--red)';
+
+    // 2. ĐỔ DỮ LIỆU BẢNG
+    let tbHtml = '';
+    // Lấy 10 nhóm gần nhất
+    subgroups.slice(-10).reverse().forEach(g => {
+        let isOOC = g.mean > UCL_X || g.mean < LCL_X;
+        tbHtml += `<tr>
+            <td><strong>${g.id}</strong></td>
+            ${g.samples.map(s => `<td>${s.toFixed(2)}</td>`).join('')}
+            <td style="color:${isOOC?'var(--red)':'var(--blue)'};font-weight:700">${g.mean.toFixed(2)}</td>
+            <td>${g.range.toFixed(2)}</td>
+        </tr>`;
+    });
+    document.getElementById('spc-table-body').innerHTML = tbHtml;
+
+    // Lables trục X
+    let labels = subgroups.map(g => g.id);
+
+    // XÓA CHART CŨ
+    if(charts.xbar) charts.xbar.destroy();
+    if(charts.rchart) charts.rchart.destroy();
+    if(charts.hist) charts.hist.destroy();
+
+    Chart.defaults.font.size = 10;
+
+    // 3. VẼ X-BAR CHART
+    charts.xbar = new Chart(document.getElementById('cXbar'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Sample Mean (X̄)', data: subgroups.map(g=>g.mean), borderColor: '#3b82f6', backgroundColor: '#3b82f6', pointRadius: 4, borderWidth: 2, tension: 0 },
+                { label: 'UCL', data: Array(25).fill(UCL_X), borderColor: '#ef4444', borderDash: [5,5], pointRadius: 0, borderWidth: 1.5 },
+                { label: 'LCL', data: Array(25).fill(LCL_X), borderColor: '#ef4444', borderDash: [5,5], pointRadius: 0, borderWidth: 1.5 },
+                { label: 'CL (Mean)', data: Array(25).fill(X_DoubleBar), borderColor: '#10b981', pointRadius: 0, borderWidth: 2 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels:{boxWidth:12} } }, scales: { x: { grid: { display: false } } } }
+    });
+
+    // 4. VẼ R-CHART
+    charts.rchart = new Chart(document.getElementById('cRchart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Sample Range (R)', data: subgroups.map(g=>g.range), borderColor: '#8b5cf6', backgroundColor: '#8b5cf6', pointRadius: 4, borderWidth: 2, tension: 0 },
+                { label: 'UCL_R', data: Array(25).fill(UCL_R), borderColor: '#ef4444', borderDash: [5,5], pointRadius: 0, borderWidth: 1.5 },
+                { label: 'CL (R̄)', data: Array(25).fill(R_Bar), borderColor: '#10b981', pointRadius: 0, borderWidth: 2 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels:{boxWidth:12} } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } }
+    });
+
+    // 5. VẼ HISTOGRAM (TÍNH TẦN SUẤT BINS)
+    // Chia data thành 10 bins
+    let minVal = Math.min(...allData, spec.lsl - spec.std);
+    let maxVal = Math.max(...allData, spec.usl + spec.std);
+    let binSize = (maxVal - minVal) / 10;
+    let bins = Array(10).fill(0);
+    let binLabels = [];
+    for(let i=0; i<10; i++) {
+        let bStart = minVal + i*binSize;
+        binLabels.push((bStart + binSize/2).toFixed(2));
+    }
+    allData.forEach(v => {
+        let bIdx = Math.floor((v - minVal) / binSize);
+        if(bIdx >= 10) bIdx = 9;
+        bins[bIdx]++;
+    });
+
+    charts.hist = new Chart(document.getElementById('cHist'), {
+        type: 'bar',
+        data: {
+            labels: binLabels,
+            datasets: [
+                { label: 'Frequency', data: bins, backgroundColor: '#cbd5e1', borderRadius: 4, type: 'bar' }
+            ]
+        },
+        options: { 
+            responsive: true, maintainAspectRatio: false, 
+            plugins: { 
+                legend: { display: false },
+                // Vẽ thủ công USL LSL lên Chart (Plugin annotation alternative)
+                tooltip: { callbacks: { title: ()=>'' } }
+            }, 
+            scales: { x: { grid: { display: false } } } 
+        }
+    });
+}
+
+function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+
+// Đồng hồ
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleString('en-US',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); }, 1000);
+
+window.onload = () => {
+    generateSPC();
+};
+</script>
+</body>
+</html>

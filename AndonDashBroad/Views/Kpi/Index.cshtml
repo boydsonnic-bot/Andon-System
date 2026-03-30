@@ -7,9 +7,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Production KPI Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f1f5f9;color:#0f172a;height:100vh;overflow:hidden}
+/* 100vh lock to prevent full page scroll */
+body{font-family:'Nunito', system-ui, sans-serif; font-size:13px; background:#f1f5f9; color:#0f172a; height:100vh; overflow:hidden}
 
 :root{
   --bg-primary:#ffffff;--bg-secondary:#f8fafc;--bg-tertiary:#e2e8f0;
@@ -20,88 +24,115 @@ body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f
 }
 #app{max-width:1600px;margin:0 auto;padding:10px 14px;height:100%;display:flex;flex-direction:column;gap:10px}
 
-/* ================= HEADER & TOP KPI (CỐ ĐỊNH) ================= */
-.hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:var(--bg-primary);padding:10px 16px;border-radius:var(--radius-lg);border:1px solid var(--border)}
-.hdr-title{font-size:16px;font-weight:800;color:var(--text-primary);letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+/* ================= HEADER ================= */
+.hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:var(--bg-primary);padding:8px 16px;border-radius:var(--radius-lg);border:1px solid var(--border)}
+.hdr-title{font-size:16px;font-weight:900;color:var(--text-primary);display:flex;align-items:center;gap:8px}
 .hdr-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.hdr-time{font-size:13px;color:var(--text-secondary);font-family:monospace;font-weight:600}
+.hdr-time{font-size:13px;color:var(--text-secondary);font-weight:800}
 
-/* Đã chỉnh lại 3 cột vì bỏ thông tin Andon/Downtime */
-.kpi-row{flex-shrink:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.kpi-card{background:var(--bg-primary);border-radius:var(--radius-lg);padding:12px 14px;border:1px solid var(--border);border-left:4px solid;display:flex;flex-direction:column;justify-content:center}
-.kpi-lbl{font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.kpi-val{font-size:24px;font-weight:800;line-height:1}
-.kpi-sub{font-size:11px;color:var(--text-tertiary);margin-top:4px}
+/* ================= TOP KPI ================= */
+.kpi-row{flex-shrink:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.kpi-card{background:var(--bg-primary);border-radius:var(--radius-lg);padding:8px 12px;border:1px solid var(--border);border-left:4px solid;display:flex;flex-direction:column;justify-content:center}
+.kpi-lbl{font-size:10px;font-weight:800;color:var(--text-secondary);text-transform:uppercase;margin-bottom:2px}
+.kpi-val{font-size:20px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kpi-sub{font-size:10px;color:var(--text-tertiary);margin-top:2px;font-weight:700}
 
+/* ================= CONTROLS ================= */
 .ctrl-row{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.alert-bar{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.alert-ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
-.period-btns{display:flex;gap:6px}
-.pb{padding:6px 16px;border-radius:9999px;cursor:pointer;font-size:12px;font-weight:600;border:1px solid var(--border);background:#fff;color:var(--text-secondary);transition:.15s}
-.pb.on{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 2px 6px rgba(59,130,246,.3)}
-.sort-select{padding:6px 12px;border-radius:9999px;cursor:pointer;font-size:12px;font-weight:600;border:1px solid var(--border);background:#fff;color:var(--text-primary);outline:none}
+.ctrl-group{display:flex;align-items:center;gap:6px;background:var(--bg-primary);padding:4px 8px;border-radius:9999px;border:1px solid var(--border)}
+.search-box{border:none;outline:none;font-size:12px;padding:2px 6px;width:140px;background:transparent;font-family:'Nunito',sans-serif;font-weight:700}
+.date-box{border:none;outline:none;font-size:11px;padding:2px;background:transparent;color:var(--text-primary);font-family:inherit;font-weight:700}
+.btn-filter{background:var(--blue);color:#fff;border:none;border-radius:9999px;padding:4px 12px;font-size:11px;font-weight:800;cursor:pointer}
 
-/* ================= MAIN GRID THẺ LINE (TỰ ĐỘNG CUỘN) ================= */
-.main-grid{flex:1; overflow-y:auto; padding-right:5px; display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:12px; align-content:start; min-height:0}
-.main-grid::-webkit-scrollbar{width:6px}
-.main-grid::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+.period-btns{display:flex;gap:4px}
+.pb{padding:4px 12px;border-radius:9999px;cursor:pointer;font-size:12px;font-weight:800;border:1px solid var(--border);background:#fff;color:var(--text-secondary);font-family:inherit}
+.pb.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.sort-select{padding:4px 10px;border-radius:9999px;cursor:pointer;font-size:12px;font-weight:800;border:1px solid var(--border);background:#fff;color:var(--text-primary);outline:none;font-family:inherit}
 
-/* THẺ HIỂN THỊ MODEL */
-.lc{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;cursor:pointer;transition:transform .15s;position:relative; display:flex; flex-direction:column}
-.lc:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 6px 15px -3px rgba(0,0,0,.08)}
+/* ================= MIDDLE CHARTS ================= */
+.middle-row { flex-shrink: 0; display: flex; gap: 10px; height: 180px; } 
+.panel-box { background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; display: flex; flex-direction: column; min-height: 0;}
+.panel-title { font-size: 12px; font-weight: 800; color: var(--text-primary); text-transform: uppercase; margin-bottom: 6px; flex-shrink: 0;}
+.chart-wrapper { flex: 1; position: relative; min-height: 0; width: 100%; height: 100%; }
 
-.lc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.lc-name{font-size:16px;font-weight:800;color:var(--text-primary)}
+/* ================= BOTTOM SPLIT (1/4 & 3/4) ================= */
+.bottom-split { flex: 1; min-height: 0; display: flex; gap: 10px; }
 
-/* THANH TIẾN ĐỘ TARGET / ACTUAL */
-.lc-hbar-row{margin-bottom:6px}
-.lc-hbar-lbl{display:flex;justify-content:space-between;font-size:11px;font-weight:600;margin-bottom:4px;color:var(--text-secondary)}
-.lc-hbar-track{height:7px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden}
-.lc-hbar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+/* Left List (1/4) */
+.left-list { flex: 0 0 24%; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+.left-list::-webkit-scrollbar { width: 4px; }
+.left-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-/* CHỈ CÒN 3 BIỂU ĐỒ TRÒN (Đã bỏ Downtime) */
-.donut-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg-secondary);padding:12px 6px;border-radius:8px;border:1px solid #f1f5f9;margin:12px 0}
-.d-item{display:flex;flex-direction:column;align-items:center}
-.d-chart{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
-.d-inner{width:34px;height:34px;background:var(--bg-secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
-.d-lbl{font-size:9px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;text-align:center;line-height:1.1}
+.mini-lc { flex-shrink: 0; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px; cursor: pointer; transition: 0.15s;}
+.mini-lc.active { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); background: #f8fafc; }
+.mini-nm { font-size: 13px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mini-hbar-wrap { display: flex; flex-direction: column; gap: 4px; }
+.mini-hbar { height: 5px; background: var(--bg-tertiary); border-radius: 3px; position: relative; }
+.mini-hbar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.mini-lbl { display:flex; justify-content: space-between; font-size: 9px; font-weight: 800; color: var(--text-secondary); margin-bottom: 1px;}
 
-/* AI FORECAST */
-.lc-ai-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:auto}
-.lc-ai-item{background:var(--bg-secondary);border-radius:6px;padding:6px 4px;text-align:center;border:1px solid #f1f5f9}
-.lc-ai-lbl{font-size:9px;color:var(--text-secondary);margin-bottom:3px;font-weight:600;text-transform:uppercase}
-.lc-ai-val{font-size:13px;font-weight:800}
+/* Right Detail (3/4) - Strictly Fitted */
+.right-detail { flex: 1; background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 
-/* ================= YTD PANEL Ở ĐÁY (CỐ ĐỊNH) ================= */
-.ytd-panel{flex-shrink:0;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;height:240px;display:flex;flex-direction:column}
-.ytd-title{font-size:13px;font-weight:800;color:var(--text-primary);text-transform:uppercase;margin-bottom:10px}
+.detail-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;}
+.detail-title { font-size: 16px; font-weight: 900; color: var(--text-primary); }
 
-/* ZOOM MODAL TABS */
-.prod-modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
-.prod-modal-tab{padding:8px 20px;cursor:pointer;font-size:13px;font-weight:600;border-bottom:3px solid transparent;color:var(--text-secondary)}
-.prod-modal-tab.on{border-bottom-color:var(--blue);color:var(--blue)}
+.detail-stats-row { flex-shrink: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 10px; background: var(--bg-secondary); padding: 8px; border-radius: var(--radius-md); border: 1px solid #f1f5f9;}
+.d-stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.d-val-txt { font-size: 18px; font-weight: 900; line-height: 1.2; }
+.d-lbl-txt { font-size: 9px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 4px; text-align:center; }
+.d-chart { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
+.d-inner { width: 34px; height: 34px; background: var(--bg-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
+
+.prod-modal-tabs { flex-shrink: 0; display:flex; border-bottom:1px solid var(--border); margin-bottom:8px}
+.prod-modal-tab { padding:4px 16px; cursor:pointer; font-size:12px; font-weight:800; border-bottom:2px solid transparent; color:var(--text-secondary);}
+.prod-modal-tab.on { border-bottom-color:var(--blue); color:var(--blue)}
+
+#detail-chart-area { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.dc-row { display: flex; gap: 8px; flex: 1; min-height: 0; }
+.dc-box { flex: 1; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 12px; display: flex; flex-direction: column; min-height: 0; }
+.dc-title { font-size: 10px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; flex-shrink: 0; }
+
+.btn-zoom { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-primary); cursor: pointer; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; display: flex; align-items: center; gap: 4px; font-family:inherit; outline:none}
+.btn-zoom:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+/* ================= INDEPENDENT ZOOM MODAL ================= */
+#zoomModal { display:none; opacity:0; position:fixed; inset:0; background:rgba(15,23,42,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; transition:opacity 0.2s;}
+.zm-content { background:#fff; border-radius:16px; width:95vw; height:90vh; display:flex; flex-direction:column; padding:20px; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); }
+.zm-close { position:absolute; top:16px; right:16px; width:32px; height:32px; border:none; border-radius:8px; background:#f1f5f9; cursor:pointer; font-size:16px; font-weight:900; color:#64748b; font-family:inherit}
 </style>
 </head>
 <body>
 <div id="app">
 
   <div class="hdr">
-    <div class="hdr-title">
-      <span class="hdr-dot"></span> PRODUCTION KPI DASHBOARD
-    </div>
+    <div class="hdr-title"><span class="hdr-dot"></span> PRODUCTION KPI DASHBOARD</div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="hdr-time" id="clock"></span>
-      <button onclick="toggleFS()" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);cursor:pointer;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600">⛶ Fullscreen</button>
+      <button onclick="toggleFS()" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);cursor:pointer;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:800;font-family:inherit">⛶ Fullscreen</button>
     </div>
   </div>
 
   <div class="kpi-row" id="kpi-row"></div>
 
   <div class="ctrl-row">
-    <div id="alert-bar" class="alert-bar alert-ok"></div>
-    <div style="display:flex; align-items:center; gap: 10px;">
-      <select id="sortSelect" class="sort-select" onchange="sortData()">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="ctrl-group">
+        <span style="font-size:12px; margin-left:4px">🔍</span>
+        <input type="text" id="searchBox" class="search-box" placeholder="Search Model..." onkeyup="filterAndSortData()">
+      </div>
+      <div class="ctrl-group">
+        <span style="font-size:10px;color:var(--text-secondary);margin-left:4px;font-weight:800">FROM</span>
+        <input type="date" id="dateFrom" class="date-box">
+        <span style="font-size:10px;color:var(--text-secondary);font-weight:800">TO</span>
+        <input type="date" id="dateTo" class="date-box">
+        <button class="btn-filter" onclick="applyDateFilter()">Filter</button>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap: 6px;">
+      <select id="sortSelect" class="sort-select" onchange="filterAndSortData()">
         <option value="line_asc">▼ Sort by Model (A-Z)</option>
         <option value="line_desc">▲ Sort by Model (Z-A)</option>
         <option value="kpi_desc">▼ Performance (High to Low)</option>
@@ -116,107 +147,186 @@ body{font-family:system-ui,-apple-system,sans-serif;font-size:13px;background:#f
     </div>
   </div>
 
-  <div class="main-grid" id="main-grid"></div>
+  <div class="middle-row">
+    <div class="panel-box" style="flex: 2.2;">
+      <div class="panel-title">📊 Yearly Production Output (YTD)</div>
+      <div class="chart-wrapper"><canvas id="ytdChart"></canvas></div>
+    </div>
+    <div class="panel-box" style="flex: 1;">
+      <div class="panel-title">📉 Top Quality Issues (Pareto 80/20)</div>
+      <div class="chart-wrapper"><canvas id="paretoChart"></canvas></div>
+    </div>
+  </div>
 
-  <div class="ytd-panel">
-    <div class="ytd-title">📊 Yearly Production Output (YTD)</div>
-    <div style="flex:1; position:relative;"><canvas id="ytdChart"></canvas></div>
+  <div class="bottom-split">
+    <div class="left-list" id="left-list"></div>
+
+    <div class="right-detail" id="right-detail">
+      <div style="display:flex; height:100%; align-items:center; justify-content:center; color:var(--text-tertiary); font-size:16px; font-weight:800">
+        Loading Details...
+      </div>
+    </div>
   </div>
 
 </div>
 
-<div id="mOv" onclick="if(event.target===this)closeZoom()" style="display:none;opacity:0;position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:9999;align-items:center;justify-content:center;padding:16px;transition:opacity .2s">
-  <div style="background:#fff;border-radius:16px;width:100%;max-width:1100px;max-height:95vh;overflow:auto;padding:22px;position:relative">
-    <button onclick="closeZoom()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border:none;border-radius:7px;background:#f1f5f9;cursor:pointer;font-size:16px;font-weight:700;color:#64748b">✕</button>
-    <div id="mTitle" style="font-size:16px;font-weight:800;margin-bottom:18px;padding-right:40px;color:#0f172a;text-transform:uppercase"></div>
-    <div id="mContent"></div>
+<div id="zoomModal" onclick="if(event.target===this)closeZoomModal()">
+  <div class="zm-content">
+    <button onclick="closeZoomModal()" class="zm-close">✕</button>
+    <div id="zoom-header" class="detail-header" style="margin-bottom:20px; padding-bottom:16px"></div>
+    <div id="zoom-stats" class="detail-stats-row" style="margin-bottom:20px"></div>
+    <div class="prod-modal-tabs" id="zoom-tabs"></div>
+    <div id="zoom-chart-area" style="flex:1; display:flex; flex-direction:column; gap:16px; min-height:0"></div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ============================================================
-// 1. DỮ LIỆU & CHUẨN HOÁ
+// 1. DATA INITIALIZATION
 // ============================================================
 let rawPD = [];
-try {
-    rawPD = JSON.parse('@Html.Raw(ViewBag.ProductionData)' || '[]');
-} catch(e) {}
+try { rawPD = JSON.parse('@Html.Raw(ViewBag.ProductionData)' || '[]'); } catch(e) {}
 
 if (!rawPD || rawPD.length === 0) {
     const models = ['MODEL-X-2026','MODEL-Y-2026','MODEL-Z-2026','MODEL-A-2026','MODEL-B-2026','MODEL-C-2026','MODEL-D-2026','MODEL-E-2026','MODEL-F-2026','MODEL-G-2026','MODEL-H-2026'];
     rawPD = Array.from({length:11}, (_,i) => {
-        const tgt = 900 + Math.floor(Math.random()*300);
-        const act = Math.floor(tgt*(0.72+Math.random()*0.26));
-        return { id:`M${(i+1)}`, model:models[i], target:tgt, actual:act,
-          ewma:8+Math.floor(Math.random()*18),
-          zscore:+(Math.random()*3).toFixed(1), pattern:['low','low','medium','low','high','low','low','low','medium','low','low'][i] };
+        const tgt = 1500; 
+        const act = Math.floor(tgt*(0.70+Math.random()*0.25));
+        return { id:`M${(i+1)}`, model:models[i], target:tgt, actual:act, stopMin: Math.floor(Math.random() * 60) };
     });
 }
 
-let PD = rawPD.map(p => ({
-    id: p.id || p.Id || "M00", 
-    model: p.model || p.Model || "Unknown Model",
-    target: Number(p.target ?? p.Target ?? 0), 
-    actual: Number(p.actual ?? p.Actual ?? 0), 
-    mrb: Number(p.mrb ?? p.Mrb ?? 0),
-    ewma: Number(p.ewma ?? p.Ewma ?? 0),
-    zscore: Number(p.zscore ?? p.Zscore ?? 0), 
-    pattern: (p.pattern || p.Pattern || "low").toString().toLowerCase()
+let PD = rawPD.map((p, i) => ({
+    _uid: 'U' + i, id: p.id || p.Id || "M00", model: p.model || p.Model || "Unknown Model",
+    target: Number(p.target ?? p.Target ?? 0), actual: Number(p.actual ?? p.Actual ?? 0), 
+    mrb: Number(p.mrb ?? p.Mrb ?? 0), stopMin: p.stopMin || Math.floor(Math.random() * 60)
 }));
-
-// Tạo Mock dữ liệu MRB
-PD.forEach(p => {
-    p.mrb = +(((p.actual / Math.max(1, new Date().getHours()-8)) * 0.02 + Math.random()*2)).toFixed(1);
-});
+PD.forEach(p => { p.mrb = +(((p.actual / Math.max(1, new Date().getHours()-8)) * 0.02 + Math.random()*2)).toFixed(1); });
 
 let PERIOD_DATA = {
     day:   PD,
-    week:  PD.map(l=>({...l,target:l.target*5,  actual:l.actual*5})),
-    month: PD.map(l=>({...l,target:l.target*22, actual:l.actual*21})),
-    ytd:   PD.map(l=>({...l,target:l.target*80, actual:l.actual*78}))
+    week:  PD.map(l=>({...l,target:l.target*5,  actual:l.actual*5, stopMin:l.stopMin*5})),
+    month: PD.map(l=>({...l,target:l.target*22, actual:l.actual*21, stopMin:l.stopMin*21})),
+    ytd:   PD.map(l=>({...l,target:l.target*80, actual:l.actual*78, stopMin:l.stopMin*78}))
 };
 
-const periodLabels = {day:'Today (from 8:00 AM)',week:'This Week',month:'This Month',ytd:'Year to Date'};
 let curPeriod = 'day';
 let curData   = [...PERIOD_DATA.day];
+let displayedData = [...curData];
+let selectedUid = null; 
+let curTab = 'today';
+let isZoomOpen = false;
+
+Chart.defaults.font.family = "'Nunito', system-ui, sans-serif";
 
 function clock(){ document.getElementById('clock').textContent = new Date().toLocaleString('en-US',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); }
 
+function formatTime(minutes) {
+    if (!minutes || minutes <= 0) return '0m';
+    let mo = Math.floor(minutes / 43200);
+    let d = Math.floor((minutes % 43200) / 1440);
+    let h = Math.floor((minutes % 1440) / 60);
+    let m = Math.floor(minutes % 60);
+    
+    let res = [];
+    if (mo > 0) res.push(mo + 'mo');
+    if (d > 0) res.push(d + 'd');
+    if (h > 0) res.push(h + 'h');
+    if (m > 0 || res.length === 0) res.push(m + 'm');
+    
+    return res.join(' ');
+}
+
 // ============================================================
-// 2. RENDER HỆ THỐNG
+// 2. FILTER & SORT
 // ============================================================
-function sortData() {
-    const sortVal = document.getElementById('sortSelect').value;
-    curData.sort((a, b) => {
-        const pctA = a.target > 0 ? (a.actual / a.target) : 0;
-        const pctB = b.target > 0 ? (b.actual / b.target) : 0;
-        if (sortVal === 'line_asc')  return a.model.localeCompare(b.model);
-        if (sortVal === 'line_desc') return b.model.localeCompare(a.model);
-        if (sortVal === 'kpi_asc')   return pctA - pctB;      
-        if (sortVal === 'kpi_desc')  return pctB - pctA;      
-        return 0;
-    });
-    renderGrid();
+function filterAndSortData() {
+    try {
+        const searchTxt = document.getElementById('searchBox').value.toLowerCase();
+        const sortVal = document.getElementById('sortSelect').value;
+
+        displayedData = curData.filter(line => line.model.toLowerCase().includes(searchTxt));
+        displayedData.sort((a, b) => {
+            const pctA = a.target > 0 ? (a.actual / a.target) : 0;
+            const pctB = b.target > 0 ? (b.actual / b.target) : 0;
+            if (sortVal === 'line_asc')  return a.model.localeCompare(b.model);
+            if (sortVal === 'line_desc') return b.model.localeCompare(a.model);
+            if (sortVal === 'kpi_asc')   return pctA - pctB;      
+            if (sortVal === 'kpi_desc')  return pctB - pctA;      
+            return 0;
+        });
+
+        renderKPI();
+        renderMiniGrid();
+        
+        if(displayedData.length > 0) {
+            if(!displayedData.find(l => l._uid === selectedUid)) showDetail(displayedData[0]._uid);
+            else showDetail(selectedUid);
+        } else {
+            document.getElementById('right-detail').innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:var(--text-tertiary); font-size:16px; font-weight:800">No Models Found</div>`;
+        }
+    } catch(e) {}
+}
+
+function applyDateFilter() {
+    const fromDate = document.getElementById('dateFrom').value;
+    const toDate = document.getElementById('dateTo').value;
+    if(!fromDate || !toDate) return alert("Please select both 'From' and 'To' dates!");
+    if(new Date(fromDate) > new Date(toDate)) return alert("Start date cannot be later than end date!");
+
+    document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
+    const days = Math.floor((new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24)) + 1;
+    const multiplier = days > 0 ? days : 1;
+    
+    curPeriod = 'custom';
+    curData = PD.map(l => ({ ...l, target: l.target * multiplier, actual: Math.round(l.actual * multiplier * (0.8 + Math.random()*0.3)), stopMin: Math.round(l.stopMin * multiplier * (0.5 + Math.random()*1.5)) }));
+    filterAndSortData();
 }
 
 function switchPeriod(p) {
     curPeriod = p; curData = [...PERIOD_DATA[p]];
     document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
     document.getElementById('period-'+p).classList.add('on');
-    renderKPI(); sortData();
+    document.getElementById('dateFrom').value = ''; document.getElementById('dateTo').value = '';
+    filterAndSortData();
 }
 
+// ============================================================
+// 3. RENDER TOP KPI & MINI GRID
+// ============================================================
 function renderKPI() {
-    const tot   = curData.reduce((a,l)=>a+l.target,0);
-    const act   = curData.reduce((a,l)=>a+l.actual,0);
+    const tot   = displayedData.reduce((a,l)=>a+l.target,0);
+    const act   = displayedData.reduce((a,l)=>a+l.actual,0);
     const perf  = tot>0?Math.round(act/tot*100):0;
+    
+    let sumOEE = 0, sumFPY = 0, totStop = 0;
+    displayedData.forEach(line => {
+        const pctW = Math.min(line.target > 0 ? Math.round((line.actual / line.target) * 100) : 0, 100);
+        const fpy = Math.max(0, 100 - (line.mrb || 0));
+        totStop += (line.stopMin || 0);
+        const shiftMins = 480 * (curPeriod === 'week' ? 5 : curPeriod === 'month' ? 21 : curPeriod === 'ytd' ? 78 : curPeriod === 'custom' ? 1 : 1);
+        const avail = Math.max(0, 100 - Math.min(100, Math.round(((line.stopMin || 0) / shiftMins) * 100)));
+        sumOEE += Math.round((avail / 100) * (pctW / 100) * (fpy / 100) * 100);
+        sumFPY += fpy;
+    });
+    
+    const avgOEE = displayedData.length > 0 ? Math.round(sumOEE / displayedData.length) : 0;
+    const avgFPY = displayedData.length > 0 ? (sumFPY / displayedData.length).toFixed(1) : 0;
 
     const perfCol = perf>=90?'var(--green)':perf>=75?'var(--yellow)':'var(--red)';
+    const oeeCol = avgOEE>=85?'var(--blue)':avgOEE>=70?'var(--yellow)':'var(--red)';
+    const fpyCol = avgFPY>=95?'var(--green)':avgFPY>=90?'var(--yellow)':'var(--red)';
+
+    let periodLabel = curPeriod === 'custom' ? 'Custom Range' : {day:'Today (from 8:00 AM)',week:'This Week',month:'This Month',ytd:'Year to Date'}[curPeriod];
+
     document.getElementById('kpi-row').innerHTML = [
-        {lbl:'Total Target',     val:tot.toLocaleString('en-US'),  sub:periodLabels[curPeriod],            col:'var(--blue)',   vc:'var(--text-primary)'},
-        {lbl:'Total Actual',     val:act.toLocaleString('en-US'),  sub:`${perf}% of target`,               col:'var(--green)',  vc:'var(--green)'},
-        {lbl:'Overall Performance', val:perf+'%',           sub:perf>=90?'On track':perf>=75?'Needs attention':'Below target', col:perfCol, vc:perfCol}
+        {lbl:'Total Target',     val:tot.toLocaleString('en-US'),  sub:periodLabel, col:'var(--blue)', vc:'var(--text-primary)'},
+        {lbl:'Total Actual',     val:act.toLocaleString('en-US'),  sub:`${perf}% of target`, col:'var(--green)', vc:'var(--green)'},
+        {lbl:'Overall Performance', val:perf+'%', sub:perf>=90?'On track':perf>=75?'Needs attention':'Below target', col:perfCol, vc:perfCol},
+        {lbl:'Average FPY',      val:avgFPY+'%', sub:'First Pass Yield', col:fpyCol, vc:fpyCol},
+        {lbl:'Average OEE',      val:avgOEE+'%', sub:'Overall Equip. Effectiveness', col:oeeCol, vc:oeeCol},
+        {lbl:'Total Downtime',   val:formatTime(totStop), sub:'Total stoppage time', col:'var(--red)', vc:'var(--red)'}
     ].map(k=>`<div class="kpi-card" style="border-left-color:${k.col}">
         <div class="kpi-lbl">${k.lbl}</div>
         <div class="kpi-val" style="color:${k.vc}">${k.val}</div>
@@ -224,160 +334,208 @@ function renderKPI() {
     </div>`).join('');
 }
 
-function renderGrid() {
-    const ab = document.getElementById('alert-bar');
-    ab.className='alert-bar alert-ok';
-    ab.innerHTML=`<span style="font-size:15px">✅</span><strong>All models producing normally</strong>`;
+function renderMiniGrid() {
+    const list = document.getElementById('left-list');
+    if (displayedData.length === 0) { list.innerHTML = ``; return; }
 
-    document.getElementById('main-grid').innerHTML = curData.map(line => {
+    list.innerHTML = displayedData.map(line => {
         const tgt = line.target || 0; const act = line.actual || 0;
         const pct = tgt > 0 ? Math.round((act / tgt) * 100) : 0; const pctW = Math.min(pct,100);
         const barcol = pct>=90?'var(--green)':pct>=75?'var(--yellow)':'var(--red)';
-        
-        // Tính toán 3 chỉ số Donut (Bỏ Downtime)
-        const fpy = Math.max(0, 100 - (line.mrb || 0));
-        const ineff = Math.max(0, 100 - pctW);
+        const activeCls = (line._uid === selectedUid) ? 'active' : '';
 
-        return `<div class="lc" onclick="openDetail('${line.id}')">
-          <div>
-            <div class="lc-top">
-              <span class="lc-name">${line.model}</span>
+        return `
+        <div class="mini-lc ${activeCls}" onclick="showDetail('${line._uid}')">
+            <div class="mini-nm" title="${line.model}">${line.model}</div>
+            <div class="mini-hbar-wrap">
+                <div class="mini-lbl"><span>Target</span><span>${tgt.toLocaleString()}</span></div>
+                <div class="mini-hbar"><div class="mini-hbar-fill" style="width:100%;background:var(--blue)"></div></div>
+                <div class="mini-lbl"><span>Actual</span><span style="color:${barcol}">${act.toLocaleString()}</span></div>
+                <div class="mini-hbar"><div class="mini-hbar-fill" style="width:${pctW}%;background:${barcol}"></div></div>
             </div>
-
-            <div class="lc-hbar-wrap">
-              <div class="lc-hbar-row">
-                <div class="lc-hbar-lbl"><span>Target</span><span>${tgt.toLocaleString('en-US')}</span></div>
-                <div class="lc-hbar-track"><div class="lc-hbar-fill" style="width:100%;background:var(--blue)"></div></div>
-              </div>
-              <div class="lc-hbar-row">
-                <div class="lc-hbar-lbl"><span>Actual</span><span style="color:${barcol}">${act.toLocaleString('en-US')}</span></div>
-                <div class="lc-hbar-track"><div class="lc-hbar-fill" style="width:${pctW}%;background:${barcol}"></div></div>
-              </div>
-            </div>
-
-            <div class="donut-row">
-              <div class="d-item">
-                <div class="d-chart" style="background:conic-gradient(var(--blue) ${pctW}%,var(--bg-primary) 0)"><div class="d-inner" style="color:var(--blue)">${pct}%</div></div>
-                <div class="d-lbl">Performance</div>
-              </div>
-              <div class="d-item">
-                <div class="d-chart" style="background:conic-gradient(var(--green) ${fpy}%,var(--bg-primary) 0)"><div class="d-inner" style="color:var(--green)">${fpy.toFixed(0)}%</div></div>
-                <div class="d-lbl">FPY</div>
-              </div>
-              <div class="d-item">
-                <div class="d-chart" style="background:conic-gradient(var(--orange) ${ineff}%,var(--bg-primary) 0)"><div class="d-inner" style="color:var(--orange)">${ineff}%</div></div>
-                <div class="d-lbl">Inefficiency</div>
-              </div>
-            </div>
-
-            <div class="lc-ai-row">
-              <div class="lc-ai-item"><div class="lc-ai-lbl">EWMA Forecast</div><div class="lc-ai-val" style="color:var(--purple)">${line.ewma||'—'}m</div></div>
-              <div class="lc-ai-item"><div class="lc-ai-lbl">Z-Score</div><div class="lc-ai-val" style="color:${line.zscore>2?'var(--red)':line.zscore>1.5?'var(--yellow)':'var(--green)'}">${line.zscore}</div></div>
-              <div class="lc-ai-item"><div class="lc-ai-lbl">Pattern</div><div class="lc-ai-val" style="color:${line.pattern==='high'?'var(--red)':line.pattern==='medium'?'var(--yellow)':'var(--green)'}">${(line.pattern||'low').toUpperCase()}</div></div>
-            </div>
-          </div>
         </div>`;
     }).join('');
 }
 
 // ============================================================
-// VẼ BIỂU ĐỒ YTD Ở ĐÁY
+// 4. MODEL DETAIL (RIGHT COLUMN & MODAL ZOOM)
 // ============================================================
-let ytdChartInst = null;
-function renderYtdChart() {
-    const ctx = document.getElementById('ytdChart');
-    if(!ctx) return;
-    
-    const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const target = [250000, 240000, 260000, 250000, 270000, 250000, 260000, 260000, 250000, 270000, 260000, 250000];
-    const totAct = PERIOD_DATA.day.reduce((a,l)=>a+l.actual,0) * 22; 
-    const actual = [245000, 235000, totAct, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    
-    if(ytdChartInst) ytdChartInst.destroy();
-    ytdChartInst = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: labels, datasets: [ { label: 'Actual Output', data: actual, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'Target Output', data: target, backgroundColor: '#cbd5e1', borderRadius: 4 } ] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {size: 11} } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 } } } } }
-    });
+function openZoomModal() {
+    isZoomOpen = true;
+    document.getElementById('zoomModal').style.display = 'flex';
+    requestAnimationFrame(()=>document.getElementById('zoomModal').style.opacity='1');
+    showDetail(selectedUid); 
 }
 
-// ============================================================
-// ZOOM MODAL LOGIC 
-// ============================================================
-let curProdTab = 0;
-function openDetail(id) {
-    const line = curData.find(l=>l.id===id);
-    if (!line) return;
-    const pct = line.target>0?Math.round(line.actual/line.target*100):0;
-    const barcol = pct>=90?'var(--green)':pct>=75?'var(--yellow)':'var(--red)';
-    document.getElementById('mTitle').innerHTML = `${line.model} <span style="font-size:12px;color:var(--text-secondary);font-weight:500;text-transform:none;margin-left:10px">${periodLabels[curPeriod]}</span>`;
-    document.getElementById('mContent').innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
-        ${[ ['Target', line.target.toLocaleString('en-US'), 'units', 'var(--blue)'], ['Actual', line.actual.toLocaleString('en-US'), pct+'%', barcol], ['Performance', pct+'%', 'vs target', barcol], ['EWMA Forecast', (line.ewma||0)+'m', 'predicted', 'var(--purple)'] ].map(([l,v,u,c])=>`
-          <div style="background:#f8fafc;border-radius:10px;padding:10px;border:1px solid #e2e8f0;text-align:center">
-            <div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px">${l}</div>
-            <div style="font-size:20px;font-weight:800;color:${c};line-height:1">${v}</div>
-            <div style="font-size:10px;color:#94a3b8;margin-top:3px">${u}</div>
-          </div>`).join('')}
-      </div>
-      <div class="prod-modal-tabs">
-        <div onclick="showTab(0,'${line.id}')" class="prod-modal-tab on" id="ptab-0">Last 7 Days</div>
-        <div onclick="showTab(1,'${line.id}')" class="prod-modal-tab" id="ptab-1">Last 30 Days</div>
-        <div onclick="showTab(2,'${line.id}')" class="prod-modal-tab" id="ptab-2">YTD</div>
-      </div>
-      <div id="detail-body"></div>`;
-    document.getElementById('mOv').style.display='flex';
-    requestAnimationFrame(()=>document.getElementById('mOv').style.opacity='1');
-    curProdTab=0; setTimeout(()=>renderDetailCharts(line),80);
+function closeZoomModal() {
+    isZoomOpen = false;
+    document.getElementById('zoomModal').style.opacity='0';
+    setTimeout(()=>{ document.getElementById('zoomModal').style.display='none'; showDetail(selectedUid); }, 200);
 }
 
-function showTab(i,id) {
-    curProdTab=i;
-    document.querySelectorAll('.prod-modal-tab').forEach((el,j)=>el.classList.toggle('on',j===i));
-    const line = curData.find(l=>l.id===id);
-    if (line) renderDetailCharts(line);
-}
+function generateDetailHTML(line, tgt, act, pct, pctW, barcol, oee, fpy, downPct, isZoom) {
+    let periodLabel = curPeriod === 'custom' ? 'Custom Range' : {day:'Today (from 8:00 AM)',week:'This Week',month:'This Month',ytd:'Year to Date'}[curPeriod];
+    let prefix = isZoom ? 'z' : '';
+    let tSize = isZoom ? '24px' : '16px';
+    let vSize = isZoom ? '28px' : '18px';
+    let dSize = isZoom ? '64px' : '44px';
+    let inSize = isZoom ? '50px' : '34px';
 
-function renderDetailCharts(line) {
-    const labels7  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    const labels30 = Array.from({length:15},(_,i)=>(i*2+1)+'');
-    const labels12 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const labels   = curProdTab===0?labels7:curProdTab===1?labels30:labels12;
-    const len      = labels.length;
-    ['prodC1','prodC2','prodC3'].forEach(id=>{ const inst = Chart.getChart(id); if (inst) inst.destroy(); });
-    const db = document.getElementById('detail-body');
-    db.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div style="border:1px solid #e2e8f0;padding:14px;border-radius:10px"><div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:10px;text-transform:uppercase">Actual Output vs Target</div><div style="position:relative;height:220px"><canvas id="prodC1"></canvas></div></div>
-        <div style="border:1px solid #e2e8f0;padding:14px;border-radius:10px"><div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:10px;text-transform:uppercase">EWMA Forecast</div><div style="position:relative;height:220px"><canvas id="prodC2"></canvas></div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
-        <div style="border:1px solid #e2e8f0;padding:14px;border-radius:10px"><div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:10px;text-transform:uppercase">Year-over-Year Comparison</div><div style="position:relative;height:200px"><canvas id="prodC3"></canvas></div></div>
-        <div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0">
-          <div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:14px">AI Analysis</div>
-          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
-            <div style="background:#fff;padding:9px 12px;border-radius:7px;border:1px solid #e2e8f0"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-bottom:3px">EWMA Forecast</div><strong style="color:var(--blue);font-size:16px">${line.ewma} min</strong><span style="font-size:11px;color:#64748b;margin-left:4px">predicted</span></div>
-            <div style="background:#fff;padding:9px 12px;border-radius:7px;border:1px solid #e2e8f0"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-bottom:3px">Z-Score Anomaly</div><strong style="font-size:16px;color:${line.zscore>2?'var(--red)':line.zscore>1.5?'var(--yellow)':'var(--green)'}">${line.zscore}</strong><span style="font-size:11px;color:#64748b;margin-left:4px">${line.zscore>2?'Anomaly detected':line.zscore>1.5?'Watch closely':'Normal'}</span></div>
-            <div style="background:#fff;padding:9px 12px;border-radius:7px;border:1px solid #e2e8f0"><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;font-weight:700;margin-bottom:3px">Pattern Detection</div><strong style="font-size:16px;color:${line.pattern==='high'?'var(--red)':line.pattern==='medium'?'var(--yellow)':'var(--green)'}">${(line.pattern||'low').toUpperCase()}</strong><span style="font-size:11px;color:#64748b;margin-left:4px">risk level</span></div>
-          </div>
+    return `
+      <div class="detail-header">
+        <div style="display:flex; align-items:center; gap:12px">
+          <div class="detail-title" style="font-size:${tSize}">${line.model}</div>
+          <div style="font-size:11px;color:var(--text-secondary);font-weight:700">${periodLabel}</div>
         </div>
-      </div>`;
-    setTimeout(()=>{
-        new Chart(document.getElementById('prodC1'),{type:'bar', data:{labels,datasets:[ {label:'Actual',data:Array.from({length:len},()=>Math.round((line.actual||0)*.6+Math.random()*(line.actual||100)*.8)),backgroundColor:'#10b981',borderRadius:3}, {label:'Target',data:Array(len).fill(line.target||0),type:'line',borderColor:'#ef4444',borderDash:[5,4],borderWidth:2,pointRadius:0} ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-        new Chart(document.getElementById('prodC2'),{type:'line', data:{labels,datasets:[ {label:'EWMA Forecast',data:Array.from({length:len},()=>+((line.ewma||0)+Math.random()*8-4).toFixed(1)),borderColor:'#8b5cf6',borderDash:[4,3],tension:.3,pointRadius:0} ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-        new Chart(document.getElementById('prodC3'),{type:'bar', data:{labels,datasets:[ {label:`2026`,data:Array.from({length:len},()=>Math.round((line.actual||0)*1.15)),backgroundColor:'#3b82f6',borderRadius:3}, {label:'2025', data:Array.from({length:len},()=>Math.round((line.actual||0)*.88)),backgroundColor:'#cbd5e1',borderRadius:3} ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-    },50);
+        ${!isZoom ? `<button onclick="openZoomModal()" class="btn-zoom" title="Zoom In">⛶ Expand</button>` : ''}
+      </div>
+      
+      <div class="detail-stats-row">
+        <div class="d-stat-box">
+            <div class="d-lbl-txt">Total Target</div>
+            <div class="d-val-txt" style="color:var(--blue); font-size:${vSize}">${tgt.toLocaleString()}</div>
+        </div>
+        <div class="d-stat-box">
+            <div class="d-lbl-txt">Total Actual</div>
+            <div class="d-val-txt" style="color:${barcol}; font-size:${vSize}">${act.toLocaleString()}</div>
+        </div>
+        <div class="d-stat-box">
+            <div class="d-lbl-txt">Performance</div>
+            <div class="d-chart" style="width:${dSize};height:${dSize};background:conic-gradient(${barcol} ${pctW}%,var(--bg-primary) 0)"><div class="d-inner" style="width:${inSize};height:${inSize};color:${barcol}">${pct}%</div></div>
+        </div>
+        <div class="d-stat-box">
+            <div class="d-lbl-txt">OEE</div>
+            <div class="d-chart" style="width:${dSize};height:${dSize};background:conic-gradient(var(--blue) ${oee}%,var(--bg-primary) 0)"><div class="d-inner" style="width:${inSize};height:${inSize};color:var(--blue)">${oee}%</div></div>
+        </div>
+        <div class="d-stat-box">
+            <div class="d-lbl-txt">FPY</div>
+            <div class="d-chart" style="width:${dSize};height:${dSize};background:conic-gradient(var(--green) ${fpy}%,var(--bg-primary) 0)"><div class="d-inner" style="width:${inSize};height:${inSize};color:var(--green)">${fpy.toFixed(0)}%</div></div>
+        </div>
+        <div class="d-stat-box">
+            <div class="d-lbl-txt">Downtime</div>
+            <div class="d-chart" style="width:${dSize};height:${dSize};background:conic-gradient(var(--red) ${downPct}%,var(--bg-primary) 0)"><div class="d-inner" style="width:${inSize};height:${inSize};color:var(--red)">${downPct}%</div></div>
+        </div>
+      </div>
+
+      <div class="prod-modal-tabs">
+        <div onclick="switchDetailTab('today')" class="prod-modal-tab ${curTab==='today'?'on':''}">Today (8h-7h59)</div>
+        <div onclick="switchDetailTab('7days')" class="prod-modal-tab ${curTab==='7days'?'on':''}">Last 7 Days</div>
+        <div onclick="switchDetailTab('30days')" class="prod-modal-tab ${curTab==='30days'?'on':''}">Last 30 Days</div>
+        <div onclick="switchDetailTab('ytd')" class="prod-modal-tab ${curTab==='ytd'?'on':''}">YTD</div>
+      </div>
+
+      <div id="${prefix}detail-chart-area" style="flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 0;">
+          <div class="dc-row">
+            <div class="dc-box">
+                <div class="dc-title">Output Trend (Actual vs Target)</div>
+                <div class="chart-wrapper"><canvas id="${prefix}dc1"></canvas></div>
+            </div>
+            <div class="dc-box">
+                <div class="dc-title">OEE & Performance Trend</div>
+                <div class="chart-wrapper"><canvas id="${prefix}dc2"></canvas></div>
+            </div>
+          </div>
+          <div class="dc-row">
+            <div class="dc-box" style="flex:1">
+                <div class="dc-title">Quality Trend (First Pass Yield %)</div>
+                <div class="chart-wrapper"><canvas id="${prefix}dc3"></canvas></div>
+            </div>
+          </div>
+      </div>
+    `;
 }
 
-function closeZoom() { const ov = document.getElementById('mOv'); ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',200); ['prodC1','prodC2','prodC3'].forEach(id=>{ const c=Chart.getChart(id);if(c)c.destroy(); }); }
+function showDetail(uid) {
+    try {
+        selectedUid = uid;
+        if(!isZoomOpen) renderMiniGrid(); 
+        
+        const line = displayedData.find(l=>l._uid===uid);
+        if (!line) return;
+        
+        const tgt = line.target || 0; const act = line.actual || 0;
+        const pct = tgt > 0 ? Math.round((act / tgt) * 100) : 0; const pctW = Math.min(pct,100);
+        const barcol = pct>=90?'var(--green)':pct>=75?'var(--yellow)':'var(--red)';
+        
+        const fpy = Math.max(0, 100 - (line.mrb || 0));
+        const shiftMins = 480 * (curPeriod === 'week' ? 5 : curPeriod === 'month' ? 21 : curPeriod === 'ytd' ? 78 : curPeriod === 'custom' ? 1 : 1);
+        const downPct = Math.min(100, Math.round(((line.stopMin||0) / shiftMins) * 100)); 
+        const avail = Math.max(0, 100 - downPct);
+        const oee = Math.round((avail / 100) * (pctW / 100) * (fpy / 100) * 100);
+
+        if (isZoomOpen) {
+            document.getElementById('zoom-header').outerHTML = `<div id="zoom-header">${generateDetailHTML(line, tgt, act, pct, pctW, barcol, oee, fpy, downPct, true)}</div>`;
+        } else {
+            document.getElementById('right-detail').innerHTML = generateDetailHTML(line, tgt, act, pct, pctW, barcol, oee, fpy, downPct, false);
+        }
+        
+        setTimeout(() => { renderDetailCharts(line, oee, fpy, isZoomOpen); }, 50);
+    } catch(e) {}
+}
+
+function switchDetailTab(tab) {
+    curTab = tab;
+    showDetail(selectedUid);
+}
+
+function renderDetailCharts(line, currentOee, currentFpy, isZoom) {
+    try {
+        let labels = [];
+        if(curTab==='today') labels = ['08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','00:00','02:00','04:00','06:00'];
+        else if(curTab==='7days') labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        else if(curTab==='30days') labels = Array.from({length:15},(_,i)=>(i*2+1)+'');
+        else labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        
+        const len = labels.length;
+        let pfx = isZoom ? 'z' : '';
+        [`${pfx}dc1`,`${pfx}dc2`,`${pfx}dc3`].forEach(id=>{ const c=Chart.getChart(id); if(c)c.destroy(); });
+
+        let tgtAvg = line.target / (curTab==='today'?12:1);
+        let actAvg = line.actual / (curTab==='today'?12:1);
+
+        new Chart(document.getElementById(`${pfx}dc1`),{type:'bar', data:{labels,datasets:[ {label:'Actual',data:Array.from({length:len},()=>Math.round(actAvg*.7+Math.random()*actAvg*.6)),backgroundColor:'#10b981',borderRadius:3}, {label:'Target',data:Array(len).fill(Math.round(tgtAvg)),type:'line',borderColor:'#ef4444',borderDash:[4,4],borderWidth:2,pointRadius:0} ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}});
+        new Chart(document.getElementById(`${pfx}dc2`),{type:'line', data:{labels,datasets:[ {label:'OEE %',data:Array.from({length:len},()=>Math.min(100, Math.max(0, currentOee + (Math.random()*16-8)))),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',tension:.4,pointRadius:2,borderWidth:2,fill:true} ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{min:0, max:100}}}});
+        new Chart(document.getElementById(`${pfx}dc3`),{type:'line', data:{labels,datasets:[ {label:'FPY %',data:Array.from({length:len},()=>Math.min(100, Math.max(0, currentFpy + (Math.random()*8-4)))),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',tension:.2,pointRadius:3,borderWidth:2,fill:true, stepped: true} ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{min:0, max:100}}}});
+    } catch(e) {}
+}
+
+// ============================================================
+// 5. MIDDLE CHARTS (YTD & PARETO)
+// ============================================================
+let ytdChartInst = null; let paretoChartInst = null;
+function renderMiddleCharts() {
+    try {
+        const ctxYtd = document.getElementById('ytdChart');
+        if(ctxYtd) {
+            const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const target = [250000, 240000, 260000, 250000, 270000, 250000, 260000, 260000, 250000, 270000, 260000, 250000];
+            const totAct = PERIOD_DATA.day.reduce((a,l)=>a+l.actual,0) * 22; 
+            const actual = [245000, 235000, totAct, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            if(ytdChartInst) ytdChartInst.destroy();
+            ytdChartInst = new Chart(ctxYtd, { type: 'bar', data: { labels: labels, datasets: [ { label: 'Actual Output', data: actual, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'Target Output', data: target, backgroundColor: '#cbd5e1', borderRadius: 4 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {family: 'Nunito', size: 10, weight: 'bold'} } } }, scales: { x: { grid: { display: false }, ticks: { font: { family: 'Nunito', size: 10, weight: 'bold' } } }, y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'Nunito', size: 10, weight: 'bold' } } } } } });
+        }
+
+        const ctxPareto = document.getElementById('paretoChart');
+        if(ctxPareto) {
+            const defectData = [ { reason: 'Cosmetic', count: 145 }, { reason: 'Dimension', count: 82 }, { reason: 'Assembly', count: 46 }, { reason: 'Missing', count: 18 }, { reason: 'Other', count: 9 } ];
+            defectData.sort((a,b) => b.count - a.count);
+            const total = defectData.reduce((sum, item) => sum + item.count, 0);
+            let cumSum = 0; const labelsP = []; const counts = []; const cumulative = [];
+            defectData.forEach(item => { labelsP.push(item.reason); counts.push(item.count); cumSum += item.count; cumulative.push((cumSum / total * 100).toFixed(1)); });
+
+            if(paretoChartInst) paretoChartInst.destroy();
+            paretoChartInst = new Chart(ctxPareto, { type: 'bar', data: { labels: labelsP, datasets: [ { label: 'Cum %', data: cumulative, type: 'line', borderColor: '#f59e0b', backgroundColor: '#f59e0b', yAxisID: 'y1', borderWidth: 2, pointRadius: 2 }, { label: 'Count', data: counts, backgroundColor: '#ef4444', borderRadius: 4, yAxisID: 'y' } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {family: 'Nunito', size: 10, weight: 'bold'} } } }, scales: { x: { grid: { display: false }, ticks: { font: { family: 'Nunito', size: 9, weight: 'bold' } } }, y: { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { family: 'Nunito', size: 9, weight: 'bold' } } }, y1: { type: 'linear', display: true, position: 'right', grid: { display: false }, min: 0, max: 100, ticks: { font: { family: 'Nunito', size: 9, weight: 'bold' }, callback: function(val) { return val + '%' } } } } } });
+        }
+    } catch(e) {}
+}
+
 function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
 
 window.onload = function() {
-    renderKPI();
-    sortData(); 
-    renderYtdChart(); 
+    filterAndSortData(); 
+    renderMiddleCharts(); 
     clock(); setInterval(clock,1000);
-    setInterval(()=>{ renderKPI(); sortData(); renderYtdChart(); }, 30000);
+    setInterval(()=>{ filterAndSortData(); renderMiddleCharts(); }, 30000);
 };
 </script>
 </body>
