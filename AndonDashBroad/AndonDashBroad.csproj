@@ -23,4 +23,9 @@
     <ProjectReference Include="..\ShareLib\SharedLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+    <Folder Include="wwwroot\lib\chart.js\" />
+  </ItemGroup>
+
 </Project>
