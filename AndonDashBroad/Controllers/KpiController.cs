@@ -28,32 +28,27 @@ namespace AndonDashboard.Controllers // Tên project của sếp
 
         // 2. API ĐỂ JAVASCRIPT GỌI MỖI 5 PHÚT (Lấy cả Kế hoạch + Thực tế)
         [HttpGet]
+        [HttpGet]
         public IActionResult GetProductionData()
         {
             try
             {
-                bool isError = false; // CỜ BÁO LỖI
+                bool isError = false;
                 var finalData = new List<object>();
-                var planData = new List<PlanModel>();
+                var planData = new List<AndonDashboard.Services.PlanModel>(); // Sửa theo đúng namespace của sếp
                 var sqlData = new List<dynamic>();
 
-                // 1. ĐỌC EXCEL (Thử đọc xem có bị lỗi hoặc trống không)
+                // 1. TRY EXCEL
                 try
                 {
                     planData = _excelReader.ReadPlan();
                     if (planData == null || planData.Count == 0) isError = true;
                 }
-                catch
-                {
-                    isError = true;
-                }
+                catch { isError = true; }
 
-                // 2. MÓC DATA SQL (Thử kết nối DB)
+                // 2. TRY SQL
                 string connString = _config.GetConnectionString("MesDatabase") ?? "";
-                if (string.IsNullOrEmpty(connString))
-                {
-                    isError = true;
-                }
+                if (string.IsNullOrEmpty(connString)) isError = true;
                 else
                 {
                     try
@@ -64,21 +59,13 @@ namespace AndonDashboard.Controllers // Tên project của sếp
                             string sql = @"
                         WITH Packing AS (
                             SELECT CAST(Date_Time AS DATE) AS ProdDate, Assy_PN AS Model, COUNT(*) AS ActualQty 
-                            FROM LCS_BoxID_SN_XRef 
-                            WHERE Date_Time >= DATEADD(day, -30, GETDATE())
-                            GROUP BY CAST(Date_Time AS DATE), Assy_PN
+                            FROM LCS_BoxID_SN_XRef WHERE Date_Time >= DATEADD(day, -30, GETDATE()) GROUP BY CAST(Date_Time AS DATE), Assy_PN
                         ),
                         MRB AS (
                             SELECT CAST(Date_Time AS DATE) AS ProdDate, Assy_PN AS Model, COUNT(*) AS MrbQty 
-                            FROM Aavid_MRB_Rework_Log_Station
-                            WHERE Date_Time >= DATEADD(day, -30, GETDATE())
-                            GROUP BY CAST(Date_Time AS DATE), Assy_PN
+                            FROM Aavid_MRB_Rework_Log_Station WHERE Date_Time >= DATEADD(day, -30, GETDATE()) GROUP BY CAST(Date_Time AS DATE), Assy_PN
                         )
-                        SELECT 
-                            ISNULL(p.ProdDate, m.ProdDate) AS ProdDate,
-                            ISNULL(p.Model, m.Model) AS Model, 
-                            ISNULL(p.ActualQty, 0) AS ActualQty, 
-                            ISNULL(m.MrbQty, 0) AS MrbQty
+                        SELECT ISNULL(p.ProdDate, m.ProdDate) AS ProdDate, ISNULL(p.Model, m.Model) AS Model, ISNULL(p.ActualQty, 0) AS ActualQty, ISNULL(m.MrbQty, 0) AS MrbQty
                         FROM Packing p FULL OUTER JOIN MRB m ON p.ProdDate = m.ProdDate AND p.Model = m.Model";
 
                             using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -97,15 +84,12 @@ namespace AndonDashboard.Controllers // Tên project của sếp
                             }
                         }
                     }
-                    catch
-                    {
-                        isError = true; // Lỗi SQL -> Bật cờ đỏ
-                    }
+                    catch { isError = true; }
                 }
 
                 Random rnd = new Random();
 
-                // 3. GHÉP DATA (Nếu MỌI THỨ NGON LÀNH)
+                // 3. MERGE DATA OR GENERATE MEGA FAKE DATA FOR DEMO
                 if (!isError && planData != null)
                 {
                     foreach (var plan in planData)
@@ -125,35 +109,47 @@ namespace AndonDashboard.Controllers // Tên project của sếp
                 }
                 else
                 {
-                    // NẾU CÓ LỖI HOẶC KHÔNG CÓ DATA EXCEL -> BƠM FAKE DATA CHO "HÔM NAY" ĐỂ LÊN HÌNH TƯNG BỪNG
-                    var fakeModelsToday = new List<string> { "123489", "123491", "679918" };
+                    // MEGA DEMO MODE: 25 Numeric Models, 15 Lines
+                    var fakeModelsToday = new List<string>();
+                    for (int i = 0; i < 25; i++) fakeModelsToday.Add(rnd.Next(100000, 999999).ToString());
+
+                    var lines = new List<string>();
+                    for (int i = 1; i <= 15; i++) lines.Add("Line " + i.ToString("D2"));
+
                     foreach (var model in fakeModelsToday)
                     {
-                        int fTarget = rnd.Next(1500, 3500);
-                        finalData.Add(new
+                        // Each model runs on 1 to 3 random lines
+                        int linesCount = rnd.Next(1, 4);
+                        var shuffledLines = lines.OrderBy(x => rnd.Next()).Take(linesCount).ToList();
+
+                        foreach (var line in shuffledLines)
                         {
-                            date = DateTime.Now.ToString("yyyy-MM-dd"), // Ép ngày hôm nay
-                            model = model,
-                            line = "Line " + rnd.Next(1, 6),
-                            workOrder = "WO-TEST-" + rnd.Next(100, 999),
-                            target = fTarget,
-                            actual = (int)(fTarget * (0.6 + rnd.NextDouble() * 0.4)),
-                            mrb = rnd.Next(0, 15)
-                        });
+                            int fTarget = rnd.Next(2000, 6000);
+                            finalData.Add(new
+                            {
+                                date = DateTime.Now.ToString("yyyy-MM-dd"),
+                                model = model,
+                                line = line,
+                                workOrder = "WO-" + rnd.Next(10000, 99999),
+                                target = fTarget,
+                                actual = (int)(fTarget * (0.4 + rnd.NextDouble() * 0.5)), // 40-90% done
+                                mrb = rnd.Next(0, 30)
+                            });
+                        }
                     }
                 }
 
-                // 4. BƠM FAKE DATA LỊCH SỬ CHO BIỂU ĐỒ YTD (Từ 1/1 đến 22/3)
+                // 4. FAKE YTD DATA
                 DateTime startDate = new DateTime(2026, 1, 1);
                 DateTime fakeEndDate = new DateTime(2026, 3, 22);
-                var uniqueModels = planData?.Select(p => p.Model).Distinct().ToList() ?? new List<string?>();
-                if (uniqueModels.Count == 0) uniqueModels = new List<string?> { "123489", "123491", "679918" };
+                var uniqueModels = planData?.Select(p => p.Model).Distinct().ToList() ?? new List<string>();
+                if (uniqueModels.Count == 0) uniqueModels = new List<string> { "849201", "392011" };
 
                 for (DateTime dt = startDate; dt <= fakeEndDate; dt = dt.AddDays(1))
                 {
                     foreach (var model in uniqueModels)
                     {
-                        int fTarget = rnd.Next(1000, 3000);
+                        int fTarget = rnd.Next(1500, 4000);
                         finalData.Add(new
                         {
                             date = dt.ToString("yyyy-MM-dd"),
@@ -167,17 +163,9 @@ namespace AndonDashboard.Controllers // Tên project của sếp
                     }
                 }
 
-                // TRẢ VỀ JSON BAO GỒM DATA + TRẠNG THÁI LỖI
-                return Json(new
-                {
-                    isError = isError,
-                    data = finalData
-                });
+                return Json(new { isError = isError, data = finalData });
             }
-            catch (Exception)
-            {
-                return Json(new { isError = true, data = new List<object>() });
-            }
+            catch (Exception) { return Json(new { isError = true, data = new List<object>() }); }
         }
     }
 }

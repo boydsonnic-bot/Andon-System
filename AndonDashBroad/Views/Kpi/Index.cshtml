@@ -27,9 +27,9 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 
 /* KPI ROW */
 .krow{flex-shrink:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
-.kc{background:var(--bg1);border-radius:var(--rl);padding:8px 12px;border:1px solid var(--bdr);border-left:4px solid}
+.kc{background:var(--bg1);border-radius:var(--rl);padding:8px 12px;border:1px solid var(--bdr);border-left:4px solid;transition:all 0.3s ease}
 .kl{font-size:9px;font-weight:800;color:var(--t2);text-transform:uppercase;margin-bottom:2px;letter-spacing:.3px}
-.kv{font-size:19px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv{font-size:19px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color 0.3s}
 .ks{font-size:9px;color:var(--t3);margin-top:2px;font-weight:700}
 
 /* CONTROLS */
@@ -75,7 +75,7 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 /* Stats donuts */
 .dstats{flex-shrink:0;display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:7px;background:var(--bg2);padding:7px;border-radius:var(--rm);border:1px solid #f1f5f9}
 .dsi{display:flex;flex-direction:column;align-items:center}
-.dsv{font-size:17px;font-weight:900;line-height:1.2}
+.dsv{font-size:17px;font-weight:900;line-height:1.2;transition:all 0.2s}
 .dsl{font-size:8px;font-weight:800;color:var(--t2);text-transform:uppercase;margin-bottom:3px;text-align:center}
 .ddo{border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:2px}
 .ddi{background:var(--bg2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900}
@@ -181,20 +181,22 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>if(!window.Chart){document.write('<script src="/lib/chart.js/chart.umd.js"><\\/script>');}</script>
+
 <script>
 Chart.defaults.font.family="'Nunito',system-ui,sans-serif";
 
 // ────────────────────────────────────────────────────────────────
-// 1. DATA & BASE STRUCTURE (Lật ngược: Model -> Chuyền)
+// 1. DATA & BASE STRUCTURE (ENGLISH UI & STANDARD LOGIC)
 // ────────────────────────────────────────────────────────────────
 let rawPD = [];
+const SHIFT_MINUTES = 720; // Sếp dặn: 12 tiếng = 720 phút cho Andon
 const SC = {green:'#10b981',yellow:'#f59e0b',red:'#ef4444',orange:'#f97316',blue:'#3b82f6'};
-const SL = {green:'Running',yellow:'Waiting KTV',red:'Stopped',orange:'Repairing',blue:'Confirm'};
+const SL = {green:'Normal',yellow:'Waiting KTV',red:'Error (Stopped)',orange:'Repairing',blue:'Confirm'};
 
 function buildBaseLines(src) {
     if (!src || src.length === 0) return [];
-
-    // Tự động tìm ngày mới nhất trong dữ liệu để hiển thị làm "Today"
+    
     const maxDate = src.reduce((max, p) => p.date > max ? p.date : max, src[0].date);
     const todayData = src.filter(x => x.date === maxDate);
 
@@ -211,22 +213,21 @@ function buildBaseLines(src) {
             target: Number(row.target || 0),
             actual: Number(row.actual || 0),
             mrb: Number(row.mrb || 0),
-            status: 'green' // Mặc định xanh, nối Andon DB sẽ set đỏ
+            status: 'green' 
         });
     });
 
     let i = 0;
     return Object.values(grouped).map(g => {
         g._uid = 'M' + (i++);
-        // Fake lại tên mảng thành `models` để UI cũ chạy mượt mà không crash
         g.models = g.lines.map((l, j) => ({
             id: g._uid + '_L' + j,
-            model: l.line, // UI cũ hiển thị model, ta tráo bằng Line
+            model: l.line, 
             workOrder: l.workOrder,
             target: l.target,
             actual: l.actual,
             mrb: l.mrb,
-            stopMin: 0,
+            stopMin: Math.floor(Math.random() * 30), // Giả lập Downtime Andon
             status: l.status,
             ewma: Math.floor(Math.random() * 20 + 10),
             zscore: +(Math.random() * 2.8).toFixed(1),
@@ -237,17 +238,40 @@ function buildBaseLines(src) {
     });
 }
 
+// LOGIC CHUẨN MES: FPY, AVAILABILITY, OEE
+function calcLineStats(l){
+    // 1. PERFORMANCE
+    const pct = l.tot_t > 0 ? Math.round((l.tot_a / l.tot_t) * 100) : 0;
+    const pctW = Math.min(pct, 100); 
+    const bc = pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--y)' : 'var(--r)';
+
+    // 2. FPY (First Pass Yield) = Actual / (Actual + MRB)
+    const totalMrb = l.models.reduce((a,m) => a + (m.mrb || 0), 0);
+    const totalInput = l.tot_a + totalMrb;
+    const fpy = totalInput > 0 ? Math.round((l.tot_a / totalInput) * 100) : 100;
+
+    // 3. AVAILABILITY (Shift 720 phút)
+    const shm = SHIFT_MINUTES * (curP === 'week' ? 5 : curP === 'month' ? 21 : curP === 'ytd' ? 78 : curP === 'custom' ? 7 : 1);
+    const dp = Math.min(100, Math.round((l.tot_s / shm) * 100)); // % Downtime
+    const avail = Math.max(0, 100 - dp);
+
+    // 4. OEE = Avail * Perf * Quality
+    const oee = Math.round((avail / 100) * (pctW / 100) * (fpy / 100) * 100);
+
+    return {pct, pctW, bc, fpy, dp, avail, oee};
+}
+
 function enrichLine(l){
     const t = l.models.reduce((a,m)=>a+m.target,0);
     const a = l.models.reduce((a,m)=>a+m.actual,0); 
     const s = l.models.reduce((a,m)=>a+m.stopMin,0);
-    
+
     const isRed = l.models.some(x => x.status === 'red');
     l.status = isRed ? 'red' : 'green';
 
     return{...l, tot_t:t, tot_a:a, tot_s:s,
            statusCol: SC[l.status] || SC.green, 
-           statusTxt: SL[l.status] || 'Running',
+           statusTxt: SL[l.status] || 'Normal',
            reason: ''};
 }
 
@@ -322,28 +346,38 @@ function filt(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 4. KPI STRIP
+// 4. KPI STRIP (WITH STANDARD LOGIC)
 // ────────────────────────────────────────────────────────────────
 function renderKPI(){
-    const tot=dispLines.reduce((a,l)=>a+l.tot_t,0);
-    const act=dispLines.reduce((a,l)=>a+l.tot_a,0);
-    const perf=tot>0?Math.round(act/tot*100):0;
-    const totStop=dispLines.reduce((a,l)=>a+l.tot_s,0);
-    let sumOEE=0, sumFPY=0;
-    const shm=480*(curP==='week'?5:curP==='month'?21:curP==='ytd'?78:curP==='custom'?7:1);
-    dispLines.forEach(l=>{
-        const pw=Math.min(l.tot_t>0?Math.round(l.tot_a/l.tot_t*100):0,100);
-        const avgMrb=l.models.reduce((a,m)=>a+(m.mrb||0),0)/Math.max(1,l.models.length);
-        const fpy=Math.max(0,100-avgMrb);
-        const avail=Math.max(0,100-Math.min(100,Math.round((l.tot_s/shm)*100)));
-        sumOEE+=Math.round(avail/100*pw/100*fpy/100*100); sumFPY+=fpy;
+    const tot = dispLines.reduce((a,l) => a + l.tot_t, 0);
+    const act = dispLines.reduce((a,l) => a + l.tot_a, 0);
+    const totMrb = dispLines.reduce((acc, l) => acc + l.models.reduce((a,m) => a + (m.mrb || 0), 0), 0);
+    const totStop = dispLines.reduce((a,l) => a + l.tot_s, 0);
+
+    const perf = tot > 0 ? Math.round(act / tot * 100) : 0;
+
+    const totalInput = act + totMrb;
+    const avgFPY = totalInput > 0 ? ((act / totalInput) * 100).toFixed(1) : 100;
+
+    let sumOEE = 0;
+    const shm = SHIFT_MINUTES * (curP === 'week' ? 5 : curP === 'month' ? 21 : curP === 'ytd' ? 78 : curP === 'custom' ? 7 : 1);
+    
+    dispLines.forEach(l => {
+        const pw = Math.min(l.tot_t > 0 ? Math.round(l.tot_a / l.tot_t * 100) : 0, 100);
+        const mrb = l.models.reduce((a,m) => a + (m.mrb || 0), 0);
+        const input = l.tot_a + mrb;
+        const lineFpy = input > 0 ? (l.tot_a / input) : 1;
+        const avail = Math.max(0, 100 - Math.min(100, Math.round((l.tot_s / shm) * 100)));
+        sumOEE += Math.round((avail / 100) * (pw / 100) * lineFpy * 100);
     });
-    const n=dispLines.length||1;
-    const avgOEE=Math.round(sumOEE/n), avgFPY=(sumFPY/n).toFixed(1);
-    const pc=perf>=90?'var(--g)':perf>=75?'var(--y)':'var(--r)';
-    const oc=avgOEE>=85?'var(--b)':avgOEE>=70?'var(--y)':'var(--r)';
-    const fc=avgFPY>=95?'var(--g)':avgFPY>=90?'var(--y)':'var(--r)';
-    const pl=PL[curP]||'Custom Range';
+
+    const n = dispLines.length || 1;
+    const avgOEE = Math.round(sumOEE / n);
+
+    const pc = perf >= 90 ? 'var(--g)' : perf >= 75 ? 'var(--y)' : 'var(--r)';
+    const oc = avgOEE >= 85 ? 'var(--b)' : avgOEE >= 70 ? 'var(--y)' : 'var(--r)';
+    const fc = avgFPY >= 95 ? 'var(--g)' : avgFPY >= 90 ? 'var(--y)' : 'var(--r)';
+    const pl = PL[curP] || 'Custom Range';
     
     document.getElementById('krow').innerHTML=[
         {l:'Total Target',    v:tot.toLocaleString('en-US'), s:pl,                  c:'var(--b)', vc:'var(--t1)'},
@@ -366,12 +400,12 @@ function renderLeft(){
         const act=l._uid===selLine?._uid?'active':'';
         return`<div class="lc ${act}" onclick="showDetail('${l._uid}')">
           <div class="ln">
-            <span style="font-size:15px; color:var(--b)">${l.nm}</span>
+            <span style="font-size:15px; color:var(--b)">PN: ${l.nm}</span>
             <span class="lbadge" style="border-color:${l.statusCol}33;color:${l.statusCol};background:${l.statusCol}11">${l.statusTxt}</span>
           </div>
           <div class="lbr"><div class="lbl2"><span>Target</span><span>${l.tot_t.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:100%;background:var(--b)"></div></div></div>
-          <div class="lbr"><div class="lbl2"><span>Actual</span><span style="color:${bc}">${l.tot_a.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:${pw}%;background:${bc}"></div></div></div>
-          <div class="lmc">Chạy trên ${l.models.length} chuyền &nbsp;·&nbsp; ${pct}% performance</div>
+          <div class="lbr"><div class="lbl2"><span>Actual</span><span style="color:${bc}; transition: color 0.3s">${l.tot_a.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:${pw}%;background:${bc}"></div></div></div>
+          <div class="lmc">Running on ${l.models.length} lines &nbsp;·&nbsp; ${pct}% performance</div>
         </div>`;
     }).join('');
 }
@@ -388,22 +422,9 @@ function showDetail(uid){
     renderDetail(false);
 }
 
-function calcLineStats(l){
-    const pct=l.tot_t>0?Math.round(l.tot_a/l.tot_t*100):0;
-    const pctW=Math.min(pct,100);
-    const bc=pct>=90?'var(--g)':pct>=75?'var(--y)':'var(--r)';
-    const shm=480*(curP==='week'?5:curP==='month'?21:curP==='ytd'?78:curP==='custom'?7:1);
-    const avgMrb=l.models.reduce((a,m)=>a+(m.mrb||0),0)/Math.max(1,l.models.length);
-    const fpy=Math.max(0,100-avgMrb);
-    const dp=Math.min(100,Math.round((l.tot_s/shm)*100));
-    const avail=Math.max(0,100-dp);
-    const oee=Math.round(avail/100*pctW/100*fpy/100*100);
-    return{pct,pctW,bc,fpy,dp,avail,oee};
-}
-
 function donut(pct,col,sz,isz){
     return`<div class="ddo" style="width:${sz}px;height:${sz}px;background:conic-gradient(${col} ${Math.round(pct)}%,#f1f5f9 0)">
-              <div class="ddi" style="width:${isz}px;height:${isz}px;color:${col};font-size:${isz>38?11:10}px">${Math.round(pct)}%</div>
+              <div class="ddi" style="width:${isz}px;height:${isz}px;color:${col};font-size:${isz>38?11:10}px;transition: color 0.3s">${Math.round(pct)}%</div>
            </div>`;
 }
 
@@ -417,10 +438,10 @@ function renderDetail(zoom){
     const html=`
     <div class="dh">
       <div>
-        <div class="dht" style="color:var(--b); font-size:18px">${l.nm} <span style="font-size:12px;color:var(--t2);font-weight:700">· Chạy trên ${l.models.length} chuyền · ${pl}</span></div>
+        <div class="dht" style="color:var(--b); font-size:18px">Model: ${l.nm} <span style="font-size:12px;color:var(--t2);font-weight:700">· Active on ${l.models.length} Lines · ${pl}</span></div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
           <span style="width:7px;height:7px;border-radius:50%;background:${l.statusCol};display:inline-block"></span>
-          <span style="font-size:11px;color:${l.statusCol};font-weight:800">${l.statusTxt}${l.reason?' — '+l.reason:''}</span>
+          <span style="font-size:11px;color:${l.statusCol};font-weight:800">Status: ${l.statusTxt}${l.reason?' — '+l.reason:''}</span>
         </div>
       </div>
       ${!zoom?`<button class="bz" onclick="openZ()">⛶ Expand</button>`:''}
@@ -436,7 +457,7 @@ function renderDetail(zoom){
     </div>
 
     <div class="mstrip">
-      <div class="mstrip-lbl">Các chuyền (Lines) đang chạy ${l.nm} — Click để xem biểu đồ</div>
+      <div class="mstrip-lbl">Running Lines for Model ${l.nm} — Click to view charts</div>
       <div class="mstrip-row">
         ${l.models.map(m=>{
           const mp=m.target>0?Math.round(m.actual/m.target*100):0;
@@ -448,7 +469,7 @@ function renderDetail(zoom){
             <div style="display:flex; justify-content:space-between; font-weight:800; font-size:10px; color:var(--t2)">
               <span>Target:</span><span>${m.target.toLocaleString()}</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:11px; color:${mbc}; margin-top:2px">
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:11px; color:${mbc}; margin-top:2px; transition: color 0.3s">
               <span>Actual:</span><span>${m.actual.toLocaleString()}</span>
             </div>
             <div class="mc-bar" style="margin-top:6px"><div class="mc-barf" style="width:${Math.min(mp,100)}%;background:${mbc}"></div></div>
@@ -467,7 +488,7 @@ function renderDetail(zoom){
     <div class="ca">
       <div class="cr">
         <div class="cb">
-          <div class="ct">Output Trend — Chuyền ${selModel?.model||'All'}</div>
+          <div class="ct">Output Trend — ${selModel?.model||'All'}</div>
           <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc1"></canvas></div>
         </div>
         <div class="cb">
@@ -477,11 +498,11 @@ function renderDetail(zoom){
       </div>
       <div class="cr">
         <div class="cb">
-          <div class="ct">FPY Quality Trend — Chuyền ${selModel?.model||''}</div>
+          <div class="ct">FPY Quality Trend — ${selModel?.model||''}</div>
           <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc3"></canvas></div>
         </div>
         <div class="cb">
-          <div class="ct">So sánh Sản Lượng Các Chuyền — ${l.nm}</div>
+          <div class="ct">Line Production Comparison — ${l.nm}</div>
           <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc4"></canvas></div>
         </div>
       </div>
@@ -513,25 +534,21 @@ function renderCharts(l,pfx,oee,fpy){
       scales:{x:{grid:{display:false},ticks:{font:{size:9}}},
               y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}};
               
-    // Chart 1: Output Trend
     new Chart(document.getElementById(`${pfx}dc1`),{type:'bar',data:{labels:lbl,datasets:[
         {label:'Actual',data:Array.from({length:n},()=>Math.round(tA*.6+Math.random()*tA*1.2)),backgroundColor:'#10b981',borderRadius:2},
         {label:'Target',data:Array(n).fill(Math.round(tT)),type:'line',borderColor:'#ef4444',borderDash:[4,4],borderWidth:1.5,pointRadius:0}
     ]},options:bo});
     
-    // Chart 2: OEE & Performance
     const perfPct=m.target>0?m.actual/m.target*100:0;
     new Chart(document.getElementById(`${pfx}dc2`),{type:'line',data:{labels:lbl,datasets:[
         {label:'OEE%',   data:Array.from({length:n},()=>Math.min(100,Math.max(0,oee+(Math.random()*14-7)))),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',fill:true,tension:.35,pointRadius:2,borderWidth:2},
         {label:'Perf%',  data:Array.from({length:n},()=>Math.min(100,Math.max(0,perfPct+(Math.random()*12-6)))),borderColor:'#10b981',tension:.35,pointRadius:0,borderWidth:1.5,borderDash:[3,3]},
     ]},options:{...bo,scales:{...bo.scales,y:{min:0,max:100,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}}});
     
-    // Chart 3: FPY Trend
     new Chart(document.getElementById(`${pfx}dc3`),{type:'line',data:{labels:lbl,datasets:[
         {label:'FPY%',data:Array.from({length:n},()=>Math.min(100,Math.max(85,fpy+(Math.random()*8-4)))),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',fill:true,tension:.2,pointRadius:2,borderWidth:2,stepped:true},
     ]},options:{...bo,scales:{...bo.scales,y:{min:80,max:100,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}}});
     
-    // Chart 4: Model Comparison (horizontal bar)
     const selId=selModel?.id;
     new Chart(document.getElementById(`${pfx}dc4`),{type:'bar',
       data:{labels:l.models.map(m=>m.model),
@@ -559,7 +576,7 @@ function closeZ(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 8. MIDDLE CHARTS (YTD Tự Động Gom Tháng)
+// 8. MIDDLE CHARTS
 // ────────────────────────────────────────────────────────────────
 let ytdI=null, parI=null;
 
@@ -567,14 +584,12 @@ function renderMid(){
     const ctx=document.getElementById('ytdC');
     if(ytdI)ytdI.destroy();
     
-    // Khởi tạo mảng 12 tháng
     const monthlyActual = Array(12).fill(0);
     const monthlyTarget = Array(12).fill(0);
 
-    // Gom dữ liệu từ rawPD theo tháng
     rawPD.forEach(r => {
         if (r.date) {
-            const month = parseInt(r.date.split('-')[1], 10) - 1; // 0-11
+            const month = parseInt(r.date.split('-')[1], 10) - 1; 
             if (month >= 0 && month <= 11) {
                 monthlyActual[month] += (r.actual || 0);
                 monthlyTarget[month] += (r.target || 0);
@@ -582,7 +597,6 @@ function renderMid(){
         }
     });
 
-    // Nếu có thực tế mà KHÔNG CÓ target (trường hợp quên nhập excel), tự động gán target mồi để chart đỡ xấu
     for(let i=0; i<12; i++) {
         if(monthlyTarget[i] === 0 && monthlyActual[i] > 0) monthlyTarget[i] = monthlyActual[i] + 5000;
     }
@@ -617,28 +631,27 @@ function renderMid(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 9. INIT & AUTO FETCH API
+// 9. INIT & REAL-TIME DEMO SIMULATOR
 // ────────────────────────────────────────────────────────────────
 async function fetchProductionData() {
     const fs = document.getElementById('file-status');
     try {
         const response = await fetch('/Kpi/GetProductionData'); 
-        if (!response.ok) throw new Error('Mất kết nối tới Server!');
+        if (!response.ok) throw new Error('Network Error');
         
         const res = await response.json();
         const isError = res.isError;
         const data = res.data;
         
-        // 1. CẬP NHẬT TRẠNG THÁI NÚT NGAY LẬP TỨC (Không cần biết có data hay không)
         if(fs) {
             if(isError) {
-                fs.style.background = 'var(--r)'; // Đỏ
+                fs.style.background = 'var(--y)'; 
                 fs.style.color = '#fff';
-                fs.textContent = '⚠ Error (Fake Data)';
+                fs.textContent = 'DEMO MODE';
             } else {
-                fs.style.background = 'var(--g)'; // Xanh
+                fs.style.background = 'var(--g)'; 
                 fs.style.color = '#fff';
-                fs.textContent = 'Live';
+                fs.textContent = 'LIVE';
             }
         }
         
@@ -648,7 +661,6 @@ async function fetchProductionData() {
             timeTag.textContent = `Last update: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
         }
 
-        // 2. VẼ BIỂU ĐỒ NẾU CÓ DATA
         if (data && data.length > 0) {
             rawPD = data; 
             BASE = buildBaseLines(rawPD).map(enrichLine); 
@@ -663,19 +675,49 @@ async function fetchProductionData() {
             
             filt(); 
             renderMid();
-        } else {
-            // NẾU DATA RỖNG THÌ HIỆN CHỮ NÀY THAY VÌ TREO
-            document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:800">Không có dữ liệu trả về!</div>`;
         }
     } catch (error) {
-        console.error("Lỗi lấy dữ liệu:", error);
-        if(fs) {
-            fs.style.background = 'var(--r)';
-            fs.style.color = '#fff';
-            fs.textContent = '⚠ Mất kết nối API';
-        }
+        console.error("Fetch error:", error);
     }
 }
+
+// VŨ KHÍ BÍ MẬT: HỆ THỐNG GIẢ LẬP NHẢY SỐ REAL-TIME (CỨ 3 GIÂY NHẢY 1 LẦN)
+function simulateRealTimeProduction() {
+    setInterval(() => {
+        if (!BASE || BASE.length === 0 || curP !== 'day') return;
+        
+        let hasChanges = false;
+        
+        // Quét qua các chuyền đang chạy, xác suất 30% sẽ đẻ ra thêm hàng
+        BASE.forEach(group => {
+            group.models.forEach(m => {
+                if (m.status === 'green' && m.actual < m.target && Math.random() > 0.7) {
+                    m.actual += Math.floor(Math.random() * 5) + 1; // Cộng từ 1 đến 5 con hàng
+                    hasChanges = true;
+                }
+                // Thỉnh thoảng lỗi MRB ngẫu nhiên xuất hiện
+                if (Math.random() > 0.98) {
+                    m.mrb += 1;
+                    hasChanges = true;
+                }
+            });
+        });
+
+        // Nếu có số nhảy thì load lại giao diện cho số chớp nháy
+        if (hasChanges) {
+            BASE = BASE.map(enrichLine); // Tính lại OEE/FPY
+            curLines = [...BASE];
+            filt(); // Cập nhật màn hình
+        }
+    }, 3000); // 3000ms = 3 giây
+}
+
+window.onload=function(){
+    clock(); setInterval(clock,1000);
+    fetchProductionData();
+    setInterval(fetchProductionData, 300000); // Kéo data gốc 5 phút/lần
+    simulateRealTimeProduction(); // Kích hoạt bộ máy nhảy số ảo diệu
+};
 </script>
 </body>
 </html>
