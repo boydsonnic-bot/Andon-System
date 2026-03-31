@@ -6,11 +6,14 @@ using System.IO;
 
 namespace AndonDashboard.Services // Đổi tên namespace cho khớp project của sếp
 {
+    // 1. Thêm WorkOrder và ProdDate vào class
     public class PlanModel
     {
-        public string ? Factory { get; set; }
+        public string? Factory { get; set; }
         public string? Line { get; set; }
         public string? Model { get; set; }
+        public string? WorkOrder { get; set; }  // Mới thêm
+        public DateTime ProdDate { get; set; }  // Mới thêm
         public int Target { get; set; }
     }
 
@@ -20,7 +23,8 @@ namespace AndonDashboard.Services // Đổi tên namespace cho khớp project c�
         {
             var planList = new List<PlanModel>();
             // Trỏ đường dẫn tới file Excel. Có thể đổi thành đường dẫn Ổ chung mạng LAN sau
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "production_plan.xlsx");
+            // Sếp nhớ có chữ @ ở đầu để C# hiểu đúng đường dẫn mạng/ổ đĩa
+            string filePath = @"Z:\Share\12. KPI\Plan\production_plan.xlsx";
 
             if (!File.Exists(filePath)) return planList;
 
@@ -45,7 +49,12 @@ namespace AndonDashboard.Services // Đổi tên namespace cho khớp project c�
                         Factory = row.Cell(1).GetString(),
                         Line = row.Cell(2).GetString(),
                         Model = row.Cell(3).GetString(),
-                        Target = row.Cell(4).GetValue<int>()
+                        WorkOrder = row.Cell(4).GetString(), // Đọc cột 4
+
+                        // Đọc cột 5 (Ngày), nếu trống thì lấy ngày hôm nay
+                        ProdDate = row.Cell(5).TryGetValue<DateTime>(out var d) ? d.Date : DateTime.Today,
+
+                        Target = row.Cell(7).GetValue<int>() // Cột 7 là Target
                     });
                 }
             }

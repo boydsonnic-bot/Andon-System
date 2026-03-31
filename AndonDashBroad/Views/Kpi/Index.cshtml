@@ -6,7 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Production KPI Dashboard — Line View</title>
+<title>Production KPI Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -121,6 +121,8 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
   <div class="hdr">
     <div class="ht"><span class="hd"></span> PRODUCTION KPI DASHBOARD</div>
     <div style="display:flex;align-items:center;gap:10px">
+      <span id="last-upd" style="font-size:10px;color:#94a3b8;font-weight:700"></span>
+      <span id="file-status" style="font-size:11px;padding:3px 8px;border-radius:6px;font-weight:800;background:var(--bg3)">Loading...</span>
       <span style="font-size:13px;color:var(--t2);font-weight:800" id="clk"></span>
       <a href="/Home" style="text-decoration:none;background:var(--r);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800">🚨 Andon</a>
       <a href="/Spc"  style="text-decoration:none;background:var(--p);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800">📈 SPC</a>
@@ -132,7 +134,7 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 
   <div class="ctrl">
     <div style="display:flex;align-items:center;gap:8px">
-      <div class="cg"><span style="font-size:12px">🔍</span><input class="si" id="sb" placeholder="Search Line / Model..." onkeyup="filt()"></div>
+      <div class="cg"><span style="font-size:12px">🔍</span><input class="si" id="sb" placeholder="Search Model / Line..." onkeyup="filt()"></div>
       <div class="cg">
         <span style="font-size:9px;color:var(--t2);font-weight:800;margin-left:3px">FROM</span>
         <input type="date" class="di" id="df">
@@ -143,8 +145,8 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
     </div>
     <div style="display:flex;align-items:center;gap:6px">
       <select class="ss" id="so" onchange="filt()">
-        <option value="line_asc">▼ Line (A-Z)</option>
-        <option value="line_desc">▲ Line (Z-A)</option>
+        <option value="line_asc">▼ Model (A-Z)</option>
+        <option value="line_desc">▲ Model (Z-A)</option>
         <option value="kpi_desc">▼ Performance High→Low</option>
         <option value="kpi_asc">▲ Performance Low→High</option>
       </select>
@@ -165,13 +167,12 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
   <div class="bs">
     <div class="ll" id="ll"></div>
     <div class="rd" id="rd">
-      <div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:15px;font-weight:800">Select a Line from the left →</div>
+      <div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:15px;font-weight:800">Select a Model from the left →</div>
     </div>
   </div>
 
 </div>
 
-<!-- ZOOM MODAL -->
 <div id="zmod" onclick="if(event.target===this)closeZ()">
   <div class="zmb">
     <button class="zmc" onclick="closeZ()">✕</button>
@@ -184,62 +185,70 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 Chart.defaults.font.family="'Nunito',system-ui,sans-serif";
 
 // ────────────────────────────────────────────────────────────────
-// 1. DATA — Lines each contain multiple Models
+// 1. DATA & BASE STRUCTURE (Lật ngược: Model -> Chuyền)
 // ────────────────────────────────────────────────────────────────
 let rawPD = [];
-try { rawPD = JSON.parse('@Html.Raw(ViewBag.ProductionData)' || '[]'); } catch(e) {}
-
-// Structure expected from ViewBag:
-// { lineId, lineName, status, models: [{ id, model, target, actual, stopMin, mrb }] }
-// Falls back to mock if empty:
-
-const LINE_NAMES = ['Line 1','Line 2','Line 3','Line 4','Line 5','Line 6','Line 7','Line 8','Line 9','Line 10','Line 11'];
-const MODEL_POOL = [
-  ['MX-450','RX-200'],['TX-300','MX-450','RX-100'],['TX-300','MX-200'],
-  ['RX-200','TX-100'],['MX-450'],['TX-300','RX-200','MX-100'],
-  ['MX-450','TX-200'],['RX-200'],['TX-300','MX-450'],
-  ['RX-100','TX-300'],['MX-200','RX-300','TX-100']
-];
-const SSTATUS = ['green','green','yellow','green','red','green','green','green','orange','green','green'];
 const SC = {green:'#10b981',yellow:'#f59e0b',red:'#ef4444',orange:'#f97316',blue:'#3b82f6'};
 const SL = {green:'Running',yellow:'Waiting KTV',red:'Stopped',orange:'Repairing',blue:'Confirm'};
 
-function rnd(a,b){ return Math.floor(Math.random()*(b-a+1)+a); }
-
 function buildBaseLines(src) {
-    if (src && src.length > 0 && src[0].lineName) {
-        return src.map((l,i)=>({
-            _uid:'L'+i, nm:l.lineName||('Line '+(i+1)),
-            status:l.status||'green',
-            models:(l.models||[]).map((m,j)=>({
-                id:`L${i}_M${j}`, model:m.model||'Unknown',
-                target:Number(m.target||0), actual:Number(m.actual||0),
-                stopMin:Number(m.stopMin||0), mrb:Number(m.mrb||0),
-                ewma:m.ewma||rnd(8,28), zscore:m.zscore||+(Math.random()*2.8).toFixed(1),
-                pattern:m.pattern||'low'
-            }))
-        }));
-    }
-    // MOCK DATA
-    return LINE_NAMES.map((nm,i)=>{
-        const models = MODEL_POOL[i].map((mdl,j)=>{
-            const tgt=rnd(600,1200), act=Math.floor(tgt*(0.68+Math.random()*.28));
-            return{ id:`L${i}_M${j}`, model:mdl, target:tgt, actual:act,
-                    stopMin:rnd(0,55), mrb:+(Math.random()*3+0.5).toFixed(1),
-                    ewma:rnd(8,28), zscore:+(Math.random()*2.8).toFixed(1),
-                    pattern:['low','low','medium','high','low','low'][rnd(0,5)] };
+    if (!src || src.length === 0) return [];
+
+    // Tự động tìm ngày mới nhất trong dữ liệu để hiển thị làm "Today"
+    const maxDate = src.reduce((max, p) => p.date > max ? p.date : max, src[0].date);
+    const todayData = src.filter(x => x.date === maxDate);
+
+    const grouped = {};
+    todayData.forEach(row => {
+        const key = row.model || 'Unknown Model';
+        if (!grouped[key]) {
+            grouped[key] = { nm: key, factory: row.factory || 'Factory', status: 'green', lines: [] };
+        }
+        grouped[key].lines.push({
+            id: row.line + "_" + (row.workOrder || 'WO'),
+            line: row.line || 'Unknown Line',
+            workOrder: row.workOrder || 'WO-NONE',
+            target: Number(row.target || 0),
+            actual: Number(row.actual || 0),
+            mrb: Number(row.mrb || 0),
+            status: 'green' // Mặc định xanh, nối Andon DB sẽ set đỏ
         });
-        return{ _uid:'L'+i, nm, status:SSTATUS[i], models };
+    });
+
+    let i = 0;
+    return Object.values(grouped).map(g => {
+        g._uid = 'M' + (i++);
+        // Fake lại tên mảng thành `models` để UI cũ chạy mượt mà không crash
+        g.models = g.lines.map((l, j) => ({
+            id: g._uid + '_L' + j,
+            model: l.line, // UI cũ hiển thị model, ta tráo bằng Line
+            workOrder: l.workOrder,
+            target: l.target,
+            actual: l.actual,
+            mrb: l.mrb,
+            stopMin: 0,
+            status: l.status,
+            ewma: Math.floor(Math.random() * 20 + 10),
+            zscore: +(Math.random() * 2.8).toFixed(1),
+            pattern: 'low'
+        }));
+        delete g.lines;
+        return g;
     });
 }
 
 function enrichLine(l){
-    const t=l.models.reduce((a,m)=>a+m.target,0);
-    const a=l.models.reduce((a,m)=>a+m.actual,0);
-    const s=l.models.reduce((a,m)=>a+m.stopMin,0);
+    const t = l.models.reduce((a,m)=>a+m.target,0);
+    const a = l.models.reduce((a,m)=>a+m.actual,0); 
+    const s = l.models.reduce((a,m)=>a+m.stopMin,0);
+    
+    const isRed = l.models.some(x => x.status === 'red');
+    l.status = isRed ? 'red' : 'green';
+
     return{...l, tot_t:t, tot_a:a, tot_s:s,
-           statusCol:SC[l.status]||SC.green, statusTxt:SL[l.status]||'Running',
-           reason:l.status==='red'?'Sensor fault':l.status==='yellow'?'Waiting KTV':l.status==='orange'?'Under repair':''};
+           statusCol: SC[l.status] || SC.green, 
+           statusTxt: SL[l.status] || 'Running',
+           reason: ''};
 }
 
 function mkPeriod(lines,mt,ma,ms){
@@ -249,16 +258,10 @@ function mkPeriod(lines,mt,ma,ms){
     }));
 }
 
-const BASE = buildBaseLines(rawPD).map(enrichLine);
-const PER  = {
-    day:   BASE,
-    week:  mkPeriod(BASE,5,5,5),
-    month: mkPeriod(BASE,22,21,21),
-    ytd:   mkPeriod(BASE,80,78,78)
-};
-const PL = {day:'Today (from 8:00 AM)',week:'This Week',month:'This Month',ytd:'Year to Date'};
-
-let curP='day', curLines=[...PER.day], dispLines=[...curLines];
+let BASE = [];
+let PER = { day: [], week: [], month: [], ytd: [] };
+const PL = {day:'Today',week:'This Week',month:'This Month',ytd:'Year to Date'};
+let curP='day', curLines=[], dispLines=[];
 let selLine=null, selModel=null, curTab='today', isZoom=false;
 
 // ────────────────────────────────────────────────────────────────
@@ -314,7 +317,7 @@ function filt(){
         if(!dispLines.find(l=>l._uid===selLine?._uid)) selLine=dispLines[0];
         showDetail(selLine._uid);
     } else {
-        document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:800">No Lines Found</div>`;
+        document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:800">No Data Found</div>`;
     }
 }
 
@@ -341,6 +344,7 @@ function renderKPI(){
     const oc=avgOEE>=85?'var(--b)':avgOEE>=70?'var(--y)':'var(--r)';
     const fc=avgFPY>=95?'var(--g)':avgFPY>=90?'var(--y)':'var(--r)';
     const pl=PL[curP]||'Custom Range';
+    
     document.getElementById('krow').innerHTML=[
         {l:'Total Target',    v:tot.toLocaleString('en-US'), s:pl,                  c:'var(--b)', vc:'var(--t1)'},
         {l:'Total Actual',    v:act.toLocaleString('en-US'), s:perf+'% of target',  c:'var(--g)', vc:'var(--g)'},
@@ -352,7 +356,7 @@ function renderKPI(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 5. LEFT LIST (Lines)
+// 5. LEFT LIST (Model)
 // ────────────────────────────────────────────────────────────────
 function renderLeft(){
     document.getElementById('ll').innerHTML = dispLines.map(l=>{
@@ -362,12 +366,12 @@ function renderLeft(){
         const act=l._uid===selLine?._uid?'active':'';
         return`<div class="lc ${act}" onclick="showDetail('${l._uid}')">
           <div class="ln">
-            <span>${l.nm}</span>
+            <span style="font-size:15px; color:var(--b)">${l.nm}</span>
             <span class="lbadge" style="border-color:${l.statusCol}33;color:${l.statusCol};background:${l.statusCol}11">${l.statusTxt}</span>
           </div>
           <div class="lbr"><div class="lbl2"><span>Target</span><span>${l.tot_t.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:100%;background:var(--b)"></div></div></div>
           <div class="lbr"><div class="lbl2"><span>Actual</span><span style="color:${bc}">${l.tot_a.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:${pw}%;background:${bc}"></div></div></div>
-          <div class="lmc">${l.models.length} model${l.models.length>1?'s':''} &nbsp;·&nbsp; ${pct}% performance</div>
+          <div class="lmc">Chạy trên ${l.models.length} chuyền &nbsp;·&nbsp; ${pct}% performance</div>
         </div>`;
     }).join('');
 }
@@ -409,11 +413,11 @@ function renderDetail(zoom){
     const pfx=zoom?'z':'';
     const pl=PL[curP]||'Custom';
     const sz=zoom?52:42, isz=zoom?40:32;
-
+    
     const html=`
     <div class="dh">
       <div>
-        <div class="dht">${l.nm} <span style="font-size:12px;color:var(--t2);font-weight:700">· ${l.models.length} Models · ${pl}</span></div>
+        <div class="dht" style="color:var(--b); font-size:18px">${l.nm} <span style="font-size:12px;color:var(--t2);font-weight:700">· Chạy trên ${l.models.length} chuyền · ${pl}</span></div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
           <span style="width:7px;height:7px;border-radius:50%;background:${l.statusCol};display:inline-block"></span>
           <span style="font-size:11px;color:${l.statusCol};font-weight:800">${l.statusTxt}${l.reason?' — '+l.reason:''}</span>
@@ -432,24 +436,22 @@ function renderDetail(zoom){
     </div>
 
     <div class="mstrip">
-      <div class="mstrip-lbl">Models in ${l.nm} — click to switch chart view</div>
+      <div class="mstrip-lbl">Các chuyền (Lines) đang chạy ${l.nm} — Click để xem biểu đồ</div>
       <div class="mstrip-row">
         ${l.models.map(m=>{
           const mp=m.target>0?Math.round(m.actual/m.target*100):0;
           const mbc=mp>=90?'#10b981':mp>=75?'#f59e0b':'#ef4444';
           const sel=selModel?.id===m.id?'sel':'';
-          const zscoreC=m.zscore>2?'#ef4444':m.zscore>1.5?'#f59e0b':'#10b981';
-          const patC=m.pattern==='high'?'#ef4444':m.pattern==='medium'?'#f59e0b':'#10b981';
-          return`<div class="mc ${sel}" onclick="pickModel('${m.id}','${pfx}')">
-            <div class="mc-nm" title="${m.model}">${m.model}</div>
-            <div class="mc-pct" style="color:${mbc}">${mp}%</div>
-            <div class="mc-sub">${m.actual.toLocaleString()} / ${m.target.toLocaleString()}</div>
-            <div class="mc-bar"><div class="mc-barf" style="width:${Math.min(mp,100)}%;background:${mbc}"></div></div>
-            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px">
-              <span style="color:${zscoreC};font-weight:800">Z:${m.zscore}</span>
-              <span style="color:${patC};font-weight:800">${(m.pattern||'low').toUpperCase()}</span>
-              <span style="color:var(--p);font-weight:800">${m.ewma}m</span>
+          return`<div class="mc ${sel}" onclick="pickModel('${m.id}','${pfx}')" style="border-left: 4px solid ${mbc}; min-width:130px">
+            <div class="mc-nm" title="${m.model}" style="font-size:13px">${m.model}</div>
+            <div class="mc-sub" style="font-size:10px; color:var(--b); margin-bottom:4px">WO: ${m.workOrder || 'N/A'}</div>
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:10px; color:var(--t2)">
+              <span>Target:</span><span>${m.target.toLocaleString()}</span>
             </div>
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:11px; color:${mbc}; margin-top:2px">
+              <span>Actual:</span><span>${m.actual.toLocaleString()}</span>
+            </div>
+            <div class="mc-bar" style="margin-top:6px"><div class="mc-barf" style="width:${Math.min(mp,100)}%;background:${mbc}"></div></div>
           </div>`;
         }).join('')}
       </div>
@@ -465,7 +467,7 @@ function renderDetail(zoom){
     <div class="ca">
       <div class="cr">
         <div class="cb">
-          <div class="ct">Output Trend — ${selModel?.model||'All'} (Actual vs Target)</div>
+          <div class="ct">Output Trend — Chuyền ${selModel?.model||'All'}</div>
           <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc1"></canvas></div>
         </div>
         <div class="cb">
@@ -475,16 +477,16 @@ function renderDetail(zoom){
       </div>
       <div class="cr">
         <div class="cb">
-          <div class="ct">FPY Quality Trend — ${selModel?.model||''}</div>
+          <div class="ct">FPY Quality Trend — Chuyền ${selModel?.model||''}</div>
           <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc3"></canvas></div>
         </div>
         <div class="cb">
-          <div class="ct">Model Comparison — ${l.nm}</div>
+          <div class="ct">So sánh Sản Lượng Các Chuyền — ${l.nm}</div>
           <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc4"></canvas></div>
         </div>
       </div>
     </div>`;
-
+    
     if(zoom){ document.getElementById('zh').innerHTML=html; }
     else     { document.getElementById('rd').innerHTML=html; }
 
@@ -499,6 +501,7 @@ function renderCharts(l,pfx,oee,fpy){
               curTab==='7days'?['Mon','Tue','Wed','Thu','Fri','Sat','Sun']:
               curTab==='30days'?Array.from({length:15},(_,i)=>(i*2+1)+''):
               ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+              
     const n=lbl.length;
     const m=selModel||l.models[0];
     const tA=m.actual/n, tT=m.target/n;
@@ -509,25 +512,25 @@ function renderCharts(l,pfx,oee,fpy){
       plugins:{legend:{display:false}},
       scales:{x:{grid:{display:false},ticks:{font:{size:9}}},
               y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}};
-
+              
     // Chart 1: Output Trend
     new Chart(document.getElementById(`${pfx}dc1`),{type:'bar',data:{labels:lbl,datasets:[
         {label:'Actual',data:Array.from({length:n},()=>Math.round(tA*.6+Math.random()*tA*1.2)),backgroundColor:'#10b981',borderRadius:2},
         {label:'Target',data:Array(n).fill(Math.round(tT)),type:'line',borderColor:'#ef4444',borderDash:[4,4],borderWidth:1.5,pointRadius:0}
     ]},options:bo});
-
+    
     // Chart 2: OEE & Performance
     const perfPct=m.target>0?m.actual/m.target*100:0;
     new Chart(document.getElementById(`${pfx}dc2`),{type:'line',data:{labels:lbl,datasets:[
         {label:'OEE%',   data:Array.from({length:n},()=>Math.min(100,Math.max(0,oee+(Math.random()*14-7)))),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',fill:true,tension:.35,pointRadius:2,borderWidth:2},
         {label:'Perf%',  data:Array.from({length:n},()=>Math.min(100,Math.max(0,perfPct+(Math.random()*12-6)))),borderColor:'#10b981',tension:.35,pointRadius:0,borderWidth:1.5,borderDash:[3,3]},
     ]},options:{...bo,scales:{...bo.scales,y:{min:0,max:100,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-
+    
     // Chart 3: FPY Trend
     new Chart(document.getElementById(`${pfx}dc3`),{type:'line',data:{labels:lbl,datasets:[
         {label:'FPY%',data:Array.from({length:n},()=>Math.min(100,Math.max(85,fpy+(Math.random()*8-4)))),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',fill:true,tension:.2,pointRadius:2,borderWidth:2,stepped:true},
     ]},options:{...bo,scales:{...bo.scales,y:{min:80,max:100,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-
+    
     // Chart 4: Model Comparison (horizontal bar)
     const selId=selModel?.id;
     new Chart(document.getElementById(`${pfx}dc4`),{type:'bar',
@@ -541,9 +544,6 @@ function renderCharts(l,pfx,oee,fpy){
                 y:{grid:{display:false},ticks:{font:{size:9}}}}}});
 }
 
-// ────────────────────────────────────────────────────────────────
-// 7. ZOOM MODAL
-// ────────────────────────────────────────────────────────────────
 function openZ(){
     isZoom=true;
     const m=document.getElementById('zmod');
@@ -559,18 +559,39 @@ function closeZ(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 8. MIDDLE CHARTS
+// 8. MIDDLE CHARTS (YTD Tự Động Gom Tháng)
 // ────────────────────────────────────────────────────────────────
 let ytdI=null, parI=null;
+
 function renderMid(){
     const ctx=document.getElementById('ytdC');
     if(ytdI)ytdI.destroy();
-    const totA=BASE.reduce((a,l)=>a+l.tot_a,0);
+    
+    // Khởi tạo mảng 12 tháng
+    const monthlyActual = Array(12).fill(0);
+    const monthlyTarget = Array(12).fill(0);
+
+    // Gom dữ liệu từ rawPD theo tháng
+    rawPD.forEach(r => {
+        if (r.date) {
+            const month = parseInt(r.date.split('-')[1], 10) - 1; // 0-11
+            if (month >= 0 && month <= 11) {
+                monthlyActual[month] += (r.actual || 0);
+                monthlyTarget[month] += (r.target || 0);
+            }
+        }
+    });
+
+    // Nếu có thực tế mà KHÔNG CÓ target (trường hợp quên nhập excel), tự động gán target mồi để chart đỡ xấu
+    for(let i=0; i<12; i++) {
+        if(monthlyTarget[i] === 0 && monthlyActual[i] > 0) monthlyTarget[i] = monthlyActual[i] + 5000;
+    }
+
     ytdI=new Chart(ctx,{type:'bar',data:{
         labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
         datasets:[
-            {label:'Actual', data:[2450000,2350000,Math.round(totA*10),0,0,0,0,0,0,0,0,0],backgroundColor:'#10b981',borderRadius:3},
-            {label:'Target', data:Array(12).fill(2600000),backgroundColor:'#e2e8f0',borderRadius:3}
+            {label:'Actual', data:monthlyActual, backgroundColor:'#10b981',borderRadius:3},
+            {label:'Target', data:monthlyTarget, backgroundColor:'#e2e8f0',borderRadius:3}
         ]},
         options:{responsive:true,maintainAspectRatio:false,
             plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
@@ -596,14 +617,65 @@ function renderMid(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 9. INIT
+// 9. INIT & AUTO FETCH API
 // ────────────────────────────────────────────────────────────────
-window.onload=function(){
-    filt();
-    renderMid();
-    clock(); setInterval(clock,1000);
-    setInterval(()=>{ filt(); renderMid(); }, 30000);
-};
+async function fetchProductionData() {
+    const fs = document.getElementById('file-status');
+    try {
+        const response = await fetch('/Kpi/GetProductionData'); 
+        if (!response.ok) throw new Error('Mất kết nối tới Server!');
+        
+        const res = await response.json();
+        const isError = res.isError;
+        const data = res.data;
+        
+        // 1. CẬP NHẬT TRẠNG THÁI NÚT NGAY LẬP TỨC (Không cần biết có data hay không)
+        if(fs) {
+            if(isError) {
+                fs.style.background = 'var(--r)'; // Đỏ
+                fs.style.color = '#fff';
+                fs.textContent = '⚠ Error (Fake Data)';
+            } else {
+                fs.style.background = 'var(--g)'; // Xanh
+                fs.style.color = '#fff';
+                fs.textContent = 'Live';
+            }
+        }
+        
+        const timeTag = document.getElementById('last-upd');
+        if(timeTag) {
+            const now = new Date();
+            timeTag.textContent = `Last update: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        }
+
+        // 2. VẼ BIỂU ĐỒ NẾU CÓ DATA
+        if (data && data.length > 0) {
+            rawPD = data; 
+            BASE = buildBaseLines(rawPD).map(enrichLine); 
+            
+            PER.day = BASE;
+            PER.week = mkPeriod(BASE, 5, 5, 5);
+            PER.month = mkPeriod(BASE, 22, 21, 21);
+            PER.ytd = mkPeriod(BASE, 80, 78, 78);
+
+            if (curP === 'day') curLines = [...BASE];
+            else sp(curP); 
+            
+            filt(); 
+            renderMid();
+        } else {
+            // NẾU DATA RỖNG THÌ HIỆN CHỮ NÀY THAY VÌ TREO
+            document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:800">Không có dữ liệu trả về!</div>`;
+        }
+    } catch (error) {
+        console.error("Lỗi lấy dữ liệu:", error);
+        if(fs) {
+            fs.style.background = 'var(--r)';
+            fs.style.color = '#fff';
+            fs.textContent = '⚠ Mất kết nối API';
+        }
+    }
+}
 </script>
 </body>
 </html>

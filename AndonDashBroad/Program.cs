@@ -1,3 +1,4 @@
+using AndonDashboard.Services;
 using AndonDashBroad.Data;
 using AndonDashBroad.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,8 @@ builder.Services.AddControllersWithViews();
 
 // Đăng ký Analytics Service
 builder.Services.AddScoped<AnalyticsService>();
-
+// Đăng ký dịch vụ đọc Excel
+builder.Services.AddScoped<ProductionPlanReader>();
 // DbContext
 builder.Services.AddDbContext<AndonDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
