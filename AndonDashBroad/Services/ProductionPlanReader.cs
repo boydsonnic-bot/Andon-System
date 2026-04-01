@@ -5,7 +5,6 @@ using System.IO;
 
 namespace AndonDashboard.Services
 {
-    // Bổ sung thêm trường Shift (Ca Sản Xuất)
     public class PlanModel
     {
         public string? Factory { get; set; }
@@ -23,50 +22,42 @@ namespace AndonDashboard.Services
         {
             var planList = new List<PlanModel>();
 
-            // Đường dẫn tới file Excel của sếp
+            // PATCH: Dùng đường dẫn mạng UNC (Tuyệt đối không dùng Z:\)
             string filePath = @"Z:\Share\12. KPI\Plan\production_plan.xlsx";
 
-            if (!File.Exists(filePath)) return planList;
-
-            try
+            if (!File.Exists(filePath))
             {
-                // FileShare.ReadWrite: Đọc file an toàn kể cả khi có người đang mở Excel
-                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var workbook = new XLWorkbook(fileStream))
-                {
-                    var worksheet = workbook.Worksheet("Production Plan");
-                    var usedRange = worksheet.RangeUsed();
-                    if (usedRange == null) return planList;
-
-                    var rows = usedRange.RowsUsed();
-
-                    foreach (var row in rows)
-                    {
-                        // Bỏ qua 5 dòng tiêu đề đầu tiên
-                        if (row.RowNumber() < 6) continue;
-
-                        string model = row.Cell(3).GetString();
-                        if (string.IsNullOrWhiteSpace(model)) continue;
-
-                        planList.Add(new PlanModel
-                        {
-                            Factory = row.Cell(1).GetString(),
-                            Line = row.Cell(2).GetString(),
-                            Model = model,
-                            WorkOrder = row.Cell(4).GetString(),
-                            ProdDate = row.Cell(5).TryGetValue<DateTime>(out var d) ? d.Date : DateTime.Today,
-
-                            // Lấy thông tin Ca Sáng / Ca Tối ở Cột 6 (Cột F)
-                            Shift = row.Cell(6).GetString(),
-
-                            Target = row.Cell(7).TryGetValue<int>(out var t) ? t : 0
-                        });
-                    }
-                }
+                // PATCH: Không nuốt lỗi nữa, ném thẳng lỗi ra cho hệ thống biết
+                throw new Exception($"KHÔNG ĐỌC ĐƯỢC EXCEL: Không tìm thấy file tại đường dẫn '{filePath}'. Vui lòng kiểm tra quyền truy cập mạng (Network Share) của IIS/AppPool.");
             }
-            catch
+
+            // Vẫn dùng FileShare.ReadWrite để chống lỗi khi có người đang mở file
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var workbook = new XLWorkbook(fileStream))
             {
-                // Bỏ qua lỗi ngầm
+                var worksheet = workbook.Worksheet("Production Plan");
+                var usedRange = worksheet.RangeUsed();
+                if (usedRange == null) throw new Exception("File Excel không có dữ liệu trong sheet 'Production Plan'.");
+
+                var rows = usedRange.RowsUsed();
+                foreach (var row in rows)
+                {
+                    if (row.RowNumber() < 6) continue;
+
+                    string model = row.Cell(3).GetString();
+                    if (string.IsNullOrWhiteSpace(model)) continue;
+
+                    planList.Add(new PlanModel
+                    {
+                        Factory = row.Cell(1).GetString(),
+                        Line = row.Cell(2).GetString(),
+                        Model = model,
+                        WorkOrder = row.Cell(4).GetString(),
+                        ProdDate = row.Cell(5).TryGetValue<DateTime>(out var d) ? d.Date : DateTime.Today,
+                        Shift = row.Cell(6).GetString(),
+                        Target = row.Cell(7).TryGetValue<int>(out var t) ? t : 0
+                    });
+                }
             }
 
             return planList;

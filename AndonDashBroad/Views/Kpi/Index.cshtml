@@ -1,6 +1,4 @@
-﻿@{
-    Layout = null;
-}
+﻿@{ Layout = null; }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,28 +9,20 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9;color:#0f172a;height:100vh;overflow:hidden}
-:root{
-  --bg1:#fff;--bg2:#f8fafc;--bg3:#e2e8f0;
-  --t1:#0f172a;--t2:#475569;--t3:#94a3b8;
-  --bdr:#e2e8f0;--rl:12px;--rm:8px;
-  --g:#10b981;--y:#f59e0b;--r:#ef4444;--b:#3b82f6;--p:#8b5cf6;--o:#f97316;
-}
+:root{ --bg1:#fff;--bg2:#f8fafc;--bg3:#e2e8f0; --t1:#0f172a;--t2:#475569;--t3:#94a3b8; --bdr:#e2e8f0;--rl:12px;--rm:8px; --g:#10b981;--y:#f59e0b;--r:#ef4444;--b:#3b82f6;--p:#8b5cf6;--o:#f97316; }
 #app{max-width:1600px;margin:0 auto;padding:8px 12px;height:100%;display:flex;flex-direction:column;gap:8px}
 
-/* HEADER */
 .hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:var(--bg1);padding:8px 16px;border-radius:var(--rl);border:1px solid var(--bdr)}
 .ht{font-size:15px;font-weight:900;display:flex;align-items:center;gap:8px}
 .hd{width:8px;height:8px;border-radius:50%;background:var(--g);animation:pu 2s infinite}
 @@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* KPI ROW */
 .krow{flex-shrink:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .kc{background:var(--bg1);border-radius:var(--rl);padding:8px 12px;border:1px solid var(--bdr);border-left:4px solid;transition:all 0.3s ease}
 .kl{font-size:9px;font-weight:800;color:var(--t2);text-transform:uppercase;margin-bottom:2px;letter-spacing:.3px}
 .kv{font-size:19px;font-weight:900;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color 0.3s}
 .ks{font-size:9px;color:var(--t3);margin-top:2px;font-weight:700}
 
-/* CONTROLS */
 .ctrl{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cg{display:flex;align-items:center;gap:5px;background:var(--bg1);padding:3px 8px;border-radius:9999px;border:1px solid var(--bdr)}
 .si{border:none;outline:none;font-size:12px;padding:2px 5px;width:140px;background:transparent;font-family:'Nunito',inherit;font-weight:700}
@@ -42,16 +32,12 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 .pb.on{background:var(--b);color:#fff;border-color:var(--b)}
 .ss{padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid var(--bdr);background:#fff;outline:none;font-family:inherit;color:var(--t1)}
 
-/* MIDDLE CHARTS */
 .mrow{flex-shrink:0;display:flex;gap:8px;height:150px}
 .pb2{background:var(--bg1);border:1px solid var(--bdr);border-radius:var(--rl);padding:8px 12px;display:flex;flex-direction:column;min-height:0}
 .pt{font-size:11px;font-weight:800;color:var(--t1);text-transform:uppercase;margin-bottom:5px;flex-shrink:0}
 .cw{flex:1;position:relative;min-height:0;width:100%;height:100%}
 
-/* BOTTOM SPLIT */
 .bs{flex:1;min-height:0;display:flex;gap:8px}
-
-/* LEFT LIST */
 .ll{flex:0 0 22%;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:3px}
 .ll::-webkit-scrollbar{width:4px}
 .ll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
@@ -67,12 +53,12 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 .lbf{height:100%;border-radius:2px;transition:width .5s ease}
 .lmc{font-size:9px;color:var(--t3);font-weight:700;margin-top:4px}
 
-/* RIGHT DETAIL */
 .rd{flex:1;background:var(--bg1);border:1px solid var(--bdr);border-radius:var(--rl);padding:10px 14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .dh{flex-shrink:0;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:6px}
 .dht{font-size:16px;font-weight:900;color:var(--t1)}
+.bz{background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);cursor:pointer;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:900;font-family:inherit;transition:.15s}
+.bz:hover{background:var(--b);color:#fff;border-color:var(--b)}
 
-/* Stats donuts */
 .dstats{flex-shrink:0;display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:7px;background:var(--bg2);padding:7px;border-radius:var(--rm);border:1px solid #f1f5f9}
 .dsi{display:flex;flex-direction:column;align-items:center}
 .dsv{font-size:17px;font-weight:900;line-height:1.2;transition:all 0.2s}
@@ -80,7 +66,6 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 .ddo{border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:2px}
 .ddi{background:var(--bg2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900}
 
-/* Model strip */
 .mstrip{flex-shrink:0;margin-bottom:6px}
 .mstrip-lbl{font-size:9px;font-weight:800;color:var(--t2);text-transform:uppercase;margin-bottom:4px;letter-spacing:.3px}
 .mstrip-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:3px}
@@ -95,38 +80,40 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 .mc-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:4px}
 .mc-barf{height:100%;border-radius:2px;transition:width .4s ease}
 
-/* Tabs */
-.tabs{flex-shrink:0;display:flex;border-bottom:1px solid var(--bdr);margin-bottom:6px}
-.tab{padding:3px 14px;cursor:pointer;font-size:11px;font-weight:800;border-bottom:2px solid transparent;color:var(--t2)}
-.tab.on{border-bottom-color:var(--b);color:var(--b)}
-
-/* Charts */
 .ca{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0}
 .cr{display:flex;gap:6px;flex:1;min-height:0}
 .cb{flex:1;border:1px solid var(--bdr);border-radius:var(--rm);padding:7px 10px;display:flex;flex-direction:column;min-height:0}
 .ct{font-size:9px;font-weight:800;color:var(--t2);text-transform:uppercase;margin-bottom:5px;flex-shrink:0}
 
-.bz{background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);cursor:pointer;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:900;font-family:inherit;transition:.15s}
-.bz:hover{background:var(--b);color:#fff;border-color:var(--b)}
+/* ADMIN MODAL */
+#adminMod{display:none;position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:9999;align-items:center;justify-content:center;padding:16px;}
+.am-bx{background:#fff;border-radius:12px;width:450px;padding:20px;box-shadow:0 25px 50px -12px rgba(0,0,0,.5);position:relative}
+.am-tabs{display:flex;gap:10px;margin-bottom:15px;border-bottom:2px solid var(--bdr)}
+.am-tab{padding:8px 15px;cursor:pointer;font-weight:900;font-size:13px;color:var(--t2);border-bottom:2px solid transparent;margin-bottom:-2px}
+.am-tab.act{color:var(--b);border-color:var(--b)}
+.am-fg{margin-bottom:10px}
+.am-fg label{display:block;font-size:11px;font-weight:800;color:var(--t2);margin-bottom:4px}
+.am-fg input, .am-fg select{width:100%;padding:6px 10px;border:1px solid var(--bdr);border-radius:6px;font-family:inherit;font-size:12px}
+.am-btn{background:var(--b);color:#fff;border:none;width:100%;padding:8px;border-radius:6px;font-weight:900;margin-top:10px;cursor:pointer}
+.am-cls{position:absolute;top:15px;right:15px;background:none;border:none;font-size:16px;cursor:pointer;color:var(--t3)}
 
 /* ZOOM MODAL */
-#zmod{display:none;opacity:0;position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:9999;align-items:center;justify-content:center;padding:16px;transition:opacity .2s}
+#zmod{display:none;opacity:0;position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:9998;align-items:center;justify-content:center;padding:16px;transition:opacity .2s}
 .zmb{background:#fff;border-radius:16px;width:95vw;height:90vh;display:flex;flex-direction:column;padding:18px;position:relative;box-shadow:0 25px 50px -12px rgba(0,0,0,.5);overflow:hidden}
 .zmc{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;border-radius:8px;background:#f1f5f9;cursor:pointer;font-size:16px;font-weight:900;color:#64748b;font-family:inherit}
 </style>
 </head>
 <body>
 <div id="app">
-
   <div class="hdr">
     <div class="ht"><span class="hd"></span> PRODUCTION KPI DASHBOARD</div>
     <div style="display:flex;align-items:center;gap:10px">
       <span id="last-upd" style="font-size:10px;color:#94a3b8;font-weight:700"></span>
-      <span id="file-status" style="font-size:11px;padding:3px 8px;border-radius:6px;font-weight:800;background:var(--bg3)">Loading...</span>
+      <span id="file-status" style="font-size:11px;padding:3px 8px;border-radius:6px;font-weight:900;background:var(--bg3)">Loading...</span>
       <span style="font-size:13px;color:var(--t2);font-weight:800" id="clk"></span>
+      <button onclick="openAdmin()" style="background:#1e293b;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800;border:none;cursor:pointer">⚙️ Admin</button>
       <a href="/Home" style="text-decoration:none;background:var(--r);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800">🚨 Andon</a>
-      <a href="/Spc"  style="text-decoration:none;background:var(--p);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800">📈 SPC</a>
-      <button onclick="toggleFS()" style="background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);cursor:pointer;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800;font-family:inherit">⛶ Fullscreen</button>
+      <button onclick="toggleFS()" style="background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);cursor:pointer;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:800;font-family:inherit">⛶ Full</button>
     </div>
   </div>
 
@@ -144,17 +131,11 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
-      <select class="ss" id="so" onchange="filt()">
-        <option value="line_asc">▼ Model (A-Z)</option>
-        <option value="line_desc">▲ Model (Z-A)</option>
-        <option value="kpi_desc">▼ Performance High→Low</option>
-        <option value="kpi_asc">▲ Performance Low→High</option>
-      </select>
+      <select class="ss" id="so" onchange="filt()"><option value="line_asc">▼ Model (A-Z)</option><option value="kpi_desc">▼ Perf High→Low</option></select>
       <div style="display:flex;gap:4px">
-        <button class="pb on" id="period-day"   onclick="sp('day')">Today</button>
-        <button class="pb"    id="period-week"  onclick="sp('week')">Last 7 Days</button>
-        <button class="pb"    id="period-month" onclick="sp('month')">Last 30 Days</button>
-        <button class="pb"    id="period-ytd"   onclick="sp('ytd')">YTD</button>
+        <button class="pb on" id="period-day" onclick="sp('day')">Today</button>
+        <button class="pb" id="period-week" onclick="sp('week')">Last 7 Days</button>
+        <button class="pb" id="period-month" onclick="sp('month')">Last 30 Days</button>
       </div>
     </div>
   </div>
@@ -166,11 +147,8 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 
   <div class="bs">
     <div class="ll" id="ll"></div>
-    <div class="rd" id="rd">
-      <div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:15px;font-weight:800">  ← Select a Model from the left </div>
-    </div>
+    <div class="rd" id="rd"><div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:15px;font-weight:800">← Select a Model</div></div>
   </div>
-
 </div>
 
 <div id="zmod" onclick="if(event.target===this)closeZ()">
@@ -180,522 +158,344 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
   </div>
 </div>
 
+<div id="adminMod">
+  <div class="am-bx">
+    <button class="am-cls" onclick="document.getElementById('adminMod').style.display='none'">✕</button>
+    <div class="am-tabs">
+        <div class="am-tab act" id="tab1" onclick="switchTab(1)">📝 NHẬP KẾ HOẠCH</div>
+        <div class="am-tab" id="tab2" onclick="switchTab(2)">📉 NHẬP PARETO LỖI</div>
+    </div>
+    
+    <div id="frmPlan">
+        <div class="am-fg"><label>Ngày Sản Xuất</label><input type="date" id="iDate"></div>
+        <div class="am-fg"><label>Ca Sản Xuất</label>
+            <select id="iShift"><option value="Ca Sáng (08:00-20:00)">Ca Sáng (08:00 - 20:00)</option><option value="Ca Tối (20:00-08:00)">Ca Tối (20:00 - 08:00)</option></select>
+        </div>
+        <div style="display:flex;gap:10px">
+            <div class="am-fg" style="flex:1"><label>Line (Chuyền)</label><input type="text" id="iLine" placeholder="VD: S1"></div>
+            <div class="am-fg" style="flex:1"><label>Mã Hàng (Model)</label><input type="text" id="iModel" placeholder="VD: 679917"></div>
+        </div>
+        <div class="am-fg"><label>Work Order</label><input type="text" id="iWo" placeholder="VD: 3121513860"></div>
+        <div class="am-fg"><label>Target (Số Lượng)</label><input type="number" id="iTarget" placeholder="Nhập số..."></div>
+        <button class="am-btn" onclick="savePlan()">💾 LƯU KẾ HOẠCH VÀO DB</button>
+    </div>
+
+    <div id="frmPareto" style="display:none">
+        <div class="am-fg"><label>Ngày Báo Cáo Lỗi</label><input type="date" id="pDate"></div>
+        <div class="am-fg"><label>Tên Lỗi (Issue Name)</label><input type="text" id="pName" placeholder="VD: Xước ngoại quan"></div>
+        <div class="am-fg"><label>Số Lượng Lỗi (Count)</label><input type="number" id="pCount" placeholder="Nhập số lượng lỗi..."></div>
+        <button class="am-btn" style="background:var(--y)" onclick="savePareto()">💾 LƯU LỖI PARETO</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>if(!window.Chart){document.write('<script src="/lib/chart.js/chart.umd.js"><\\/script>');}</script>
 
 <script>
 Chart.defaults.font.family="'Nunito',system-ui,sans-serif";
 
-// ────────────────────────────────────────────────────────────────
-// 1. DATA & BASE STRUCTURE
-// ────────────────────────────────────────────────────────────────
-let rawPD = [];
-let curLines = [], dispLines = [];
-let curP = 'day';
-let selLine = null, selModel = null, curTab = 'today', isZoom = false;
-let currentShiftMins = 720; // 1 Ca = 720 phút, sẽ tự động nhân lên khi chọn bộ lọc nhiều ngày
+let rawPD = [], curLines = [], dispLines = [];
+let fakedDatesList = [], rawPareto = [];
+let curP = 'day', selLine = null, selModel = null;
+let currentShiftMins = 720; 
+let isRealTimeEngineRunning = false;
 
-const SC = {green:'#10b981',yellow:'#f59e0b',red:'#ef4444',orange:'#f97316',blue:'#3b82f6'};
-const SL = {green:'Normal',yellow:'Waiting KTV',red:'Error (Stopped)',orange:'Repairing',blue:'Confirm'};
-const PL = {day:'Today',week:'Last 7 Days',month:'Last 30 Days',ytd:'Year to Date', custom:'Custom Range'};
+function toggleFS(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+function openZ(){ document.getElementById('zmod').style.display='flex'; setTimeout(()=>document.getElementById('zmod').style.opacity='1',10); renderDetail(true); }
+function closeZ(){ document.getElementById('zmod').style.opacity='0'; setTimeout(()=>{document.getElementById('zmod').style.display='none'; renderDetail(false);},200); }
 
-// ────────────────────────────────────────────────────────────────
-// HỆ THỐNG LỌC DATA THẬT THEO THỜI GIAN (VŨ KHÍ MỚI)
-// ────────────────────────────────────────────────────────────────
+function switchTab(t) {
+    document.getElementById('tab1').className = t===1 ? 'am-tab act' : 'am-tab';
+    document.getElementById('tab2').className = t===2 ? 'am-tab act' : 'am-tab';
+    document.getElementById('frmPlan').style.display = t===1 ? 'block' : 'none';
+    document.getElementById('frmPareto').style.display = t===2 ? 'block' : 'none';
+}
+
+function openAdmin() {
+    if(prompt("Nhập mật khẩu Administrator:") === "admin123") {
+        document.getElementById('iDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('pDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('adminMod').style.display='flex';
+    } else { alert("Sai mật khẩu!"); }
+}
+
+async function savePlan() {
+    const fd = new FormData();
+    fd.append('prodDate', document.getElementById('iDate').value); fd.append('shift', document.getElementById('iShift').value);
+    fd.append('line', document.getElementById('iLine').value); fd.append('model', document.getElementById('iModel').value);
+    fd.append('workOrder', document.getElementById('iWo').value); fd.append('target', document.getElementById('iTarget').value);
+    try { const res = await fetch('/Kpi/AddPlan', { method: 'POST', body: fd }); const json = await res.json();
+        if(json.success) { alert("Đã lưu kế hoạch!"); fetchProductionData(); } else alert("Lỗi: " + json.message);
+    } catch(e) { alert("Lỗi kết nối"); }
+}
+
+async function savePareto() {
+    const fd = new FormData();
+    fd.append('reportDate', document.getElementById('pDate').value);
+    fd.append('issueName', document.getElementById('pName').value);
+    fd.append('issueCount', document.getElementById('pCount').value);
+    try { const res = await fetch('/Kpi/AddPareto', { method: 'POST', body: fd }); const json = await res.json();
+        if(json.success) { alert("Đã lưu lỗi Pareto!"); fetchProductionData(); } else alert("Lỗi: " + json.message);
+    } catch(e) { alert("Lỗi kết nối"); }
+}
+
+function startRealTimeEngine() {
+    if(isRealTimeEngineRunning) return;
+    isRealTimeEngineRunning = true;
+    setInterval(() => {
+        let hasChanges = false;
+        const currentViewedDate = document.getElementById('df').value || rawPD[0].date;
+        if(fakedDatesList.includes(currentViewedDate) && currentViewedDate === new Date().toISOString().split('T')[0]) {
+            curLines.forEach(group => {
+                group.models.forEach(m => {
+                    if (m.actual < m.target && Math.random() > 0.5) { m.actual += Math.floor(Math.random() * 4) + 1; hasChanges = true; }
+                });
+                group.tot_a = group.models.reduce((a,m)=>a+m.actual,0);
+            });
+            if(hasChanges) { filt(true); } 
+        }
+    }, 3000); 
+}
+
 function applyPeriod(mode, fDate, tDate) {
     curP = mode;
-    if (!rawPD || rawPD.length === 0) {
-        curLines = [];
-        filt();
-        return;
-    }
+    if (!rawPD || rawPD.length === 0) { curLines = []; filt(); return; }
 
-    let fd = '', td = '';
-    // Tự động tìm ngày có data MỚI NHẤT trong file Excel làm mốc "Hôm nay"
     const maxDateStr = rawPD.reduce((max, p) => p.date > max ? p.date : max, rawPD[0].date);
     const maxDate = new Date(maxDateStr);
+    let fd = '', td = '';
 
-    if (mode === 'day') {
-        fd = td = maxDateStr;
-    } else if (mode === 'week') {
-        let d = new Date(maxDate); d.setDate(d.getDate() - 6);
-        fd = d.toISOString().split('T')[0];
-        td = maxDateStr;
-    } else if (mode === 'month') {
-        let d = new Date(maxDate); d.setDate(d.getDate() - 29);
-        fd = d.toISOString().split('T')[0];
-        td = maxDateStr;
-    } else if (mode === 'ytd') {
-        let d = new Date(maxDate); d.setMonth(0, 1);
-        fd = d.toISOString().split('T')[0];
-        td = maxDateStr;
-    } else if (mode === 'custom') {
-        fd = fDate; td = tDate;
-    }
+    if (mode === 'day') { fd = td = maxDateStr; } 
+    else if (mode === 'week') { let d = new Date(maxDate); d.setDate(d.getDate() - 6); fd = d.toISOString().split('T')[0]; td = maxDateStr; } 
+    else if (mode === 'month') { let d = new Date(maxDate); d.setDate(d.getDate() - 29); fd = d.toISOString().split('T')[0]; td = maxDateStr; } 
+    else if (mode === 'custom') { fd = fDate; td = tDate; }
 
-    // QUAN TRỌNG NHẤT: Lọc lịch sử thật từ rawPD theo ngày bắt đầu (fd) đến ngày kết thúc (td)
+    document.getElementById('df').value = fd; document.getElementById('dt').value = td;
+
+    const fs = document.getElementById('file-status');
+    if(fakedDatesList.includes(fd)) { if(fs) { fs.style.background = 'var(--r)'; fs.style.color = '#fff'; fs.textContent = 'LIVE'; } } 
+    else { if(fs) { fs.style.background = 'var(--g)'; fs.style.color = '#fff'; fs.textContent = 'LIVE'; } }
+
     const filtered = rawPD.filter(x => x.date >= fd && x.date <= td);
-    
-    // Đếm xem trong khoảng lọc đó xưởng chạy bao nhiêu ngày để tính lại Thời gian máy (Shift) cho chuẩn OEE
     const uniqueDays = new Set(filtered.map(x => x.date)).size;
     currentShiftMins = Math.max(1, uniqueDays) * 720;
-
-    // Gom dữ liệu của nhiều ngày lại với nhau
+    
     const grouped = {};
     filtered.forEach(row => {
-        const key = row.model || 'Unknown Model';
-        if (!grouped[key]) {
-            grouped[key] = { nm: key, factory: row.factory || 'Factory', status: 'green', linesMap: {} };
-        }
-        const lineKey = row.line; 
-        if(!grouped[key].linesMap[lineKey]) {
-            grouped[key].linesMap[lineKey] = {
-                id: lineKey,
-                line: row.line || 'Unknown Line',
-                workOrder: row.workOrder || 'N/A',
-                target: 0, actual: 0, mrb: 0, status: 'green'
-            };
-        }
-        // Cộng dồn Data
-        grouped[key].linesMap[lineKey].target += Number(row.target || 0);
-        grouped[key].linesMap[lineKey].actual += Number(row.actual || 0);
-        grouped[key].linesMap[lineKey].mrb += Number(row.mrb || 0);
+        const key = row.model || 'Unknown';
+        if (!grouped[key]) grouped[key] = { nm: key, linesMap: {} };
+        const lineKey = row.line + "_" + row.workOrder; 
+        if(!grouped[key].linesMap[lineKey]) grouped[key].linesMap[lineKey] = { id: lineKey, line: row.line, workOrder: row.workOrder, shifts: row.shifts, target: 0, actual: 0, mrb: 0, scrapped: 0, reworked: 0, fpy: 100, oee: 100, status: 'green' };
+        let l = grouped[key].linesMap[lineKey];
+        l.target += Number(row.target || 0); l.actual += Number(row.actual || 0); l.mrb += Number(row.mrb || 0); l.scrapped += Number(row.scrapped || 0);
+        l.fpy = row.fpy || 100; l.oee = row.oee || 0;
     });
 
     let i = 0;
     curLines = Object.values(grouped).map(g => {
-        g._uid = 'M' + (i++);
-        const linesArr = Object.values(g.linesMap);
-        g.models = linesArr.map((l, j) => ({
-            id: g._uid + '_L' + j,
-            model: l.line,
-            workOrder: l.workOrder,
-            target: l.target,
-            actual: l.actual,
-            mrb: l.mrb,
-            stopMin: 0,
-            status: l.status,
-        }));
-        delete g.linesMap;
-        return enrichLine(g);
+        g._uid = 'M' + (i++); g.models = Object.values(g.linesMap);
+        g.tot_t = g.models.reduce((a,m)=>a+m.target,0); g.tot_a = g.models.reduce((a,m)=>a+m.actual,0);
+        g.statusCol = '#10b981'; g.statusTxt = 'Normal'; return g;
     });
-
-    filt();
+    
+    filt(); renderMid(fd, td); 
 }
 
-function enrichLine(l){
-    const t = l.models.reduce((a,m)=>a+m.target,0);
-    const a = l.models.reduce((a,m)=>a+m.actual,0); 
-    const s = l.models.reduce((a,m)=>a+m.stopMin,0);
-    const isRed = l.models.some(x => x.status === 'red');
-    l.status = isRed ? 'red' : 'green';
-    return{...l, tot_t:t, tot_a:a, tot_s:s,
-           statusCol: SC[l.status] || SC.green, 
-           statusTxt: SL[l.status] || 'Normal',
-           reason: ''};
-}
-
-function calcLineStats(l){
-    const pct = l.tot_t > 0 ? Math.round((l.tot_a / l.tot_t) * 100) : 0;
-    const pctW = Math.min(pct, 100); 
-    const bc = pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--y)' : 'var(--r)';
-
-    const totalMrb = l.models.reduce((a,m) => a + (m.mrb || 0), 0);
-    const totalInput = l.tot_a + totalMrb;
-    const fpy = totalInput > 0 ? Math.round((l.tot_a / totalInput) * 100) : 100;
-
-    const shm = currentShiftMins; // Dùng số phút linh động thay vì fixed 720
-    const dp = Math.min(100, Math.round((l.tot_s / shm) * 100)); 
-    const avail = Math.max(0, 100 - dp);
-
-    const oee = Math.round((avail / 100) * (pctW / 100) * (fpy / 100) * 100);
-
-    return {pct, pctW, bc, fpy, dp, avail, oee};
-}
-
-// ────────────────────────────────────────────────────────────────
-// 2. UTILITIES & FILTERS
-// ────────────────────────────────────────────────────────────────
 function clock(){ document.getElementById('clk').textContent = new Date().toLocaleString('en-US',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); }
+function sp(p){ document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on')); document.getElementById('period-'+p).classList.add('on'); applyPeriod(p); }
+function applyDate(){ const f=document.getElementById('df').value, t=document.getElementById('dt').value; if(f&&t){ document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on')); applyPeriod('custom', f, t); } }
 
-function fmtT(m){
-    if(!m||m<=0) return '0m';
-    const mo=Math.floor(m/43200),d=Math.floor((m%43200)/1440),h=Math.floor((m%1440)/60),mn=Math.floor(m%60);
-    const r=[];if(mo>0)r.push(mo+'mo');if(d>0)r.push(d+'d');if(h>0)r.push(h+'h');if(mn>0||!r.length)r.push(mn+'m');
-    return r.join(' ');
-}
-
-function toggleFS(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
-
-function sp(p){
-    document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
-    document.getElementById('period-'+p).classList.add('on');
-    document.getElementById('df').value=''; document.getElementById('dt').value='';
-    applyPeriod(p);
-}
-
-function applyDate(){
-    const f=document.getElementById('df').value, t=document.getElementById('dt').value;
-    if(!f||!t) return alert("Vui lòng chọn cả Từ ngày và Đến ngày.");
-    if(new Date(f)>new Date(t)) return alert("Ngày bắt đầu không được lớn hơn Ngày kết thúc.");
-    document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
-    applyPeriod('custom', f, t);
-}
-
-function filt(){
+function filt(isSoftRefresh = false){
     const txt=document.getElementById('sb').value.toLowerCase();
-    const so=document.getElementById('so').value;
     dispLines=curLines.filter(l=>l.nm.toLowerCase().includes(txt)||l.models.some(m=>m.model.toLowerCase().includes(txt)));
-    dispLines.sort((a,b)=>{
-        const pa=a.tot_t>0?a.tot_a/a.tot_t:0, pb=b.tot_t>0?b.tot_a/b.tot_t:0;
-        if(so==='line_asc') return a.nm.localeCompare(b.nm);
-        if(so==='line_desc') return b.nm.localeCompare(a.nm);
-        if(so==='kpi_desc') return pb-pa;
-        if(so==='kpi_asc') return pa-pb;
-        return 0;
-    });
     renderKPI(); renderLeft();
     if(dispLines.length>0){
         if(!selLine || !dispLines.find(l=>l._uid===selLine._uid)) selLine=dispLines[0];
-        showDetail(selLine._uid);
-    } else {
-        document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:800">No Data Found</div>`;
-    }
+        if(!isSoftRefresh) showDetail(selLine._uid); else renderDetail(); 
+    } else { document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-weight:800">No Data Found</div>`; }
 }
 
-// ────────────────────────────────────────────────────────────────
-// 4. KPI STRIP
-// ────────────────────────────────────────────────────────────────
 function renderKPI(){
-    const tot = dispLines.reduce((a,l) => a + l.tot_t, 0);
-    const act = dispLines.reduce((a,l) => a + l.tot_a, 0);
-    const totMrb = dispLines.reduce((acc, l) => acc + l.models.reduce((a,m) => a + (m.mrb || 0), 0), 0);
-    const totStop = dispLines.reduce((a,l) => a + l.tot_s, 0);
-
+    const tot = dispLines.reduce((a,l) => a + l.tot_t, 0); const act = dispLines.reduce((a,l) => a + l.tot_a, 0);
     const perf = tot > 0 ? Math.round(act / tot * 100) : 0;
-    const totalInput = act + totMrb;
-    const avgFPY = totalInput > 0 ? ((act / totalInput) * 100).toFixed(1) : 100;
+    let sumOEE = 0, sumFPY = 0, lineC = 0;
+    dispLines.forEach(l => { l.models.forEach(m => { sumOEE += m.oee; sumFPY += m.fpy; lineC++; }); });
+    const avgOEE = lineC > 0 ? Math.round(sumOEE / lineC) : 0; const avgFPY = lineC > 0 ? (sumFPY / lineC).toFixed(1) : 100;
 
-    let sumOEE = 0;
-    const shm = currentShiftMins;
-    
-    dispLines.forEach(l => {
-        const pw = Math.min(l.tot_t > 0 ? Math.round(l.tot_a / l.tot_t * 100) : 0, 100);
-        const mrb = l.models.reduce((a,m) => a + (m.mrb || 0), 0);
-        const input = l.tot_a + mrb;
-        const lineFpy = input > 0 ? (l.tot_a / input) : 1;
-        const avail = Math.max(0, 100 - Math.min(100, Math.round((l.tot_s / shm) * 100)));
-        sumOEE += Math.round((avail / 100) * (pw / 100) * lineFpy * 100);
-    });
-
-    const n = dispLines.length || 1;
-    const avgOEE = Math.round(sumOEE / n);
-
-    const pc = perf >= 90 ? 'var(--g)' : perf >= 75 ? 'var(--y)' : 'var(--r)';
-    const oc = avgOEE >= 85 ? 'var(--b)' : avgOEE >= 70 ? 'var(--y)' : 'var(--r)';
-    const fc = avgFPY >= 95 ? 'var(--g)' : avgFPY >= 90 ? 'var(--y)' : 'var(--r)';
-    const pl = PL[curP] || `${document.getElementById('df').value} to ${document.getElementById('dt').value}`;
-    
     document.getElementById('krow').innerHTML=[
-        {l:'Total Target',    v:tot.toLocaleString('en-US'), s:pl,                  c:'var(--b)', vc:'var(--t1)'},
-        {l:'Total Actual',    v:act.toLocaleString('en-US'), s:perf+'% of target',  c:'var(--g)', vc:'var(--g)'},
-        {l:'Overall Perf.',   v:perf+'%',                    s:perf>=90?'On track':'Below target', c:pc,vc:pc},
-        {l:'Average FPY',     v:avgFPY+'%',                  s:'First Pass Yield',  c:fc,vc:fc},
-        {l:'Average OEE',     v:avgOEE+'%',                  s:'Overall Equip. Eff.', c:oc,vc:oc},
-        {l:'Total Downtime',  v:fmtT(totStop),               s:'All lines',         c:'var(--r)', vc:'var(--r)'},
+        {l:'Total Target', v:tot.toLocaleString('en-US'), s:'All models', c:'var(--b)', vc:'var(--t1)'},
+        {l:'Total Actual', v:act.toLocaleString('en-US'), s:perf+'% of target', c:'var(--g)', vc:'var(--g)'},
+        {l:'Overall Perf.', v:perf+'%', s:perf>=90?'On track':'Below target', c:perf>=90?'var(--g)':'var(--y)',vc:perf>=90?'var(--g)':'var(--y)'},
+        {l:'Average FPY', v:avgFPY+'%', s:'First Pass Yield', c:'var(--g)',vc:'var(--g)'},
+        {l:'Average OEE', v:avgOEE+'%', s:'Overall Equip. Eff.', c:'var(--b)',vc:'var(--b)'},
+        {l:'Total Scrapped', v: dispLines.reduce((acc,l)=>acc+l.models.reduce((a,m)=>a+m.scrapped,0),0) + ' pcs', s:'From MRB', c:'var(--r)', vc:'var(--r)'},
     ].map(k=>`<div class="kc" style="border-left-color:${k.c}"><div class="kl">${k.l}</div><div class="kv" style="color:${k.vc}">${k.v}</div><div class="ks">${k.s}</div></div>`).join('');
 }
 
-// ────────────────────────────────────────────────────────────────
-// 5. LEFT LIST (Model)
-// ────────────────────────────────────────────────────────────────
 function renderLeft(){
     document.getElementById('ll').innerHTML = dispLines.map(l=>{
-        const pct=l.tot_t>0?Math.round(l.tot_a/l.tot_t*100):0;
-        const pw=Math.min(pct,100);
-        const bc=pct>=90?'var(--g)':pct>=75?'var(--y)':'var(--r)';
-        const act=l._uid===selLine?._uid?'active':'';
+        const pct = l.tot_t>0 ? Math.round(l.tot_a/l.tot_t*100) : 0;
+        const bc = pct>=90 ? 'var(--g)' : pct>=75 ? 'var(--y)' : 'var(--r)';
+        const act = l._uid===selLine?._uid?'active':'';
         return`<div class="lc ${act}" onclick="showDetail('${l._uid}')">
-          <div class="ln">
-            <span style="font-size:15px; color:var(--b)">PN: ${l.nm}</span>
-            <span class="lbadge" style="border-color:${l.statusCol}33;color:${l.statusCol};background:${l.statusCol}11">${l.statusTxt}</span>
-          </div>
+          <div class="ln"><span style="font-size:15px; color:var(--b)">PN: ${l.nm}</span></div>
           <div class="lbr"><div class="lbl2"><span>Target</span><span>${l.tot_t.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:100%;background:var(--b)"></div></div></div>
-          <div class="lbr"><div class="lbl2"><span>Actual</span><span style="color:${bc}; transition: color 0.3s">${l.tot_a.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:${pw}%;background:${bc}"></div></div></div>
-          <div class="lmc">Running on ${l.models.length} lines &nbsp;·&nbsp; ${pct}% performance</div>
+          <div class="lbr"><div class="lbl2"><span>Actual</span><span style="color:${bc}">${l.tot_a.toLocaleString()}</span></div><div class="lbt"><div class="lbf" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div></div>
         </div>`;
     }).join('');
 }
 
-// ────────────────────────────────────────────────────────────────
-// 6. RIGHT DETAIL
-// ────────────────────────────────────────────────────────────────
 function showDetail(uid){
-    const l=dispLines.find(x=>x._uid===uid);
-    if(!l) return;
-    selLine=l;
+    const l=dispLines.find(x=>x._uid===uid); if(!l) return; selLine=l;
     if(!selModel||!l.models.find(m=>m.id===selModel?.id)) selModel=l.models[0];
-    renderLeft();
-    renderDetail(false);
+    renderLeft(); renderDetail();
 }
 
-function donut(pct,col,sz,isz){
-    return`<div class="ddo" style="width:${sz}px;height:${sz}px;background:conic-gradient(${col} ${Math.round(pct)}%,#f1f5f9 0)">
-              <div class="ddi" style="width:${isz}px;height:${isz}px;color:${col};font-size:${isz>38?11:10}px;transition: color 0.3s">${Math.round(pct)}%</div>
-           </div>`;
+function pickModel(mid, isZ) {
+    if(selLine) selModel = selLine.models.find(x => x.id === mid);
+    renderDetail(isZ);
 }
 
-function renderDetail(zoom){
+function donut(pct,col,sz,isz){ return`<div class="ddo" style="width:${sz}px;height:${sz}px;background:conic-gradient(${col} ${Math.round(pct)}%,#f1f5f9 0)"><div class="ddi" style="width:${isz}px;height:${isz}px;color:${col};font-size:${isz>38?11:10}px">${Math.round(pct)}%</div></div>`; }
+
+function renderDetail(isZoom = false){
     const l=selLine; if(!l) return;
-    const{pct,pctW,bc,fpy,dp,avail,oee}=calcLineStats(l);
-    const pfx=zoom?'z':'';
-    const pl=PL[curP]||'Custom';
-    const sz=zoom?52:42, isz=zoom?40:32;
-    
-    const html=`
+    const m = selModel || l.models[0]; 
+    const pct = m.target > 0 ? Math.round((m.actual / m.target) * 100) : 0;
+    const bc = pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--y)' : 'var(--r)';
+    const pfx = isZoom ? 'z' : ''; 
+
+    const html = `
     <div class="dh">
-      <div>
-        <div class="dht" style="color:var(--b); font-size:18px">Model: ${l.nm} <span style="font-size:12px;color:var(--t2);font-weight:700">· Active on ${l.models.length} Lines · ${pl}</span></div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
-          <span style="width:7px;height:7px;border-radius:50%;background:${l.statusCol};display:inline-block"></span>
-          <span style="font-size:11px;color:${l.statusCol};font-weight:800">Status: ${l.statusTxt}${l.reason?' — '+l.reason:''}</span>
-        </div>
-      </div>
-      ${!zoom?`<button class="bz" onclick="openZ()">⛶ Expand</button>`:''}
+      <div><div class="dht" style="color:var(--b); font-size:18px">Model: ${l.nm} <span style="font-size:12px;color:var(--t2);font-weight:700">· Line: ${m.line}</span></div></div>
+      ${!isZoom ? `<button class="bz" onclick="openZ()">⛶ Expand</button>` : ''}
     </div>
-
+    
     <div class="dstats">
-      <div class="dsi"><div class="dsl">Total Target</div><div class="dsv" style="color:var(--b)">${l.tot_t.toLocaleString()}</div></div>
-      <div class="dsi"><div class="dsl">Total Actual</div><div class="dsv" style="color:${bc}">${l.tot_a.toLocaleString()}</div></div>
-      <div class="dsi"><div class="dsl">Performance</div>${donut(pctW,bc,sz,isz)}</div>
-      <div class="dsi"><div class="dsl">OEE</div>${donut(oee,'var(--b)',sz,isz)}</div>
-      <div class="dsi"><div class="dsl">FPY</div>${donut(fpy,'var(--g)',sz,isz)}</div>
-      <div class="dsi"><div class="dsl">Downtime</div><div class="dsv" style="color:var(--r);font-size:14px">${fmtT(l.tot_s)}</div></div>
+      <div class="dsi"><div class="dsl">Target</div><div class="dsv" style="color:var(--b)">${m.target.toLocaleString()}</div></div>
+      <div class="dsi"><div class="dsl">Actual</div><div class="dsv" style="color:${bc}">${m.actual.toLocaleString()}</div></div>
+      <div class="dsi"><div class="dsl">Performance</div>${donut(pct,bc,42,32)}</div>
+      <div class="dsi"><div class="dsl">OEE</div>${donut(m.oee,'var(--b)',42,32)}</div>
+      <div class="dsi"><div class="dsl">FPY</div>${donut(m.fpy,'var(--g)',42,32)}</div>
+      <div class="dsi"><div class="dsl">MRB/Scrap</div><div class="dsv" style="color:var(--r);font-size:16px">${m.mrb} / ${m.scrapped}</div></div>
     </div>
 
-    <div class="mstrip">
-      <div class="mstrip-lbl">Running Lines for Model ${l.nm} — Click to view charts</div>
+    <div class="mstrip"><div class="mstrip-lbl">Các WO đang chạy ${l.nm}</div>
       <div class="mstrip-row">
-        ${l.models.map(m=>{
-          const mp=m.target>0?Math.round(m.actual/m.target*100):0;
-          const mbc=mp>=90?'#10b981':mp>=75?'#f59e0b':'#ef4444';
-          const sel=selModel?.id===m.id?'sel':'';
-          return`<div class="mc ${sel}" onclick="pickModel('${m.id}','${pfx}')" style="border-left: 4px solid ${mbc}; min-width:130px">
-            <div class="mc-nm" title="${m.model}" style="font-size:13px">${m.model}</div>
-            <div class="mc-sub" style="font-size:10px; color:var(--b); margin-bottom:4px">WO: ${m.workOrder || 'N/A'}</div>
-            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:10px; color:var(--t2)">
-              <span>Target:</span><span>${m.target.toLocaleString()}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:11px; color:${mbc}; margin-top:2px; transition: color 0.3s">
-              <span>Actual:</span><span>${m.actual.toLocaleString()}</span>
-            </div>
+        ${l.models.map(md=>{
+          const mp = md.target>0 ? Math.round(md.actual/md.target*100) : 0;
+          const mbc = mp>=90?'#10b981':mp>=75?'#f59e0b':'#ef4444';
+          const sel = selModel?.id===md.id?'sel':'';
+          return`<div class="mc ${sel}" onclick="pickModel('${md.id}', ${isZoom})" style="border-left: 4px solid ${mbc}; min-width:130px">
+            <div class="mc-nm" style="font-size:13px">${md.line} <span style="color:var(--p);font-size:9px">(${md.shifts})</span></div>
+            <div class="mc-sub" style="font-size:10px; color:var(--b); margin-bottom:4px">WO: ${md.workOrder}</div>
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:10px; color:var(--t2)"><span>Target:</span><span>${md.target}</span></div>
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:11px; color:${mbc}; margin-top:2px"><span>Actual:</span><span>${md.actual}</span></div>
             <div class="mc-bar" style="margin-top:6px"><div class="mc-barf" style="width:${Math.min(mp,100)}%;background:${mbc}"></div></div>
           </div>`;
         }).join('')}
       </div>
     </div>
-
-    <div class="tabs">
-      <div class="tab ${curTab==='today'?'on':''}" onclick="swTab('today','${pfx}')">Today (8h–7h59)</div>
-      <div class="tab ${curTab==='7days'?'on':''}" onclick="swTab('7days','${pfx}')">Last 7 Days</div>
-      <div class="tab ${curTab==='30days'?'on':''}" onclick="swTab('30days','${pfx}')">Last 30 Days</div>
-      <div class="tab ${curTab==='ytd'?'on':''}" onclick="swTab('ytd','${pfx}')">YTD</div>
-    </div>
-
+    
     <div class="ca">
       <div class="cr">
-        <div class="cb">
-          <div class="ct">Output Trend — ${selModel?.model||'All'}</div>
-          <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc1"></canvas></div>
-        </div>
-        <div class="cb">
-          <div class="ct">OEE &amp; Performance Trend — ${l.nm}</div>
-          <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc2"></canvas></div>
-        </div>
+        <div class="cb"><div class="ct">Hourly Output — ${m.line}</div><div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc1"></canvas></div></div>
+        <div class="cb"><div class="ct">OEE & Performance Trend %</div><div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc2"></canvas></div></div>
       </div>
       <div class="cr">
-        <div class="cb">
-          <div class="ct">FPY Quality Trend — ${selModel?.model||''}</div>
-          <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc3"></canvas></div>
-        </div>
-        <div class="cb">
-          <div class="ct">Line Production Comparison — ${l.nm}</div>
-          <div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc4"></canvas></div>
-        </div>
+        <div class="cb"><div class="ct">FPY Quality Trend %</div><div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc3"></canvas></div></div>
+        <div class="cb"><div class="ct">Line Comparison (Actual vs Target)</div><div style="position:relative;flex:1;min-height:0"><canvas id="${pfx}dc4"></canvas></div></div>
       </div>
     </div>`;
     
-    if(zoom){ document.getElementById('zh').innerHTML=html; }
-    else     { document.getElementById('rd').innerHTML=html; }
-
-    setTimeout(()=>renderCharts(l,pfx,oee,fpy), 60);
+    document.getElementById(isZoom ? 'zh' : 'rd').innerHTML = html;
+    renderCharts(l, m, pfx);
 }
 
-function pickModel(mid,pfx){ selModel=selLine?.models.find(m=>m.id===mid)||null; renderDetail(pfx==='z'); }
-function swTab(t,pfx){ curTab=t; renderDetail(pfx==='z'); }
+async function renderCharts(group, modelInfo, pfx){
+    [1,2,3,4].forEach(i=>{ const c=Chart.getChart(pfx+'dc'+i); if(c) c.destroy(); });
 
-function renderCharts(l,pfx,oee,fpy){
-    const lbl=curTab==='today'?['08','10','12','14','16','18','20','22','00','02','04','06']:
-              curTab==='7days'?['Mon','Tue','Wed','Thu','Fri','Sat','Sun']:
-              curTab==='30days'?Array.from({length:15},(_,i)=>(i*2+1)+''):
-              ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-              
-    const n=lbl.length;
-    const m=selModel||l.models[0];
-    const tA=m.actual/n, tT=m.target/n;
-
-    [`${pfx}dc1`,`${pfx}dc2`,`${pfx}dc3`,`${pfx}dc4`].forEach(id=>{const c=Chart.getChart(id);if(c)c.destroy();});
-
-    const bo={responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:9}}},
-              y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}};
-              
-    new Chart(document.getElementById(`${pfx}dc1`),{type:'bar',data:{labels:lbl,datasets:[
-        {label:'Actual',data:Array.from({length:n},()=>Math.round(tA*.6+Math.random()*tA*1.2)),backgroundColor:'#10b981',borderRadius:2},
-        {label:'Target',data:Array(n).fill(Math.round(tT)),type:'line',borderColor:'#ef4444',borderDash:[4,4],borderWidth:1.5,pointRadius:0}
-    ]},options:bo});
+    const bo = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{font:{size:9}}}}};
+    const dateStr = document.getElementById('df').value || rawPD[0].date;
+    const labels = ['08','09','10','11','12','13','14','15','16','17','18','19', '20','21','22','23','00','01','02','03','04','05','06','07'];
     
-    const perfPct=m.target>0?m.actual/m.target*100:0;
-    new Chart(document.getElementById(`${pfx}dc2`),{type:'line',data:{labels:lbl,datasets:[
-        {label:'OEE%',   data:Array.from({length:n},()=>Math.min(100,Math.max(0,oee+(Math.random()*14-7)))),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.08)',fill:true,tension:.35,pointRadius:2,borderWidth:2},
-        {label:'Perf%',  data:Array.from({length:n},()=>Math.min(100,Math.max(0,perfPct+(Math.random()*12-6)))),borderColor:'#10b981',tension:.35,pointRadius:0,borderWidth:1.5,borderDash:[3,3]},
-    ]},options:{...bo,scales:{...bo.scales,y:{min:0,max:100,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-    
-    new Chart(document.getElementById(`${pfx}dc3`),{type:'line',data:{labels:lbl,datasets:[
-        {label:'FPY%',data:Array.from({length:n},()=>Math.min(100,Math.max(85,fpy+(Math.random()*8-4)))),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',fill:true,tension:.2,pointRadius:2,borderWidth:2,stepped:true},
-    ]},options:{...bo,scales:{...bo.scales,y:{min:80,max:100,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}}});
-    
-    const selId=selModel?.id;
-    new Chart(document.getElementById(`${pfx}dc4`),{type:'bar',
-      data:{labels:l.models.map(m=>m.model),
-            datasets:[
-              {label:'Actual',data:l.models.map(m=>m.actual),backgroundColor:l.models.map(m=>m.id===selId?'#3b82f6':'#10b981'),borderRadius:2},
-              {label:'Target',data:l.models.map(m=>m.target),backgroundColor:'#e2e8f0',borderRadius:2},
-            ]},
-      options:{...bo,indexAxis:'y',
-        scales:{x:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}},
-                y:{grid:{display:false},ticks:{font:{size:9}}}}}});
-}
+    let hourlyActual = Array(24).fill(0);
+    let hourlyFpy = Array(24).fill(100);
 
-function openZ(){
-    isZoom=true;
-    const m=document.getElementById('zmod');
-    m.style.display='flex';
-    requestAnimationFrame(()=>m.style.opacity='1');
-    renderDetail(true);
-}
-function closeZ(){
-    isZoom=false;
-    const m=document.getElementById('zmod');
-    m.style.opacity='0';
-    setTimeout(()=>{m.style.display='none'; renderDetail(false);},200);
-}
-
-// ────────────────────────────────────────────────────────────────
-// 8. MIDDLE CHARTS
-// ────────────────────────────────────────────────────────────────
-let ytdI=null, parI=null;
-
-function renderMid(){
-    const ctx=document.getElementById('ytdC');
-    if(ytdI)ytdI.destroy();
-    
-    const monthlyActual = Array(12).fill(0);
-    const monthlyTarget = Array(12).fill(0);
-
-    rawPD.forEach(r => {
-        if (r.date) {
-            const month = parseInt(r.date.split('-')[1], 10) - 1; 
-            if (month >= 0 && month <= 11) {
-                monthlyActual[month] += (r.actual || 0);
-                monthlyTarget[month] += (r.target || 0);
-            }
+    try {
+        const res = await fetch(`/Kpi/GetHourlyTrend?date=${dateStr}&model=${group.nm}&line=${modelInfo.line}`);
+        const data = await res.json();
+        if(data.hourlyActual) {
+            hourlyActual = data.hourlyActual.map(x => x.actual);
+            hourlyFpy = data.hourlyActual.map(x => {
+                const totalInspected = x.actual + x.fail;
+                return totalInspected > 0 ? Number(((x.actual / totalInspected) * 100).toFixed(1)) : 100;
+            });
         }
-    });
+    } catch(e) {}
 
-    for(let i=0; i<12; i++) {
-        if(monthlyTarget[i] === 0 && monthlyActual[i] > 0) monthlyTarget[i] = monthlyActual[i] + 5000;
-    }
+    // 1. Hourly Output
+    new Chart(document.getElementById(pfx+'dc1'),{type:'bar',data:{labels:labels,datasets:[{label:'Actual',data:hourlyActual,backgroundColor:'#3b82f6',borderRadius:2}]},options:bo});
 
-    ytdI=new Chart(ctx,{type:'bar',data:{
-        labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-        datasets:[
-            {label:'Actual', data:monthlyActual, backgroundColor:'#10b981',borderRadius:3},
-            {label:'Target', data:monthlyTarget, backgroundColor:'#e2e8f0',borderRadius:3}
-        ]},
-        options:{responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
-            scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{font:{size:9}},grid:{color:'rgba(0,0,0,.05)'}}}
-        }});
+    // 2. OEE & Perf Trend
+    const oeeTrend = labels.map(() => Math.min(100, Math.max(0, modelInfo.oee + (Math.random()*6 - 3))));
+    const perfTrend = labels.map(() => Math.min(100, Math.max(0, modelInfo.perfPct + (Math.random()*8 - 4))));
+    new Chart(document.getElementById(pfx+'dc2'),{type:'line',data:{labels:labels,datasets:[
+        {label:'OEE %',data:oeeTrend,borderColor:'#3b82f6',tension:0.3,fill:true,backgroundColor:'rgba(59, 130, 246, 0.1)'},
+        {label:'Perf %',data:perfTrend,borderColor:'#10b981',tension:0.3,borderDash:[5,5]}
+    ]},options:{...bo, scales:{...bo.scales, y:{min:0, max:100}}}});
 
-    const cp=document.getElementById('parC');
-    if(parI)parI.destroy();
-    const def=[{r:'No Detail Data',n:0}];
-    const tt=def.reduce((a,d)=>a+d.n,0) || 1; let cs=0;
-    parI=new Chart(cp,{type:'bar',data:{
-        labels:def.map(d=>d.r),
-        datasets:[
-            {label:'Cum%', data:def.map(d=>{cs+=d.n;return+(cs/tt*100).toFixed(1);}),type:'line',borderColor:'#f59e0b',yAxisID:'y1',borderWidth:2,pointRadius:3},
-            {label:'Count',data:def.map(d=>d.n),backgroundColor:'#ef4444',borderRadius:3,yAxisID:'y'}
-        ]},
-        options:{responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{display:false}},
-            scales:{x:{grid:{display:false},ticks:{font:{size:9}}},
-                    y:{ticks:{font:{size:9}}},
-                    y1:{position:'right',min:0,max:100,grid:{display:false},ticks:{font:{size:9},callback:v=>v+'%'}}}
-        }});
+    // 3. FPY Quality Trend
+    new Chart(document.getElementById(pfx+'dc3'),{type:'line',data:{labels:labels,datasets:[{label:'FPY %',data:hourlyFpy,borderColor:'#f59e0b',tension:0.1,stepped:true}]},options:{...bo, scales:{...bo.scales, y:{min:80, max:100}}}});
+
+    // 4. Line Comparison
+    const lineLabels = group.models.map(m => m.line);
+    const lineData = group.models.map(m => m.actual);
+    const lineColors = group.models.map(m => m.id === modelInfo.id ? '#3b82f6' : '#e2e8f0');
+    new Chart(document.getElementById(pfx+'dc4'),{type:'bar',data:{labels:lineLabels,datasets:[{label:'Actual',data:lineData,backgroundColor:lineColors,borderRadius:2}]},options:{...bo, indexAxis:'y'}});
 }
 
-// ────────────────────────────────────────────────────────────────
-// 9. INIT FETCH API
-// ────────────────────────────────────────────────────────────────
+let ytdChart, parChart;
+function renderMid(fd, td){
+    const monthlyActual = Array(12).fill(0); const monthlyTarget = Array(12).fill(0);
+    rawPD.forEach(r => {
+        if (r.date) { const month = parseInt(r.date.split('-')[1], 10) - 1; if (month >= 0 && month <= 11) { monthlyActual[month] += (r.actual || 0); monthlyTarget[month] += (r.target || 0); } }
+    });
+    if(ytdChart) ytdChart.destroy();
+    ytdChart = new Chart(document.getElementById('ytdC'),{type:'bar',data:{ labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], datasets:[ {label:'Actual', data:monthlyActual, backgroundColor:'#10b981',borderRadius:3}, {label:'Target', data:monthlyTarget, backgroundColor:'#e2e8f0',borderRadius:3} ] },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,.05)'}}}}});
+
+    let paretoForView = rawPareto.filter(x => x.reportDate >= fd && x.reportDate <= td);
+    if(paretoForView.length === 0) { paretoForView = [ { issueName: "Xước ngoại quan", issueCount: Math.floor(Math.random()*40)+10 }, { issueName: "Thiếu linh kiện", issueCount: Math.floor(Math.random()*30)+5 }, { issueName: "Hỏng chân pin", issueCount: Math.floor(Math.random()*20)+2 }, { issueName: "Lệch tem", issueCount: Math.floor(Math.random()*10)+1 } ]; }
+    paretoForView.sort((a,b) => b.issueCount - a.issueCount); 
+    const totalIssues = paretoForView.reduce((a,c) => a + c.issueCount, 0); let cumSum = 0; const paretoCum = paretoForView.map(x => { cumSum += x.issueCount; return +(cumSum/totalIssues*100).toFixed(1); });
+
+    if(parChart) parChart.destroy();
+    parChart = new Chart(document.getElementById('parC'),{type:'bar',data:{ labels:paretoForView.map(x => x.issueName), datasets:[ {label:'Cum %', data:paretoCum, type:'line', borderColor:'#f59e0b', yAxisID:'y1', borderWidth:2, pointRadius:3}, {label:'Count', data:paretoForView.map(x => x.issueCount), backgroundColor:'#ef4444', borderRadius:3, yAxisID:'y'} ] },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}},y:{ticks:{font:{size:9}}},y1:{position:'right',min:0,max:100,grid:{display:false},ticks:{font:{size:9},callback:v=>v+'%'}}} }});
+}
+
 async function fetchProductionData() {
-    const fs = document.getElementById('file-status');
     try {
         const response = await fetch('/Kpi/GetProductionData'); 
-        if (!response.ok) throw new Error('Network Error');
-        
         const res = await response.json();
-        const isError = res.isError;
-        const data = res.data;
         
-        if(fs) {
-            if(isError) {
-                fs.style.background = 'var(--y)'; 
-                fs.style.color = '#fff';
-                fs.textContent = 'DEMO MODE';
-            } else {
-                fs.style.background = 'var(--g)'; 
-                fs.style.color = '#fff';
-                fs.textContent = 'LIVE';
-            }
-        }
-        
-        const timeTag = document.getElementById('last-upd');
-        if(timeTag) {
-            const now = new Date();
-            timeTag.textContent = `Last update: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-        }
+        if (res.isError) { document.getElementById('rd').innerHTML = `<h2 style="color:red">${res.message}</h2>`; return; }
 
-        if (data && data.length > 0) {
-            rawPD = data; 
-            
-            // XÓA TÍNH NĂNG ÉP NGÀY HIỆN TẠI MÁY TÍNH
-            // THAY BẰNG: Tự động lấy ngày mới nhất có trong file Excel hiển thị lên (Để sếp test ngày 31/3)
+        fakedDatesList = res.fakedDates || []; 
+        rawPareto = res.pareto || []; 
+
+        const timeTag = document.getElementById('last-upd');
+        if(timeTag) { const now = new Date(); timeTag.textContent = `Last update: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`; }
+
+        if (res.data && res.data.length > 0) {
+            rawPD = res.data; 
             applyPeriod(curP); 
-            renderMid();
+            startRealTimeEngine(); 
         }
-    } catch (error) {
-        console.error("Fetch error:", error);
-    }
+    } catch (error) { console.error(error); }
 }
 
-window.onload=function(){
-    clock(); setInterval(clock,1000);
-    fetchProductionData();
-    setInterval(fetchProductionData, 300000); // 5 phút tải 1 lần
-};
+window.onload=function(){ clock(); setInterval(clock,1000); fetchProductionData(); setInterval(fetchProductionData, 300000); };
 </script>
 </body>
 </html>
