@@ -5,6 +5,7 @@ using System.IO;
 
 namespace AndonDashboard.Services
 {
+    // Bổ sung thêm trường Shift (Ca Sản Xuất)
     public class PlanModel
     {
         public string? Factory { get; set; }
@@ -12,6 +13,7 @@ namespace AndonDashboard.Services
         public string? Model { get; set; }
         public string? WorkOrder { get; set; }
         public DateTime ProdDate { get; set; }
+        public string? Shift { get; set; }
         public int Target { get; set; }
     }
 
@@ -21,15 +23,14 @@ namespace AndonDashboard.Services
         {
             var planList = new List<PlanModel>();
 
-            // LƯU Ý Ổ Z: Nếu sếp build xong mà vẫn Demo Mode, sếp PHẢI đổi Z: thành IP gốc
-            // Ví dụ: string filePath = @"\\10.102.4.xx\Share\12. KPI\Plan\production_plan.xlsx";
+            // Đường dẫn tới file Excel của sếp
             string filePath = @"Z:\Share\12. KPI\Plan\production_plan.xlsx";
 
             if (!File.Exists(filePath)) return planList;
 
             try
             {
-                // VŨ KHÍ MỚI: Thêm FileShare.ReadWrite để đọc được file kể cả khi đang có người mở file!
+                // FileShare.ReadWrite: Đọc file an toàn kể cả khi có người đang mở Excel
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 using (var workbook = new XLWorkbook(fileStream))
                 {
@@ -41,10 +42,9 @@ namespace AndonDashboard.Services
 
                     foreach (var row in rows)
                     {
-                        // 1. SỬA LỖI CHÍ MẠNG: Bỏ qua 5 dòng đầu (vì dòng 6 mới bắt đầu có data)
+                        // Bỏ qua 5 dòng tiêu đề đầu tiên
                         if (row.RowNumber() < 6) continue;
 
-                        // 2. Bỏ qua dòng rác: Nếu không có mã Model thì lờ đi luôn
                         string model = row.Cell(3).GetString();
                         if (string.IsNullOrWhiteSpace(model)) continue;
 
@@ -54,9 +54,11 @@ namespace AndonDashboard.Services
                             Line = row.Cell(2).GetString(),
                             Model = model,
                             WorkOrder = row.Cell(4).GetString(),
-
-                            // 3. TryGetValue để lỡ file Excel gõ nhầm chữ/trống nó không bị crash
                             ProdDate = row.Cell(5).TryGetValue<DateTime>(out var d) ? d.Date : DateTime.Today,
+
+                            // Lấy thông tin Ca Sáng / Ca Tối ở Cột 6 (Cột F)
+                            Shift = row.Cell(6).GetString(),
+
                             Target = row.Cell(7).TryGetValue<int>(out var t) ? t : 0
                         });
                     }
@@ -64,7 +66,7 @@ namespace AndonDashboard.Services
             }
             catch
             {
-                // Bắt lỗi ngầm để tránh chết chương trình
+                // Bỏ qua lỗi ngầm
             }
 
             return planList;

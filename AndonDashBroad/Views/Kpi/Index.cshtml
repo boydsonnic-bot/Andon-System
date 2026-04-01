@@ -152,8 +152,8 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
       </select>
       <div style="display:flex;gap:4px">
         <button class="pb on" id="period-day"   onclick="sp('day')">Today</button>
-        <button class="pb"    id="period-week"  onclick="sp('week')">This Week</button>
-        <button class="pb"    id="period-month" onclick="sp('month')">This Month</button>
+        <button class="pb"    id="period-week"  onclick="sp('week')">Last 7 Days</button>
+        <button class="pb"    id="period-month" onclick="sp('month')">Last 30 Days</button>
         <button class="pb"    id="period-ytd"   onclick="sp('ytd')">YTD</button>
       </div>
     </div>
@@ -187,109 +187,134 @@ body{font-family:'Nunito',system-ui,sans-serif;font-size:12px;background:#f1f5f9
 Chart.defaults.font.family="'Nunito',system-ui,sans-serif";
 
 // ────────────────────────────────────────────────────────────────
-// 1. DATA & BASE STRUCTURE (ENGLISH UI & STANDARD LOGIC)
+// 1. DATA & BASE STRUCTURE
 // ────────────────────────────────────────────────────────────────
 let rawPD = [];
-const SHIFT_MINUTES = 720; // Sếp dặn: 12 tiếng = 720 phút cho Andon
+let curLines = [], dispLines = [];
+let curP = 'day';
+let selLine = null, selModel = null, curTab = 'today', isZoom = false;
+let currentShiftMins = 720; // 1 Ca = 720 phút, sẽ tự động nhân lên khi chọn bộ lọc nhiều ngày
+
 const SC = {green:'#10b981',yellow:'#f59e0b',red:'#ef4444',orange:'#f97316',blue:'#3b82f6'};
 const SL = {green:'Normal',yellow:'Waiting KTV',red:'Error (Stopped)',orange:'Repairing',blue:'Confirm'};
+const PL = {day:'Today',week:'Last 7 Days',month:'Last 30 Days',ytd:'Year to Date', custom:'Custom Range'};
 
-function buildBaseLines(src) {
-    if (!src || src.length === 0) return [];
+// ────────────────────────────────────────────────────────────────
+// HỆ THỐNG LỌC DATA THẬT THEO THỜI GIAN (VŨ KHÍ MỚI)
+// ────────────────────────────────────────────────────────────────
+function applyPeriod(mode, fDate, tDate) {
+    curP = mode;
+    if (!rawPD || rawPD.length === 0) {
+        curLines = [];
+        filt();
+        return;
+    }
+
+    let fd = '', td = '';
+    // Tự động tìm ngày có data MỚI NHẤT trong file Excel làm mốc "Hôm nay"
+    const maxDateStr = rawPD.reduce((max, p) => p.date > max ? p.date : max, rawPD[0].date);
+    const maxDate = new Date(maxDateStr);
+
+    if (mode === 'day') {
+        fd = td = maxDateStr;
+    } else if (mode === 'week') {
+        let d = new Date(maxDate); d.setDate(d.getDate() - 6);
+        fd = d.toISOString().split('T')[0];
+        td = maxDateStr;
+    } else if (mode === 'month') {
+        let d = new Date(maxDate); d.setDate(d.getDate() - 29);
+        fd = d.toISOString().split('T')[0];
+        td = maxDateStr;
+    } else if (mode === 'ytd') {
+        let d = new Date(maxDate); d.setMonth(0, 1);
+        fd = d.toISOString().split('T')[0];
+        td = maxDateStr;
+    } else if (mode === 'custom') {
+        fd = fDate; td = tDate;
+    }
+
+    // QUAN TRỌNG NHẤT: Lọc lịch sử thật từ rawPD theo ngày bắt đầu (fd) đến ngày kết thúc (td)
+    const filtered = rawPD.filter(x => x.date >= fd && x.date <= td);
     
-    const maxDate = src.reduce((max, p) => p.date > max ? p.date : max, src[0].date);
-    const todayData = src.filter(x => x.date === maxDate);
+    // Đếm xem trong khoảng lọc đó xưởng chạy bao nhiêu ngày để tính lại Thời gian máy (Shift) cho chuẩn OEE
+    const uniqueDays = new Set(filtered.map(x => x.date)).size;
+    currentShiftMins = Math.max(1, uniqueDays) * 720;
 
+    // Gom dữ liệu của nhiều ngày lại với nhau
     const grouped = {};
-    todayData.forEach(row => {
+    filtered.forEach(row => {
         const key = row.model || 'Unknown Model';
         if (!grouped[key]) {
-            grouped[key] = { nm: key, factory: row.factory || 'Factory', status: 'green', lines: [] };
+            grouped[key] = { nm: key, factory: row.factory || 'Factory', status: 'green', linesMap: {} };
         }
-        grouped[key].lines.push({
-            id: row.line + "_" + (row.workOrder || 'WO'),
-            line: row.line || 'Unknown Line',
-            workOrder: row.workOrder || 'WO-NONE',
-            target: Number(row.target || 0),
-            actual: Number(row.actual || 0),
-            mrb: Number(row.mrb || 0),
-            status: 'green' 
-        });
+        const lineKey = row.line; 
+        if(!grouped[key].linesMap[lineKey]) {
+            grouped[key].linesMap[lineKey] = {
+                id: lineKey,
+                line: row.line || 'Unknown Line',
+                workOrder: row.workOrder || 'N/A',
+                target: 0, actual: 0, mrb: 0, status: 'green'
+            };
+        }
+        // Cộng dồn Data
+        grouped[key].linesMap[lineKey].target += Number(row.target || 0);
+        grouped[key].linesMap[lineKey].actual += Number(row.actual || 0);
+        grouped[key].linesMap[lineKey].mrb += Number(row.mrb || 0);
     });
 
     let i = 0;
-    return Object.values(grouped).map(g => {
+    curLines = Object.values(grouped).map(g => {
         g._uid = 'M' + (i++);
-        g.models = g.lines.map((l, j) => ({
+        const linesArr = Object.values(g.linesMap);
+        g.models = linesArr.map((l, j) => ({
             id: g._uid + '_L' + j,
-            model: l.line, 
+            model: l.line,
             workOrder: l.workOrder,
             target: l.target,
             actual: l.actual,
             mrb: l.mrb,
-            stopMin: Math.floor(Math.random() * 30), // Giả lập Downtime Andon
+            stopMin: 0,
             status: l.status,
-            ewma: Math.floor(Math.random() * 20 + 10),
-            zscore: +(Math.random() * 2.8).toFixed(1),
-            pattern: 'low'
         }));
-        delete g.lines;
-        return g;
+        delete g.linesMap;
+        return enrichLine(g);
     });
-}
 
-// LOGIC CHUẨN MES: FPY, AVAILABILITY, OEE
-function calcLineStats(l){
-    // 1. PERFORMANCE
-    const pct = l.tot_t > 0 ? Math.round((l.tot_a / l.tot_t) * 100) : 0;
-    const pctW = Math.min(pct, 100); 
-    const bc = pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--y)' : 'var(--r)';
-
-    // 2. FPY (First Pass Yield) = Actual / (Actual + MRB)
-    const totalMrb = l.models.reduce((a,m) => a + (m.mrb || 0), 0);
-    const totalInput = l.tot_a + totalMrb;
-    const fpy = totalInput > 0 ? Math.round((l.tot_a / totalInput) * 100) : 100;
-
-    // 3. AVAILABILITY (Shift 720 phút)
-    const shm = SHIFT_MINUTES * (curP === 'week' ? 5 : curP === 'month' ? 21 : curP === 'ytd' ? 78 : curP === 'custom' ? 7 : 1);
-    const dp = Math.min(100, Math.round((l.tot_s / shm) * 100)); // % Downtime
-    const avail = Math.max(0, 100 - dp);
-
-    // 4. OEE = Avail * Perf * Quality
-    const oee = Math.round((avail / 100) * (pctW / 100) * (fpy / 100) * 100);
-
-    return {pct, pctW, bc, fpy, dp, avail, oee};
+    filt();
 }
 
 function enrichLine(l){
     const t = l.models.reduce((a,m)=>a+m.target,0);
     const a = l.models.reduce((a,m)=>a+m.actual,0); 
     const s = l.models.reduce((a,m)=>a+m.stopMin,0);
-
     const isRed = l.models.some(x => x.status === 'red');
     l.status = isRed ? 'red' : 'green';
-
     return{...l, tot_t:t, tot_a:a, tot_s:s,
            statusCol: SC[l.status] || SC.green, 
            statusTxt: SL[l.status] || 'Normal',
            reason: ''};
 }
 
-function mkPeriod(lines,mt,ma,ms){
-    return lines.map(l=>({...l,
-        tot_t:l.tot_t*mt, tot_a:l.tot_a*ma, tot_s:l.tot_s*ms,
-        models:l.models.map(m=>({...m, target:m.target*mt, actual:m.actual*ma, stopMin:m.stopMin*ms}))
-    }));
+function calcLineStats(l){
+    const pct = l.tot_t > 0 ? Math.round((l.tot_a / l.tot_t) * 100) : 0;
+    const pctW = Math.min(pct, 100); 
+    const bc = pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--y)' : 'var(--r)';
+
+    const totalMrb = l.models.reduce((a,m) => a + (m.mrb || 0), 0);
+    const totalInput = l.tot_a + totalMrb;
+    const fpy = totalInput > 0 ? Math.round((l.tot_a / totalInput) * 100) : 100;
+
+    const shm = currentShiftMins; // Dùng số phút linh động thay vì fixed 720
+    const dp = Math.min(100, Math.round((l.tot_s / shm) * 100)); 
+    const avail = Math.max(0, 100 - dp);
+
+    const oee = Math.round((avail / 100) * (pctW / 100) * (fpy / 100) * 100);
+
+    return {pct, pctW, bc, fpy, dp, avail, oee};
 }
 
-let BASE = [];
-let PER = { day: [], week: [], month: [], ytd: [] };
-const PL = {day:'Today',week:'This Week',month:'This Month',ytd:'Year to Date'};
-let curP='day', curLines=[], dispLines=[];
-let selLine=null, selModel=null, curTab='today', isZoom=false;
-
 // ────────────────────────────────────────────────────────────────
-// 2. UTILITIES
+// 2. UTILITIES & FILTERS
 // ────────────────────────────────────────────────────────────────
 function clock(){ document.getElementById('clk').textContent = new Date().toLocaleString('en-US',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); }
 
@@ -302,26 +327,19 @@ function fmtT(m){
 
 function toggleFS(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
 
-// ────────────────────────────────────────────────────────────────
-// 3. PERIOD & FILTER
-// ────────────────────────────────────────────────────────────────
 function sp(p){
-    curP=p; curLines=[...PER[p]];
     document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
     document.getElementById('period-'+p).classList.add('on');
     document.getElementById('df').value=''; document.getElementById('dt').value='';
-    filt();
+    applyPeriod(p);
 }
 
 function applyDate(){
     const f=document.getElementById('df').value, t=document.getElementById('dt').value;
-    if(!f||!t) return alert("Please select both dates.");
-    if(new Date(f)>new Date(t)) return alert("Start date cannot be after end date.");
-    const days=Math.max(1,Math.floor((new Date(t)-new Date(f))/86400000)+1);
+    if(!f||!t) return alert("Vui lòng chọn cả Từ ngày và Đến ngày.");
+    if(new Date(f)>new Date(t)) return alert("Ngày bắt đầu không được lớn hơn Ngày kết thúc.");
     document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'));
-    curP='custom';
-    curLines=mkPeriod(BASE,days,Math.round(days*0.95),days);
-    filt();
+    applyPeriod('custom', f, t);
 }
 
 function filt(){
@@ -338,7 +356,7 @@ function filt(){
     });
     renderKPI(); renderLeft();
     if(dispLines.length>0){
-        if(!dispLines.find(l=>l._uid===selLine?._uid)) selLine=dispLines[0];
+        if(!selLine || !dispLines.find(l=>l._uid===selLine._uid)) selLine=dispLines[0];
         showDetail(selLine._uid);
     } else {
         document.getElementById('rd').innerHTML=`<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;font-weight:800">No Data Found</div>`;
@@ -346,7 +364,7 @@ function filt(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 4. KPI STRIP (WITH STANDARD LOGIC)
+// 4. KPI STRIP
 // ────────────────────────────────────────────────────────────────
 function renderKPI(){
     const tot = dispLines.reduce((a,l) => a + l.tot_t, 0);
@@ -355,12 +373,11 @@ function renderKPI(){
     const totStop = dispLines.reduce((a,l) => a + l.tot_s, 0);
 
     const perf = tot > 0 ? Math.round(act / tot * 100) : 0;
-
     const totalInput = act + totMrb;
     const avgFPY = totalInput > 0 ? ((act / totalInput) * 100).toFixed(1) : 100;
 
     let sumOEE = 0;
-    const shm = SHIFT_MINUTES * (curP === 'week' ? 5 : curP === 'month' ? 21 : curP === 'ytd' ? 78 : curP === 'custom' ? 7 : 1);
+    const shm = currentShiftMins;
     
     dispLines.forEach(l => {
         const pw = Math.min(l.tot_t > 0 ? Math.round(l.tot_a / l.tot_t * 100) : 0, 100);
@@ -377,7 +394,7 @@ function renderKPI(){
     const pc = perf >= 90 ? 'var(--g)' : perf >= 75 ? 'var(--y)' : 'var(--r)';
     const oc = avgOEE >= 85 ? 'var(--b)' : avgOEE >= 70 ? 'var(--y)' : 'var(--r)';
     const fc = avgFPY >= 95 ? 'var(--g)' : avgFPY >= 90 ? 'var(--y)' : 'var(--r)';
-    const pl = PL[curP] || 'Custom Range';
+    const pl = PL[curP] || `${document.getElementById('df').value} to ${document.getElementById('dt').value}`;
     
     document.getElementById('krow').innerHTML=[
         {l:'Total Target',    v:tot.toLocaleString('en-US'), s:pl,                  c:'var(--b)', vc:'var(--t1)'},
@@ -614,8 +631,8 @@ function renderMid(){
 
     const cp=document.getElementById('parC');
     if(parI)parI.destroy();
-    const def=[{r:'Cosmetic',n:145},{r:'Dimension',n:82},{r:'Assembly',n:46},{r:'Missing',n:18},{r:'Other',n:9}];
-    const tt=def.reduce((a,d)=>a+d.n,0); let cs=0;
+    const def=[{r:'No Detail Data',n:0}];
+    const tt=def.reduce((a,d)=>a+d.n,0) || 1; let cs=0;
     parI=new Chart(cp,{type:'bar',data:{
         labels:def.map(d=>d.r),
         datasets:[
@@ -631,7 +648,7 @@ function renderMid(){
 }
 
 // ────────────────────────────────────────────────────────────────
-// 9. INIT & REAL-TIME DEMO SIMULATOR
+// 9. INIT FETCH API
 // ────────────────────────────────────────────────────────────────
 async function fetchProductionData() {
     const fs = document.getElementById('file-status');
@@ -663,17 +680,10 @@ async function fetchProductionData() {
 
         if (data && data.length > 0) {
             rawPD = data; 
-            BASE = buildBaseLines(rawPD).map(enrichLine); 
             
-            PER.day = BASE;
-            PER.week = mkPeriod(BASE, 5, 5, 5);
-            PER.month = mkPeriod(BASE, 22, 21, 21);
-            PER.ytd = mkPeriod(BASE, 80, 78, 78);
-
-            if (curP === 'day') curLines = [...BASE];
-            else sp(curP); 
-            
-            filt(); 
+            // XÓA TÍNH NĂNG ÉP NGÀY HIỆN TẠI MÁY TÍNH
+            // THAY BẰNG: Tự động lấy ngày mới nhất có trong file Excel hiển thị lên (Để sếp test ngày 31/3)
+            applyPeriod(curP); 
             renderMid();
         }
     } catch (error) {
@@ -681,42 +691,10 @@ async function fetchProductionData() {
     }
 }
 
-// VŨ KHÍ BÍ MẬT: HỆ THỐNG GIẢ LẬP NHẢY SỐ REAL-TIME (CỨ 3 GIÂY NHẢY 1 LẦN)
-function simulateRealTimeProduction() {
-    setInterval(() => {
-        if (!BASE || BASE.length === 0 || curP !== 'day') return;
-        
-        let hasChanges = false;
-        
-        // Quét qua các chuyền đang chạy, xác suất 30% sẽ đẻ ra thêm hàng
-        BASE.forEach(group => {
-            group.models.forEach(m => {
-                if (m.status === 'green' && m.actual < m.target && Math.random() > 0.7) {
-                    m.actual += Math.floor(Math.random() * 5) + 1; // Cộng từ 1 đến 5 con hàng
-                    hasChanges = true;
-                }
-                // Thỉnh thoảng lỗi MRB ngẫu nhiên xuất hiện
-                if (Math.random() > 0.98) {
-                    m.mrb += 1;
-                    hasChanges = true;
-                }
-            });
-        });
-
-        // Nếu có số nhảy thì load lại giao diện cho số chớp nháy
-        if (hasChanges) {
-            BASE = BASE.map(enrichLine); // Tính lại OEE/FPY
-            curLines = [...BASE];
-            filt(); // Cập nhật màn hình
-        }
-    }, 3000); // 3000ms = 3 giây
-}
-
 window.onload=function(){
     clock(); setInterval(clock,1000);
     fetchProductionData();
-    setInterval(fetchProductionData, 300000); // Kéo data gốc 5 phút/lần
-    simulateRealTimeProduction(); // Kích hoạt bộ máy nhảy số ảo diệu
+    setInterval(fetchProductionData, 300000); // 5 phút tải 1 lần
 };
 </script>
 </body>
