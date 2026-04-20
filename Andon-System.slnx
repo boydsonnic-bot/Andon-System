@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="AndonDashBroad/AndonDashBroad.csproj" Id="ae00fa36-cc39-4f10-be83-59e6cb4c7e7c" />
+  <Project Path="AndonSystem.Tests/AndonSystem.Tests.csproj" />
   <Project Path="AndonTerminal/AndonTerminal.csproj" />
   <Project Path="ShareLib/SharedLib.csproj" />
 </Solution>
